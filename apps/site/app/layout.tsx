@@ -5,7 +5,7 @@ import { SiGithub } from "react-icons/si";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://cms-lab.dev"),
+  metadataBase: new URL("https://cmslab.afaqrashid.com"),
   title: {
     default: "cms-lab | Catch CMS bugs before deploy",
     template: "%s | cms-lab",
