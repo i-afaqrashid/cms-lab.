@@ -328,6 +328,163 @@ test("runCli agent-context overwrites generated files with force", async () => {
   ).toContain("npx @cms-lab/cli@latest scan");
 });
 
+test("runCli agent-context supports tool-specific presets", async () => {
+  const cases = [
+    {
+      preset: "codex",
+      expected: [
+        "AGENTS.md",
+        ".cms-lab/agent-context.md",
+        ".cms-lab/agent-prompt.md",
+      ],
+      unexpected: ["CLAUDE.md", "GEMINI.md", ".github/copilot-instructions.md"],
+    },
+    {
+      preset: "claude",
+      expected: [
+        "CLAUDE.md",
+        ".cms-lab/agent-context.md",
+        ".cms-lab/agent-prompt.md",
+      ],
+      unexpected: ["AGENTS.md", "GEMINI.md", ".github/copilot-instructions.md"],
+    },
+    {
+      preset: "gemini",
+      expected: [
+        "GEMINI.md",
+        ".cms-lab/agent-context.md",
+        ".cms-lab/agent-prompt.md",
+      ],
+      unexpected: ["AGENTS.md", "CLAUDE.md", ".github/copilot-instructions.md"],
+    },
+    {
+      preset: "copilot",
+      expected: [
+        ".github/copilot-instructions.md",
+        ".github/prompts/cms-lab-fix.prompt.md",
+        ".cms-lab/agent-context.md",
+        ".cms-lab/agent-prompt.md",
+      ],
+      unexpected: ["AGENTS.md", "CLAUDE.md", "GEMINI.md"],
+    },
+    {
+      preset: "all",
+      expected: [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "GEMINI.md",
+        ".github/copilot-instructions.md",
+        ".github/prompts/cms-lab-fix.prompt.md",
+        ".cms-lab/agent-context.md",
+        ".cms-lab/agent-prompt.md",
+      ],
+      unexpected: [],
+    },
+  ];
+
+  for (const testCase of cases) {
+    const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+    await mkdir(join(cwd, "pages"), { recursive: true });
+    await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+    const configPath = join(cwd, "cms-lab.config.ts");
+    await writeFile(
+      configPath,
+      `
+        import { defineConfig } from '@cms-lab/core'
+        export default defineConfig({
+          site: { url: 'http://localhost:3000' },
+          framework: { type: 'next', router: 'pages' },
+          cms: { provider: 'directus', url: 'http://localhost:8055', collections: [{ type: 'page', collection: 'pages' }] },
+          routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+        })
+      `,
+    );
+
+    let stdout = "";
+    const exitCode = await runCli(
+      ["agent-context", "--config", configPath, "--preset", testCase.preset],
+      {
+        cwd,
+        stdout: (text) => {
+          stdout += text;
+        },
+        stderr: () => {},
+      },
+    );
+
+    expect(exitCode, testCase.preset).toBe(0);
+
+    for (const file of testCase.expected) {
+      expect(stdout, `${testCase.preset}:${file}`).toContain(`created ${file}`);
+      expect(await readFile(join(cwd, file), "utf8")).toContain("cms-lab");
+    }
+
+    for (const file of testCase.unexpected) {
+      await expect(
+        readFile(join(cwd, file), "utf8"),
+        `${testCase.preset}:${file}`,
+      ).rejects.toThrow();
+    }
+
+    if (testCase.preset === "claude" || testCase.preset === "all") {
+      expect(await readFile(join(cwd, "CLAUDE.md"), "utf8")).toContain(
+        "@.cms-lab/agent-context.md",
+      );
+    }
+
+    if (testCase.preset === "gemini" || testCase.preset === "all") {
+      expect(await readFile(join(cwd, "GEMINI.md"), "utf8")).toContain(
+        "@.cms-lab/agent-context.md",
+      );
+    }
+
+    if (testCase.preset === "copilot" || testCase.preset === "all") {
+      expect(
+        await readFile(
+          join(cwd, ".github/prompts/cms-lab-fix.prompt.md"),
+          "utf8",
+        ),
+      ).toContain("cms-lab diagnostics");
+    }
+  }
+});
+
+test("runCli agent-context rejects unknown presets", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let stderr = "";
+  const exitCode = await runCli(
+    ["agent-context", "--config", configPath, "--preset", "cursor"],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: (text) => {
+        stderr += text;
+      },
+    },
+  );
+
+  expect(exitCode).toBe(2);
+  expect(stderr).toContain(
+    "--preset must be one of: generic, codex, claude, gemini, copilot, all",
+  );
+});
+
 test("runCli pretty output respects --no-color and suggests the next explain command", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "app"), { recursive: true });

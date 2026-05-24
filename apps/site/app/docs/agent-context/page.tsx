@@ -13,6 +13,7 @@ export default function AgentContextPage() {
       active="/docs/agent-context"
       toc={[
         { href: "#generate", label: "Generate" },
+        { href: "#presets", label: "Presets" },
         { href: "#files", label: "Files" },
         { href: "#agents", label: "Agents" },
         { href: "#safety", label: "Safety" },
@@ -35,9 +36,80 @@ export default function AgentContextPage() {
         Use flags when you need a custom config path or an intentional rewrite.
       </p>
       <CodeBlock>{`npx @cms-lab/cli agent-context --config ./cms-lab.config.ts
+npx @cms-lab/cli agent-context --preset all
+npx @cms-lab/cli agent-context --preset claude
+npx @cms-lab/cli agent-context --preset gemini
+npx @cms-lab/cli agent-context --preset copilot
 npx @cms-lab/cli agent-context --force
 npx @cms-lab/cli agent-context --no-agents-md
 npx @cms-lab/cli agent-context --out .cms-lab`}</CodeBlock>
+
+      <h2 id="presets">Presets</h2>
+      <p>
+        The default preset is intentionally plain. Use a tool-specific preset
+        when the repository needs files that a coding assistant reads
+        automatically.
+      </p>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Preset</th>
+            <th>Writes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <code>generic</code>
+            </td>
+            <td>
+              <code>AGENTS.md</code> and shared files in <code>.cms-lab/</code>.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>codex</code>
+            </td>
+            <td>
+              Same as <code>generic</code>, tuned for repositories that use
+              agent instruction files.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>claude</code>
+            </td>
+            <td>
+              <code>CLAUDE.md</code> plus shared cms-lab context and prompt
+              files.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>gemini</code>
+            </td>
+            <td>
+              <code>GEMINI.md</code> plus shared cms-lab context and prompt
+              files.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>copilot</code>
+            </td>
+            <td>
+              <code>.github/copilot-instructions.md</code>, a Copilot prompt,
+              and shared cms-lab files.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>all</code>
+            </td>
+            <td>All supported agent files.</td>
+          </tr>
+        </tbody>
+      </table>
 
       <h2 id="files">Generated files</h2>
       <table className="table">
@@ -76,6 +148,11 @@ npx @cms-lab/cli agent-context --out .cms-lab`}</CodeBlock>
           </tr>
         </tbody>
       </table>
+      <p>
+        Some presets add <code>CLAUDE.md</code>, <code>GEMINI.md</code>, or
+        Copilot files that point back to the same shared context instead of
+        copying project details into several places.
+      </p>
 
       <h2 id="agents">Agent usage</h2>
       <p>

@@ -22,6 +22,10 @@ cms-lab scan --json --include-sensitive-output
 cms-lab scan --max-warnings 0
 cms-lab scan --strict
 cms-lab agent-context
+cms-lab agent-context --preset all
+cms-lab agent-context --preset claude
+cms-lab agent-context --preset gemini
+cms-lab agent-context --preset copilot
 cms-lab agent-context --force
 cms-lab explain CMS-ROUTE-404
 ```
@@ -46,10 +50,12 @@ Exports include local HTML (`--report`), Markdown (`--markdown`), JUnit XML
 (`--slack-webhook <url>`). Slack notifications send counts and diagnostic codes
 only, never raw CMS payloads, local paths, or webhook URLs.
 
-`cms-lab agent-context` writes `AGENTS.md`, `.cms-lab/agent-context.md`, and
-`.cms-lab/agent-prompt.md` so coding agents can read the cms-lab docs, package
-links, route mappings, and safe project facts before attempting fixes. Existing
-files are not overwritten unless `--force` is passed.
+`cms-lab agent-context` writes safe handoff files so coding agents can read the
+cms-lab docs, package links, route mappings, and safe project facts before
+attempting fixes. The default preset writes `AGENTS.md` plus shared files in
+`.cms-lab/`. Tool-specific presets can write `CLAUDE.md`, `GEMINI.md`, Copilot
+instructions, and a reusable Copilot prompt. Existing files are not overwritten
+unless `--force` is passed.
 
 ## Config
 

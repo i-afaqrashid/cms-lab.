@@ -29,7 +29,10 @@ import {
   renderSlackPayload,
   type ScanStatus,
 } from "./exporters.js";
-import { renderAgentContextFiles } from "./agent-context.js";
+import {
+  type AgentContextPreset,
+  renderAgentContextFiles,
+} from "./agent-context.js";
 import { formatPrettyResult } from "./output.js";
 
 export type CliDependencies = {
@@ -88,6 +91,7 @@ type InitCommandOptions = {
 type AgentContextCommandOptions = {
   config?: string;
   out?: string;
+  preset?: string;
   force?: boolean;
   agentsMd?: boolean;
 };
@@ -115,6 +119,7 @@ Examples:
   cms-lab doctor --config cms-lab.config.ts
   cms-lab scan --ci --report
   cms-lab agent-context
+  cms-lab agent-context --preset all
   cms-lab explain CMS-ROUTE-404
 `,
   );
@@ -276,6 +281,11 @@ Examples:
       "Directory for generated cms-lab agent files",
       ".cms-lab",
     )
+    .option(
+      "--preset <preset>",
+      "Agent preset: generic, codex, claude, gemini, copilot, or all",
+      "generic",
+    )
     .option("--force", "Overwrite existing generated files")
     .option("--no-agents-md", "Do not create or update AGENTS.md")
     .addHelpText(
@@ -284,6 +294,9 @@ Examples:
 Examples:
   cms-lab agent-context
   cms-lab agent-context --config cms-lab.config.ts
+  cms-lab agent-context --preset all
+  cms-lab agent-context --preset claude
+  cms-lab agent-context --preset copilot
   cms-lab agent-context --out .cms-lab --force
 `,
     )
@@ -676,6 +689,7 @@ async function runAgentContext(
       configFile: safeRelativePath(cwd, loaded.configFile),
       outputDir: options.out ?? ".cms-lab",
       includeAgentsMd: options.agentsMd !== false,
+      preset: parseAgentContextPreset(options.preset),
     });
     const existingFiles: string[] = [];
 
@@ -880,6 +894,27 @@ function parseVerbosity(
   }
 
   throw new ConfigLoadError("--verbose must be one of: 0, 1, 2, 3");
+}
+
+function parseAgentContextPreset(
+  value: string | undefined,
+): AgentContextPreset {
+  const preset = value ?? "generic";
+
+  if (
+    preset === "generic" ||
+    preset === "codex" ||
+    preset === "claude" ||
+    preset === "gemini" ||
+    preset === "copilot" ||
+    preset === "all"
+  ) {
+    return preset;
+  }
+
+  throw new ConfigLoadError(
+    "--preset must be one of: generic, codex, claude, gemini, copilot, all",
+  );
 }
 
 function shouldUseColor(
