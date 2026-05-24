@@ -15,7 +15,6 @@ out/
 coverage/
 .cms-lab/
 .release-packages/
-.release-github-package/
 
 # Environment and secrets
 .env
