@@ -64,7 +64,7 @@ for (const name of packageOrder) {
 
   if (!dryRun && name.startsWith("@")) {
     console.log(`Setting ${name} access to public`);
-    run("npm", ["access", "public", name]);
+    run("npm", ["access", "set", "status=public", name]);
   }
 }
 
