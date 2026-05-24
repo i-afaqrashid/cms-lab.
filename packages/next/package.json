@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/next",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Next.js project detection for cms-lab.",
   "license": "MIT",
