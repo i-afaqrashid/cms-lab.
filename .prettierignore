@@ -1,6 +1,7 @@
 node_modules
 dist
 apps/site/.next
+apps/site/out
 design
 coverage
 .cms-lab
