@@ -1,6 +1,8 @@
 import {
   CmsFetchError,
+  readCmsDataPath,
   type CMSDocument,
+  type DirectusCollectionConfig,
   type DirectusCmsProviderConfig,
   type FetchLike,
 } from "@cms-lab/core";
@@ -39,7 +41,7 @@ export async function fetchDirectusDocuments(
       );
       const rows = response.data ?? [];
       documents.push(
-        ...rows.map((item) => normalizeDirectusItem(collection.type, item)),
+        ...rows.map((item) => normalizeDirectusItem(collection, item)),
       );
 
       if (rows.length < pageSize) {
@@ -54,9 +56,10 @@ export async function fetchDirectusDocuments(
 }
 
 export function normalizeDirectusItem(
-  type: string,
+  collection: string | DirectusCollectionConfig,
   item: unknown,
 ): CMSDocument {
+  const config = collectionConfig(collection);
   const data = asRecord(item);
   const id = stringFrom(
     data.id ?? data.uid ?? data.slug,
@@ -65,8 +68,11 @@ export function normalizeDirectusItem(
 
   return {
     id,
-    type,
-    uid: optionalString(data.uid ?? data.slug ?? data.id),
+    type: config.type,
+    uid: optionalString(
+      mappedValue(data, config.uidField) ?? data.uid ?? data.slug ?? data.id,
+    ),
+    url: optionalString(mappedValue(data, config.urlField)),
     status: normalizeStatus(data.status),
     data,
   };
@@ -145,6 +151,21 @@ function optionalString(value: unknown): string | undefined {
   }
 
   return undefined;
+}
+
+function collectionConfig(
+  collection: string | DirectusCollectionConfig,
+): DirectusCollectionConfig {
+  return typeof collection === "string"
+    ? { type: collection, collection }
+    : collection;
+}
+
+function mappedValue(
+  data: Record<string, unknown>,
+  path: string | undefined,
+): unknown {
+  return path ? readCmsDataPath(data, path) : undefined;
 }
 
 function normalizeStatus(value: unknown): CMSDocument["status"] {

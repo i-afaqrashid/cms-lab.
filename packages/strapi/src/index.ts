@@ -1,8 +1,10 @@
 import {
   CmsFetchError,
+  readCmsDataPath,
   type CMSDocument,
   type FetchLike,
   type StrapiCmsProviderConfig,
+  type StrapiCollectionConfig,
 } from "@cms-lab/core";
 
 type StrapiResponse = {
@@ -45,7 +47,7 @@ export async function fetchStrapiDocuments(
       );
       documents.push(
         ...(response.data ?? []).map((item) =>
-          normalizeStrapiItem(collection.type, item),
+          normalizeStrapiItem(collection, item),
         ),
       );
       const pageCount = response.meta?.pagination?.pageCount ?? page;
@@ -61,7 +63,11 @@ export async function fetchStrapiDocuments(
   return documents;
 }
 
-export function normalizeStrapiItem(type: string, item: unknown): CMSDocument {
+export function normalizeStrapiItem(
+  collection: string | StrapiCollectionConfig,
+  item: unknown,
+): CMSDocument {
+  const config = collectionConfig(collection);
   const record = asRecord(item);
   const attributes = optionalRecord(record.attributes);
   const data = attributes ? { id: record.id, ...attributes } : record;
@@ -72,10 +78,15 @@ export function normalizeStrapiItem(type: string, item: unknown): CMSDocument {
 
   return {
     id,
-    type,
+    type: config.type,
     uid: optionalString(
-      data.uid ?? data.slug ?? record.documentId ?? record.id,
+      mappedValue(data, config.uidField) ??
+        data.uid ??
+        data.slug ??
+        record.documentId ??
+        record.id,
     ),
+    url: optionalString(mappedValue(data, config.urlField)),
     status: normalizeStatus(data),
     data,
   };
@@ -160,6 +171,21 @@ function optionalString(value: unknown): string | undefined {
   }
 
   return undefined;
+}
+
+function collectionConfig(
+  collection: string | StrapiCollectionConfig,
+): StrapiCollectionConfig {
+  return typeof collection === "string"
+    ? { type: collection, endpoint: collection }
+    : collection;
+}
+
+function mappedValue(
+  data: Record<string, unknown>,
+  path: string | undefined,
+): unknown {
+  return path ? readCmsDataPath(data, path) : undefined;
 }
 
 function normalizeStatus(data: Record<string, unknown>): CMSDocument["status"] {

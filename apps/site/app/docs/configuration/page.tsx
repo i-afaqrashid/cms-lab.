@@ -14,6 +14,7 @@ export default function ConfigurationPage() {
         { href: "#example", label: "Example" },
         { href: "#keys", label: "Keys" },
         { href: "#adapter-examples", label: "Adapter examples" },
+        { href: "#route-fields", label: "Route fields" },
         { href: "#required-fields", label: "Required fields" },
       ]}
     >
@@ -37,7 +38,11 @@ export default defineConfig({
   },
   routes: [
     { type: "page", pattern: "/:uid", getPath: (doc) => "/" + doc.uid },
-    { type: "article", pattern: "/articles/:uid", getPath: (doc) => "/articles/" + doc.uid },
+    {
+      type: "article",
+      pattern: "/articles/:uid",
+      getPath: (doc) => "/articles/" + doc.uid,
+    },
   ],
   checks: {
     fields: {
@@ -118,35 +123,93 @@ export default defineConfig({
   provider: "strapi",
   url: "http://localhost:1337",
   token: process.env.STRAPI_TOKEN,
-  collections: [{ type: "page", endpoint: "pages" }],
+  collections: [
+    {
+      type: "page",
+      endpoint: "pages",
+      uidField: "routing.slug",
+    },
+  ],
 }
 
 cms: {
   provider: "directus",
   url: "http://localhost:8055",
   token: process.env.DIRECTUS_TOKEN,
-  collections: [{ type: "page", collection: "pages" }],
+  collections: [
+    {
+      type: "page",
+      collection: "pages",
+      uidField: "routing.slug",
+    },
+  ],
 }
 
 cms: {
   provider: "wordpress",
   url: "http://localhost:8080",
-  contentTypes: [{ type: "post", endpoint: "posts" }],
+  contentTypes: [
+    {
+      type: "post",
+      endpoint: "posts",
+      uidField: "acf.handle",
+    },
+  ],
 }
 
 cms: {
   provider: "contentful",
   spaceId: "my-space",
   accessToken: process.env.CONTENTFUL_DELIVERY_TOKEN,
-  contentTypes: [{ type: "page", contentType: "page" }],
+  contentTypes: [
+    {
+      type: "page",
+      contentType: "page",
+      uidField: "routing.slug",
+    },
+  ],
 }
 
 cms: {
   provider: "sanity",
   projectId: "my-project",
   dataset: "production",
-  contentTypes: [{ type: "page", documentType: "page" }],
+  contentTypes: [
+    {
+      type: "page",
+      documentType: "page",
+      uidField: "slug.current",
+    },
+  ],
 }`}</CodeBlock>
+
+      <h2 id="route-fields">Route fields</h2>
+      <p>
+        Strapi, Directus, WordPress, Contentful, and Sanity entries can define{" "}
+        <code>uidField</code> and <code>urlField</code> on each configured
+        collection or content type. Use them when the route value lives in a
+        project-specific field instead of a plain <code>uid</code> or{" "}
+        <code>slug</code>.
+      </p>
+      <CodeBlock>{`cms: {
+  provider: "sanity",
+  projectId: "my-project",
+  dataset: "production",
+  contentTypes: [
+    {
+      type: "article",
+      documentType: "post",
+      uidField: "slug.current",
+      urlField: "seo.canonical",
+    },
+  ],
+}`}</CodeBlock>
+      <div className="callout">
+        <strong>Path format</strong>
+        Adapter field mappings are read from <code>document.data</code>. Use
+        dotted paths for nested objects, for example <code>routing.slug</code>{" "}
+        or <code>seo.canonical</code>.
+      </div>
 
       <h2 id="required-fields">Required fields</h2>
       <p>

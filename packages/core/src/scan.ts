@@ -1,4 +1,5 @@
 import { createDiagnostic, summarizeDiagnostics } from "./diagnostics.js";
+import { readCmsDataPath } from "./data-path.js";
 import { SiteUnreachableError } from "./errors.js";
 import type {
   CMSDocument,
@@ -413,7 +414,7 @@ function checkRequiredFields(
       }
 
       const fullPath = `data.${rule.path}`;
-      if (!isMissingFieldValue(readDataPath(document.data, rule.path))) {
+      if (!isMissingFieldValue(readCmsDataPath(document.data, rule.path))) {
         continue;
       }
 
@@ -447,7 +448,7 @@ function hasSeoValue(
   kind: "title" | "description",
 ): boolean {
   return seoFieldPaths(config.cms.provider, kind).some(
-    (path) => !isBlank(readDataPath(data, path)),
+    (path) => !isBlank(readCmsDataPath(data, path)),
   );
 }
 
@@ -798,25 +799,6 @@ function isMissingFieldValue(value: unknown): boolean {
   }
 
   return false;
-}
-
-function readDataPath(data: unknown, path: string): unknown {
-  let current: unknown = data;
-
-  for (const segment of path.split(".")) {
-    if (!segment) {
-      return undefined;
-    }
-
-    const record = asRecord(current);
-    if (!record || !(segment in record)) {
-      return undefined;
-    }
-
-    current = record[segment];
-  }
-
-  return current;
 }
 
 function isBlankOrPlaceholderAlt(value: unknown): boolean {

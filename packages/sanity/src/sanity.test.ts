@@ -122,6 +122,36 @@ test("normalizeSanityDocument supports slug strings and draft ids", () => {
   });
 });
 
+test("normalizeSanityDocument supports configured uid and url fields", () => {
+  expect(
+    normalizeSanityDocument(
+      {
+        type: "article",
+        documentType: "post",
+        uidField: "routing.handle",
+        urlField: "seo.canonical",
+      },
+      {
+        _id: "post-custom-route",
+        _type: "post",
+        slug: { current: "ignored-slug" },
+        routing: {
+          handle: "custom-article",
+        },
+        seo: {
+          canonical: "https://example.com/blog/custom-article",
+        },
+      },
+    ),
+  ).toMatchObject({
+    id: "post-custom-route",
+    type: "article",
+    uid: "custom-article",
+    url: "https://example.com/blog/custom-article",
+    status: "published",
+  });
+});
+
 test("fetchSanityDocuments reports HTTP failures", async () => {
   await expect(
     fetchSanityDocuments(

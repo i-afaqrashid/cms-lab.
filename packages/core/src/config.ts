@@ -27,6 +27,11 @@ const prismicConfigSchema = z
   })
   .strict();
 
+const cmsFieldMappingShape = {
+  uidField: z.string().min(1).optional(),
+  urlField: z.string().min(1).optional(),
+};
+
 const strapiConfigSchema = z
   .object({
     provider: z.literal("strapi"),
@@ -38,6 +43,7 @@ const strapiConfigSchema = z
           .object({
             type: z.string().min(1),
             endpoint: z.string().min(1),
+            ...cmsFieldMappingShape,
           })
           .strict(),
       )
@@ -56,6 +62,7 @@ const directusConfigSchema = z
           .object({
             type: z.string().min(1),
             collection: z.string().min(1),
+            ...cmsFieldMappingShape,
           })
           .strict(),
       )
@@ -73,6 +80,7 @@ const wordpressConfigSchema = z
           .object({
             type: z.string().min(1),
             endpoint: z.string().min(1),
+            ...cmsFieldMappingShape,
           })
           .strict(),
       )
@@ -93,6 +101,7 @@ const contentfulConfigSchema = z
           .object({
             type: z.string().min(1),
             contentType: z.string().min(1),
+            ...cmsFieldMappingShape,
           })
           .strict(),
       )
@@ -115,6 +124,7 @@ const sanityConfigSchema = z
           .object({
             type: z.string().min(1),
             documentType: z.string().min(1),
+            ...cmsFieldMappingShape,
           })
           .strict(),
       )

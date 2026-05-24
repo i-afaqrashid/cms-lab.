@@ -1,5 +1,6 @@
 import {
   CmsFetchError,
+  readCmsDataPath,
   type CMSDocument,
   type FetchLike,
   type WordPressCmsProviderConfig,
@@ -37,7 +38,7 @@ export async function fetchWordPressDocuments(
 
       const { rows, pages } = await fetchRows(fetchImpl, url);
       documents.push(
-        ...rows.map((row) => normalizeWordPressItem(contentType.type, row)),
+        ...rows.map((row) => normalizeWordPressItem(contentType, row)),
       );
       const totalPages = pages;
 
@@ -81,14 +82,18 @@ async function fetchRows(
 }
 
 export function normalizeWordPressItem(
-  type: string,
+  contentType: string | WordPressContentTypeConfig,
   data: WordPressItem,
 ): CMSDocument {
+  const config = contentTypeConfig(contentType);
+
   return {
     id: stringFrom(data.id, "WordPress item is missing id"),
-    type,
-    uid: optionalString(data.slug ?? data.id),
-    url: optionalString(data.link),
+    type: config.type,
+    uid: optionalString(
+      mappedValue(data, config.uidField) ?? data.slug ?? data.id,
+    ),
+    url: optionalString(mappedValue(data, config.urlField) ?? data.link),
     status: normalizeStatus(data.status),
     data,
   };
@@ -131,6 +136,21 @@ function optionalString(value: unknown): string | undefined {
   }
 
   return undefined;
+}
+
+function contentTypeConfig(
+  contentType: string | WordPressContentTypeConfig,
+): WordPressContentTypeConfig {
+  return typeof contentType === "string"
+    ? { type: contentType, endpoint: contentType }
+    : contentType;
+}
+
+function mappedValue(
+  data: Record<string, unknown>,
+  path: string | undefined,
+): unknown {
+  return path ? readCmsDataPath(data, path) : undefined;
 }
 
 function normalizeStatus(value: unknown): CMSDocument["status"] {

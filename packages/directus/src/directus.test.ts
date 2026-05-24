@@ -168,6 +168,34 @@ test("normalizeDirectusItem keeps rich SEO and file fields while treating archiv
   });
 });
 
+test("normalizeDirectusItem supports configured uid and url fields", () => {
+  expect(
+    normalizeDirectusItem(
+      {
+        type: "page",
+        collection: "pages",
+        uidField: "routing.handle",
+        urlField: "routing.path",
+      },
+      {
+        id: "directus-page-7",
+        slug: "ignored-slug",
+        routing: {
+          handle: "custom-page",
+          path: "/custom-page",
+        },
+        status: "published",
+      },
+    ),
+  ).toMatchObject({
+    id: "directus-page-7",
+    type: "page",
+    uid: "custom-page",
+    url: "/custom-page",
+    status: "published",
+  });
+});
+
 test("fetchDirectusDocuments sends bearer tokens and reports HTTP failures", async () => {
   let authorization: string | null = null;
 

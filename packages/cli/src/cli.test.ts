@@ -1734,7 +1734,7 @@ test("runCli scans Contentful configs through the bundled adapter", async () => 
           provider: 'contentful',
           spaceId: 'space123',
           accessToken: 'delivery-token',
-          contentTypes: [{ type: 'page', contentType: 'page' }],
+          contentTypes: [{ type: 'page', contentType: 'page', uidField: 'routing.slug' }],
         },
         routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
       })
@@ -1749,7 +1749,7 @@ test("runCli scans Contentful configs through the bundled adapter", async () => 
     },
     stderr: () => {},
     fetch: async (url) => {
-      if (String(url).startsWith("https://cdn.contentful.com/")) {
+      if (new URL(String(url)).hostname === "cdn.contentful.com") {
         return Response.json({
           skip: 0,
           limit: 100,
@@ -1758,7 +1758,8 @@ test("runCli scans Contentful configs through the bundled adapter", async () => 
             {
               sys: { id: "entry-1", updatedAt: "2026-01-01T00:00:00Z" },
               fields: {
-                slug: "about",
+                slug: "ignored-slug",
+                routing: { slug: "about" },
                 meta_title: "About",
                 meta_description: "About page",
               },

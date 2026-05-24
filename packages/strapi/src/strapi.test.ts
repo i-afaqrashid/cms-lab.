@@ -135,6 +135,34 @@ test("normalizeStrapiItem keeps rich SEO and media fields while treating non-pub
   });
 });
 
+test("normalizeStrapiItem supports configured uid and url fields", () => {
+  expect(
+    normalizeStrapiItem(
+      {
+        type: "article",
+        endpoint: "articles",
+        uidField: "routing.handle",
+        urlField: "routing.path",
+      },
+      {
+        id: 12,
+        slug: "ignored-slug",
+        routing: {
+          handle: "custom-handle",
+          path: "/articles/custom-handle",
+        },
+        publishedAt: "2026-05-23T00:00:00.000Z",
+      },
+    ),
+  ).toMatchObject({
+    id: "12",
+    type: "article",
+    uid: "custom-handle",
+    url: "/articles/custom-handle",
+    status: "published",
+  });
+});
+
 test("fetchStrapiDocuments uses numeric ids and slugs when documentId is absent", async () => {
   const documents = await fetchStrapiDocuments(
     {

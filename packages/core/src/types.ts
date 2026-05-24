@@ -54,10 +54,15 @@ export type PrismicCmsProviderConfig = {
   endpoint?: string;
 };
 
+export type CmsFieldMappingConfig = {
+  uidField?: string;
+  urlField?: string;
+};
+
 export type StrapiCollectionConfig = {
   type: string;
   endpoint: string;
-};
+} & CmsFieldMappingConfig;
 
 export type StrapiCmsProviderConfig = {
   provider: "strapi";
@@ -69,7 +74,7 @@ export type StrapiCmsProviderConfig = {
 export type DirectusCollectionConfig = {
   type: string;
   collection: string;
-};
+} & CmsFieldMappingConfig;
 
 export type DirectusCmsProviderConfig = {
   provider: "directus";
@@ -81,7 +86,7 @@ export type DirectusCmsProviderConfig = {
 export type WordPressContentTypeConfig = {
   type: string;
   endpoint: string;
-};
+} & CmsFieldMappingConfig;
 
 export type WordPressCmsProviderConfig = {
   provider: "wordpress";
@@ -92,7 +97,7 @@ export type WordPressCmsProviderConfig = {
 export type ContentfulContentTypeConfig = {
   type: string;
   contentType: string;
-};
+} & CmsFieldMappingConfig;
 
 export type ContentfulCmsProviderConfig = {
   provider: "contentful";
@@ -106,7 +111,7 @@ export type ContentfulCmsProviderConfig = {
 export type SanityContentTypeConfig = {
   type: string;
   documentType: string;
-};
+} & CmsFieldMappingConfig;
 
 export type SanityCmsProviderConfig = {
   provider: "sanity";

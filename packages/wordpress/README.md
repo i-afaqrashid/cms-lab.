@@ -8,7 +8,12 @@ cms: {
   url: "http://localhost:8080",
   contentTypes: [
     { type: "page", endpoint: "pages" },
-    { type: "post", endpoint: "posts" },
+    {
+      type: "post",
+      endpoint: "posts",
+      uidField: "acf.handle",
+      urlField: "acf.permalink",
+    },
   ],
 }
 ```
@@ -18,6 +23,9 @@ The adapter reads WordPress REST API content and normalizes it into cms-lab
 in `document.data`, stores the REST `link` as `document.url`, uses `slug` as the
 UID when available, and treats scheduled, draft, pending, and private content as
 `draft`.
+
+Use `uidField` or `urlField` when your project stores route values in custom
+fields. Both options read dotted paths from `document.data`.
 
 ## Open Source
 
