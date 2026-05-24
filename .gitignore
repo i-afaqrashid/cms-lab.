@@ -40,6 +40,7 @@ pnpm-debug.log*
 .netlify/
 
 # Local AI/agent workspace notes
+design/
 CLAUDE.md
 claude.md
 AGENTS.md
