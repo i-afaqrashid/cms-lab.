@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/reporter",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "HTML report rendering for cms-lab.",
   "license": "MIT",
