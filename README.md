@@ -8,7 +8,7 @@ No hosted cms-lab service is involved. The CLI runs inside your project and talk
 
 ## Status
 
-The project targets Next.js App Router sites that pull content from Prismic, Strapi, Directus, or WordPress. The `design/` folder remains a non-shipping visual reference, while `apps/site` is the production marketing/docs implementation.
+The project targets Next.js App Router sites that pull content from Prismic, Strapi, Directus, or WordPress. The `apps/site` package is the production marketing/docs implementation.
 
 ## Install
 
@@ -189,7 +189,6 @@ packages/wordpress WordPress REST document adapter
 packages/reporter  local HTML report renderer
 apps/site          marketing site and docs
 test-fixtures/     live public Prismic fixture
-design/            visual/copy reference source
 ```
 
 ## Development
