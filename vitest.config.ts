@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     globals: true,
-    include: ["packages/**/*.test.ts"],
+    include: ["packages/**/*.test.ts", "scripts/**/*.test.mjs"],
     environment: "node",
     benchmark: {
       include: ["benchmarks/**/*.bench.ts"],

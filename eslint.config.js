@@ -16,6 +16,8 @@ export default tseslint.config(
     ignores: [
       "**/dist/**",
       ".cms-lab/**",
+      ".release-github-package/**",
+      ".release-packages/**",
       "design/**",
       "examples/**",
       "apps/site/.next/**",
