@@ -73,7 +73,7 @@ export default function HomePage() {
             <div className="heroActions">
               <span className="commandPill" aria-label="Run command">
                 <span className="prompt">$</span>
-                <span>npx cms-lab scan</span>
+                <span>npx @cms-lab/cli scan</span>
               </span>
               <Link className="btn btnPrimary" href="/docs">
                 Read docs
@@ -90,7 +90,7 @@ export default function HomePage() {
             <h2 className="sectionTitle">Run it before deploy.</h2>
           </div>
           <Terminal title="cms-lab scan">
-            <span className="tMuted">$</span> npx cms-lab scan
+            <span className="tMuted">$</span> npx @cms-lab/cli scan
             {"\n\n"}
             <span className="tBold">cms-lab</span>
             {"\n"}checked your Next.js routes and CMS content{"\n\n"}

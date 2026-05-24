@@ -13,13 +13,13 @@ The project targets Next.js App Router sites that pull content from Prismic, Str
 ## Install
 
 ```sh
-pnpm add -D cms-lab @cms-lab/core @cms-lab/next @cms-lab/prismic @cms-lab/strapi @cms-lab/directus @cms-lab/wordpress
+pnpm add -D @cms-lab/cli @cms-lab/core @cms-lab/next @cms-lab/prismic @cms-lab/strapi @cms-lab/directus @cms-lab/wordpress
 ```
 
 Or run without installing after publishing:
 
 ```sh
-npx cms-lab scan
+npx @cms-lab/cli scan
 ```
 
 ## Configure

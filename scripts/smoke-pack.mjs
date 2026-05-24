@@ -37,7 +37,7 @@ const installTarballs = [
   findTarball(tarballs, /^cms-lab-reporter-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-strapi-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-wordpress-\d.*\.tgz$/),
-  findTarball(tarballs, /^cms-lab-\d.*\.tgz$/),
+  findTarball(tarballs, /^cms-lab-cli-\d.*\.tgz$/),
 ].map((file) => join(packDir, file));
 
 await writeFile(
