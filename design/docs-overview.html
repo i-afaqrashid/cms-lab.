@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docs — cms-lab</title>
+  <meta name="description" content="cms-lab documentation: install, configure, scan, and integrate with CI." />
+  <link rel="icon" href="assets/favicon-64.png" type="image/png" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="page">
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="landing.html">
+        <span class="brand-mark"><img src="assets/favicon-64.png" width="26" height="26" alt="" /></span>
+        <span class="brand-name">cms-lab</span>
+      </a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="docs-overview.html" class="is-active">Docs</a>
+        <a href="docs-scan-command.html">scan</a>
+        <a href="report-success.html">Report</a>
+        <a href="landing.html#roadmap">Roadmap</a>
+      </nav>
+      <div class="top-right">
+        <a class="gh-pill" href="#" aria-label="GitHub">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.08.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          <span>github.com/i-afaqrashid/cms-lab</span>
+          <span class="star">unpublished</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div class="docs">
+
+        <aside class="sidenav" aria-label="Docs navigation">
+          <div class="group">
+            <div class="group-title">Getting started</div>
+            <a href="docs-overview.html" class="is-active">Overview</a>
+            <a href="docs-overview.html#install">Install</a>
+            <a href="docs-overview.html#configure">Configure</a>
+            <a href="docs-overview.html#first-scan">Your first scan</a>
+          </div>
+          <div class="group">
+            <div class="group-title">CLI</div>
+            <a href="docs-scan-command.html">scan</a>
+            <a href="#">init</a>
+            <a href="#">check</a>
+            <a href="#">explain</a>
+          </div>
+          <div class="group">
+            <div class="group-title">Adapters</div>
+            <a href="#">@cms-lab/next</a>
+            <a href="#">@cms-lab/prismic</a>
+            <a href="#">@cms-lab/strapi <em style="color:var(--muted);font-style:normal;font-size:11px;">· planned</em></a>
+            <a href="#">@cms-lab/shopify <em style="color:var(--muted);font-style:normal;font-size:11px;">· planned</em></a>
+          </div>
+          <div class="group">
+            <div class="group-title">Checks</div>
+            <a href="#">Route reachability</a>
+            <a href="#">Required fields</a>
+            <a href="#">SEO completeness</a>
+            <a href="#">Image alt text</a>
+            <a href="#">Internal links</a>
+          </div>
+          <div class="group">
+            <div class="group-title">CI</div>
+            <a href="#">GitHub Actions</a>
+            <a href="#">GitLab CI</a>
+            <a href="#">Vercel preview</a>
+          </div>
+        </aside>
+
+        <article class="docs-main">
+          <div class="breadcrumb">Docs / Overview</div>
+          <h1>cms-lab documentation</h1>
+          <p class="lede">
+            cms-lab is a CLI that scans your headless CMS content against your Next.js routes
+            and tells you what will break before you deploy. This page covers how it works,
+            what to install, and how to run your first scan.
+          </p>
+
+          <h2 id="how-it-works">How it works</h2>
+          <p>
+            cms-lab is config-first. You declare your CMS provider and a small set of route
+            patterns. The CLI then fetches your documents, resolves their expected URLs,
+            probes your local or staging site, and runs a fixed set of content + accessibility
+            + SEO checks against the result.
+          </p>
+          <p>
+            There is no cms-lab service, dashboard, or account. Everything runs against the
+            CMS credentials already in your <code>.env</code>, and output is either terminal,
+            JSON, or a static <code>report.html</code> you can open or upload as a CI artifact.
+          </p>
+
+          <div class="callout">
+            <div>
+              <div class="label">Heads up</div>
+              <p>cms-lab does not test rendered DOM, performance, or runtime errors. It validates the contract between your CMS and your routes. Pair it with Playwright/Lighthouse for the rest.</p>
+            </div>
+          </div>
+
+          <h2 id="install">Install</h2>
+          <p>Install per-project so version pinning lives in your lockfile:</p>
+          <pre class="codeblock"><span class="c-fn">pnpm</span> add -D @cms-lab/cli @cms-lab/next @cms-lab/prismic</pre>
+          <p>Or run ad-hoc with no install:</p>
+          <pre class="codeblock">npx cms-lab scan</pre>
+          <p>Requires Node ≥ 18. Works with pnpm, npm, yarn, and bun.</p>
+
+          <h2 id="configure">Configure</h2>
+          <p>
+            Add a <code>cms-lab.config.ts</code> at the root of your project. Most projects
+            need fewer than 30 lines.
+          </p>
+          <pre class="codeblock"><span class="c-com">// cms-lab.config.ts</span>
+<span class="c-key">import</span> { <span class="c-fn">defineConfig</span> } <span class="c-key">from</span> <span class="c-str">'@cms-lab/core'</span>
+
+<span class="c-key">export default</span> <span class="c-fn">defineConfig</span>({
+  site: { url: <span class="c-str">'http://localhost:3000'</span> },
+
+  framework: {
+    type:   <span class="c-str">'next'</span>,
+    router: <span class="c-str">'app'</span>,
+  },
+
+  cms: {
+    provider:       <span class="c-str">'prismic'</span>,
+    repositoryName: <span class="c-str">'my-agency-cms'</span>,
+    accessToken:    process.env.PRISMIC_ACCESS_TOKEN,
+  },
+
+  routes: [
+    { type: <span class="c-str">'page'</span>,      pattern: <span class="c-str">'/:uid'</span>,       getPath: (d) =&gt; <span class="c-str">`/${d.uid}`</span> },
+    { type: <span class="c-str">'blog_post'</span>, pattern: <span class="c-str">'/blog/:uid'</span>, getPath: (d) =&gt; <span class="c-str">`/blog/${d.uid}`</span> },
+  ],
+
+  checks: {
+    seo: { metaDescription: <span class="c-num">true</span>, ogImage: <span class="c-num">true</span> },
+    a11y: { imgAlt: <span class="c-num">true</span> },
+    links: { internal: <span class="c-num">true</span> },
+  },
+})</pre>
+
+          <h3 id="config-options">Config options</h3>
+          <table class="flags-table">
+            <thead>
+              <tr><th>Key</th><th>Type</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>site.url</code></td><td>string</td><td>The URL cms-lab probes. Override at runtime with <code>--url</code>.</td></tr>
+              <tr><td><code>framework.type</code></td><td><code>'next'</code></td><td>Next.js is supported. Astro and Remix are tracked.</td></tr>
+              <tr><td><code>framework.router</code></td><td><code>'app' | 'pages'</code></td><td>How cms-lab matches your routes to file-system segments.</td></tr>
+              <tr><td><code>cms.provider</code></td><td><code>'prismic' | 'strapi' | 'shopify'</code></td><td>Which adapter loads documents. Strapi is planned, Shopify is planned.</td></tr>
+              <tr><td><code>routes[]</code></td><td>Route[]</td><td>How each content type maps to a URL. The source of truth for route checks.</td></tr>
+              <tr><td><code>checks.*</code></td><td>object</td><td>Toggle individual check groups. All default to <code>true</code>.</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="first-scan">Your first scan</h2>
+          <p>Boot your Next.js dev server, then run:</p>
+          <pre class="codeblock">pnpm dev &amp;
+npx cms-lab scan</pre>
+
+          <p>You should see something like this:</p>
+
+          <div class="terminal" style="margin-top:16px;">
+            <div class="terminal-chrome">
+              <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+              <span class="title">first scan · zsh</span>
+            </div>
+<pre class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npx cms-lab scan</span>
+
+<span class="t-bold">cms-lab</span>
+<span class="t-ok">✓</span> config loaded         <span class="t-dim">cms-lab.config.ts</span>
+<span class="t-ok">✓</span> cms reachable         <span class="t-dim">prismic · 142 docs</span>
+<span class="t-ok">✓</span> probing 142 routes    <span class="t-dim">http://localhost:3000</span>
+
+<span class="t-mut">summary ───────────────────────────────</span>
+  errors    <span class="t-ok">0</span>
+  warnings  <span class="t-warn">2</span>
+  info      <span class="t-mut">0</span>
+  duration  <span class="t-dim">2.8s</span>
+
+<span class="t-ok">✓</span> <span class="t-bold">scan passed</span> <span class="t-dim">with 2 warnings</span>
+</pre>
+          </div>
+
+          <h2 id="output-formats">Output formats</h2>
+          <p>cms-lab can emit results in three formats. Combine as needed.</p>
+          <table class="flags-table">
+            <thead>
+              <tr><th>Flag</th><th>Output</th><th>Use it for</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>--pretty</code> <span style="color:var(--muted);font-size:12px;">(default)</span></td><td>Grouped terminal output</td><td>Local development</td></tr>
+              <tr><td><code>--json</code></td><td><code>ScanResult</code> JSON to stdout</td><td>Custom tooling, dashboards</td></tr>
+              <tr><td><code>--report</code></td><td><code>.cms-lab/report.html</code></td><td>CI artifacts, PR review</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="ci">Use it in CI</h2>
+          <p>Add a step that runs after your build. cms-lab exits non-zero on errors, so failed scans block your pipeline by default.</p>
+          <pre class="codeblock"><span class="c-com"># .github/workflows/cms.yml</span>
+<span class="c-tag">name:</span> cms-lab
+<span class="c-tag">on:</span> [pull_request]
+
+<span class="c-tag">jobs:</span>
+  <span class="c-tag">scan:</span>
+    <span class="c-tag">runs-on:</span> ubuntu-latest
+    <span class="c-tag">steps:</span>
+      <span class="c-tag">- uses:</span> actions/checkout@v4
+      <span class="c-tag">- uses:</span> pnpm/action-setup@v3
+      <span class="c-tag">- run:</span>  pnpm install
+      <span class="c-tag">- run:</span>  pnpm build &amp;&amp; pnpm start &amp;
+      <span class="c-tag">- run:</span>  npx wait-on http://localhost:3000
+      <span class="c-tag">- run:</span>  npx cms-lab scan --ci --report
+      <span class="c-tag">- uses:</span> actions/upload-artifact@v4
+        <span class="c-tag">if:</span> always()
+        <span class="c-tag">with:</span>
+          <span class="c-tag">name:</span> cms-lab-report
+          <span class="c-tag">path:</span> .cms-lab/report.html</pre>
+
+          <div class="callout">
+            <div>
+              <div class="label">Tip</div>
+              <p>Use <code>--ci</code> instead of <code>--pretty</code> in pipelines. It disables spinners, colorizes for plain text, and emits annotations GitHub can parse.</p>
+            </div>
+          </div>
+
+          <h2 id="next">Where to next</h2>
+          <ul>
+            <li>Read the <a class="ulink" href="docs-scan-command.html"><code>scan</code> command reference</a> for all flags and exit codes.</li>
+            <li>See a real <a class="ulink" href="report-errors.html">report with errors</a> or a <a class="ulink" href="report-success.html">clean run</a>.</li>
+            <li>Browse the <a class="ulink" href="landing.html#roadmap">roadmap</a>.</li>
+          </ul>
+        </article>
+
+        <aside class="toc" aria-label="On this page">
+          <div class="toc-title">On this page</div>
+          <a href="#how-it-works">How it works</a>
+          <a href="#install">Install</a>
+          <a href="#configure">Configure</a>
+          <a href="#config-options" style="padding-left:22px;">Options</a>
+          <a href="#first-scan" class="is-active">Your first scan</a>
+          <a href="#output-formats">Output formats</a>
+          <a href="#ci">Use it in CI</a>
+          <a href="#next">Where to next</a>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>cms-lab · MIT</span>
+      <span class="footer-links">
+        <a href="landing.html">Home</a>
+        <a href="docs-overview.html">Docs</a>
+        <a href="report-success.html">Report</a>
+        <a href="#">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>

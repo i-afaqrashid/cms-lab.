@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>cms-lab — social preview source</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    /* Force 1200×630 canvas for OG capture */
+    html, body { background: #2a2c2a; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .og {
+      width: 1200px;
+      height: 630px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      box-shadow: 0 1px 0 #0001;
+    }
+    .og::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      mask-image: linear-gradient(to bottom, #000 60%, transparent);
+    }
+    .og-left {
+      padding: 64px 64px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .og-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .og-brand img { width: 44px; height: 44px; }
+    .og-brand .name {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .og-brand .badge {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      margin-left: 4px;
+    }
+    .og-headline {
+      font-size: 72px;
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      font-weight: 600;
+      max-width: 14ch;
+    }
+    .og-headline .mark {
+      background: linear-gradient(180deg, transparent 62%, var(--accent) 62%);
+      padding: 0 4px;
+    }
+    .og-sub {
+      font-size: 20px;
+      color: var(--muted);
+      max-width: 38ch;
+      line-height: 1.4;
+      margin-top: 24px;
+    }
+    .og-footer {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .og-footer .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .og-footer .pill .prompt { color: var(--muted); }
+    .og-right {
+      position: relative;
+      padding: 64px 64px 64px 0;
+      display: flex;
+      align-items: center;
+    }
+    .og-term {
+      width: 100%;
+      background: var(--term-bg);
+      border-radius: 12px;
+      border: 1px solid #2a2c30;
+      overflow: hidden;
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.55;
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.4);
+      transform: rotate(0.2deg);
+    }
+    .og-term .chrome {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      background: var(--term-bg-2);
+      border-bottom: 1px solid #25272b;
+      font-size: 13px; color: var(--term-muted);
+    }
+    .og-term .chrome .dots { display:inline-flex; gap:7px; }
+    .og-term .chrome .d { width:11px; height:11px; border-radius:50%; background:#3a3c40; }
+    .og-term .chrome .d.r { background:#e25c50; }
+    .og-term .chrome .d.y { background:#e2a83a; }
+    .og-term .chrome .d.g { background:#4caf70; }
+    .og-term pre {
+      margin: 0;
+      padding: 22px 24px 26px;
+      color: var(--term-ink);
+      white-space: pre;
+      overflow: hidden;
+    }
+    .corner-tag {
+      position: absolute;
+      top: 32px; right: 32px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="og" role="img" aria-label="cms-lab — Catch CMS bugs before deploy">
+    <div class="og-left">
+      <div class="og-brand">
+        <img src="../assets/logo-192.png" alt="" />
+        <span class="name">cms-lab</span>
+        <span class="badge">MIT licensed</span>
+      </div>
+
+      <div>
+        <h1 class="og-headline">Catch <span class="mark">CMS bugs</span> before deploy.</h1>
+        <p class="og-sub">A CLI that scans your headless CMS content against your Next.js routes. Locally, in CI, or wherever you ship from.</p>
+      </div>
+
+      <div class="og-footer">
+        <span class="pill"><span class="prompt">$</span> npx cms-lab scan</span>
+        <span>github.com/i-afaqrashid/cms-lab</span>
+      </div>
+    </div>
+
+    <div class="og-right">
+      <div class="og-term">
+        <div class="chrome">
+          <span class="dots"><span class="d r"></span><span class="d y"></span><span class="d g"></span></span>
+          <span style="margin-left:8px;">~/sites/agency · zsh</span>
+        </div>
+<pre><span class="t-prompt">$</span> <span class="t-cmd">npx cms-lab scan</span>
+
+<span class="t-ok">✓</span> cms reachable      <span class="t-dim">prismic · 142 docs</span>
+<span class="t-ok">✓</span> next.js detected   <span class="t-dim">app router</span>
+<span class="t-ok">✓</span> probing 142 routes
+
+<span class="t-mut">routes ────────────────────────────</span>
+  <span class="t-err">✗</span> 3 routes 404
+  <span class="t-warn">!</span> 1 route 500
+
+<span class="t-mut">content ───────────────────────────</span>
+  <span class="t-err">✗</span> 4 missing required field
+  <span class="t-warn">!</span> 6 images missing alt text
+
+<span class="t-err">×</span> <span class="t-bold">scan failed</span>  <span class="t-dim">7 err · 9 warn</span></pre>
+      </div>
+      <span class="corner-tag">1200 × 630</span>
+    </div>
+  </div>
+</body>
+</html>

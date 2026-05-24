@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Screenshot — HTML report preview</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    body {
+      background: #ece9dd;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .frame { max-width: 1120px; margin: 0 auto; }
+    .caption {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 14px;
+      display: flex; justify-content: space-between;
+    }
+    .browser {
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      overflow: hidden;
+      box-shadow: 0 30px 60px -28px rgba(0,0,0,0.25);
+    }
+    .browser .chrome {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: #f1efe6;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono); font-size: 12px; color: var(--muted);
+    }
+    .browser .dots { display:inline-flex; gap:6px; margin-right:8px; }
+    .browser .d { width: 10px; height:10px; border-radius:50%; background:#cfccc0; }
+    .browser .url {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-2);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="caption">
+      <span>screenshot · .cms-lab/report.html</span>
+      <span>browser view</span>
+    </div>
+
+    <div class="browser">
+      <div class="chrome">
+        <span class="dots"><span class="d"></span><span class="d"></span><span class="d"></span></span>
+        <span class="url">file:///acme-marketing/.cms-lab/report.html</span>
+      </div>
+
+      <div style="padding: 24px 28px 28px;">
+        <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:12px;">
+          cms-lab report · generated 2026-05-23 09:41 UTC
+        </div>
+
+        <div class="report-shell">
+          <div class="report-head">
+            <div>
+              <div class="title-row">
+                <h1>scan failed</h1>
+                <span class="badge fail">● 7 errors</span>
+                <span class="badge warn">● 9 warnings</span>
+              </div>
+              <div class="subtitle">acme-marketing · next 14.2.5 · prismic · 142 docs</div>
+            </div>
+          </div>
+
+          <div class="report-meta">
+            <div class="stat err"><div class="k">Errors</div><div class="v">7</div></div>
+            <div class="stat warn"><div class="k">Warnings</div><div class="v">9</div></div>
+            <div class="stat"><div class="k">Routes failing</div><div class="v">4 / 142</div></div>
+            <div class="stat"><div class="k">Duration</div><div class="v">3.42s</div></div>
+          </div>
+
+          <div class="report-toolbar">
+            <span class="chip active">All <span class="n">16</span></span>
+            <span class="chip"><span class="swatch-dot err"></span>Errors <span class="n">7</span></span>
+            <span class="chip"><span class="swatch-dot warn"></span>Warnings <span class="n">9</span></span>
+            <span class="chip">routes <span class="n">4</span></span>
+            <span class="chip">fields <span class="n">4</span></span>
+            <span class="chip">seo <span class="n">2</span></span>
+            <span class="chip">a11y <span class="n">6</span></span>
+          </div>
+
+          <div class="group-header"><span>routes</span> · <span class="count">4 issues</span></div>
+
+          <div class="diag error">
+            <div class="col-num">1</div>
+            <div class="sev"><span class="marker"></span>error</div>
+            <div class="msg">
+              <strong>/blog/old-launch-post</strong> returned <code style="background:none;padding:0;border:0;">404</code>.
+              <span class="ctx">CMS-ROUTE-404 · type=blog_post · uid=old-launch-post</span>
+            </div>
+            <div class="src"><div class="doc">prismic:blog_post</div><div>id H1qP</div></div>
+          </div>
+
+          <div class="diag error">
+            <div class="col-num">2</div>
+            <div class="sev"><span class="marker"></span>error</div>
+            <div class="msg">
+              <strong>/case/acme-rebrand</strong> returned <code style="background:none;padding:0;border:0;">404</code>.
+              <span class="ctx">CMS-ROUTE-404 · type=case_study · uid=acme-rebrand</span>
+            </div>
+            <div class="src"><div class="doc">prismic:case_study</div><div>id J4oM</div></div>
+          </div>
+
+          <div class="diag warning">
+            <div class="col-num">3</div>
+            <div class="sev"><span class="marker"></span>warning</div>
+            <div class="msg">
+              <code style="background:none;padding:0;border:0;">hero_image</code> missing alt text on 4 <code style="background:none;padding:0;border:0;">page</code> documents.
+              <span class="ctx">A11Y-IMG-ALT · field=hero_image</span>
+            </div>
+            <div class="src"><div class="doc">prismic:page</div><div>4 documents</div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

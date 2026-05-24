@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Screenshot — passing scan</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+  <style>
+    body {
+      background: #ece9dd;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .frame { max-width: 880px; margin: 0 auto; }
+    .caption {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 14px;
+      display: flex; justify-content: space-between;
+    }
+    .terminal { font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="caption">
+      <span>screenshot · cms-lab scan (clean)</span>
+      <span>1× · light terminal</span>
+    </div>
+    <div class="terminal">
+      <div class="terminal-chrome">
+        <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+        <span class="title">~/sites/agency-marketing · zsh</span>
+      </div>
+<pre class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npx cms-lab scan</span>
+
+<span class="t-bold">cms-lab</span>
+<span class="t-ok">✓</span> config loaded         <span class="t-dim">cms-lab.config.ts</span>
+<span class="t-ok">✓</span> cms reachable         <span class="t-dim">prismic · 142 docs</span>
+<span class="t-ok">✓</span> next.js detected      <span class="t-dim">app router · 18 segments</span>
+<span class="t-ok">✓</span> probing 142 routes    <span class="t-dim">http://localhost:3000</span>
+
+<span class="t-mut">routes ───────────────────────────────────────────────</span>
+  <span class="t-ok">✓</span> 142 routes ok            <span class="t-dim">avg 184ms · p95 412ms</span>
+
+<span class="t-mut">content ──────────────────────────────────────────────</span>
+  <span class="t-ok">✓</span> all required fields present
+  <span class="t-ok">✓</span> 317 image fields have alt text
+  <span class="t-ok">✓</span> all meta_description fields populated
+  <span class="t-ok">✓</span> 0 broken internal links
+
+<span class="t-mut">summary ──────────────────────────────────────────────</span>
+  errors    <span class="t-ok">0</span>
+  warnings  <span class="t-ok">0</span>
+  duration  <span class="t-dim">2.81s</span>
+
+<span class="t-ok">✓</span> <span class="t-bold">scan passed</span>
+</pre>
+    </div>
+  </div>
+</body>
+</html>

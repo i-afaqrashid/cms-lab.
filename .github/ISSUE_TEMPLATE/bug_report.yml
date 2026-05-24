@@ -1,0 +1,65 @@
+name: Bug Report
+description: Report a reproducible cms-lab bug.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please include enough detail for someone else to reproduce it.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect cms-lab to do?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide commands, config, fixture data, and output.
+      render: sh
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI
+        - Core checks
+        - Prismic adapter
+        - Strapi adapter
+        - Directus adapter
+        - WordPress adapter
+        - HTML report
+        - Docs/site
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: cms-lab Version
+      placeholder: "Run cms-lab --version"
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Node version, pnpm version, OS, Next.js version, CMS version.
+      render: text
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Output
+      description: Redact secrets before pasting logs.
+      render: text

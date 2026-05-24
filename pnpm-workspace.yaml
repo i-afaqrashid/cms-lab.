@@ -1,0 +1,17 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+  - "examples/*"
+onlyBuiltDependencies:
+  - esbuild
+allowBuilds:
+  "@scarf/scarf": false
+  esbuild: true
+  sharp: true
+peerDependencyRules:
+  allowedVersions:
+    zod: "3 || 4"
+overrides:
+  file-type: 21.3.2
+  postcss: 8.5.15
+  uuid: 11.1.1

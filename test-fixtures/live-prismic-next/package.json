@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "name": "cms-lab-live-prismic-next-fixture",
+  "type": "module",
+  "dependencies": {
+    "next": "^15.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+# @cms-lab/directus
+
+Directus adapter for cms-lab.
+
+```ts
+cms: {
+  provider: "directus",
+  url: "http://localhost:8055",
+  token: process.env.DIRECTUS_TOKEN,
+  collections: [{ type: "page", collection: "pages" }],
+}
+```
+
+The adapter reads Directus REST items and normalizes them into cms-lab
+`CMSDocument` objects. It keeps native SEO/file fields in `document.data`, uses
+`id`, `uid`, or `slug` as stable identity values, and treats non-published
+statuses such as archived content as `draft`.
+
+## Open Source
+
+MIT licensed. See the repository [license](https://github.com/i-afaqrashid/cms-lab/blob/main/LICENSE), [contributing guide](https://github.com/i-afaqrashid/cms-lab/blob/main/CONTRIBUTING.md), and [support guide](https://github.com/i-afaqrashid/cms-lab/blob/main/SUPPORT.md).

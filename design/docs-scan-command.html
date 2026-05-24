@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>cms-lab scan — Command reference</title>
+  <meta name="description" content="Reference for the cms-lab scan command: flags, output, exit codes, and check IDs." />
+  <link rel="icon" href="assets/favicon-64.png" type="image/png" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="page">
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="landing.html">
+        <span class="brand-mark"><img src="assets/favicon-64.png" width="26" height="26" alt="" /></span>
+        <span class="brand-name">cms-lab</span>
+      </a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="docs-overview.html">Docs</a>
+        <a href="docs-scan-command.html" class="is-active">scan</a>
+        <a href="report-success.html">Report</a>
+        <a href="landing.html#roadmap">Roadmap</a>
+      </nav>
+      <div class="top-right">
+        <a class="gh-pill" href="#"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.08.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg><span>github.com/i-afaqrashid/cms-lab</span><span class="star">unpublished</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div class="docs">
+
+        <aside class="sidenav" aria-label="Docs navigation">
+          <div class="group">
+            <div class="group-title">Getting started</div>
+            <a href="docs-overview.html">Overview</a>
+            <a href="docs-overview.html#install">Install</a>
+            <a href="docs-overview.html#configure">Configure</a>
+            <a href="docs-overview.html#first-scan">Your first scan</a>
+          </div>
+          <div class="group">
+            <div class="group-title">CLI</div>
+            <a href="docs-scan-command.html" class="is-active">scan</a>
+            <a href="#">init</a>
+            <a href="#">check</a>
+            <a href="#">explain</a>
+          </div>
+          <div class="group">
+            <div class="group-title">Adapters</div>
+            <a href="#">@cms-lab/next</a>
+            <a href="#">@cms-lab/prismic</a>
+            <a href="#">@cms-lab/strapi <em style="color:var(--muted);font-style:normal;font-size:11px;">· planned</em></a>
+            <a href="#">@cms-lab/shopify <em style="color:var(--muted);font-style:normal;font-size:11px;">· planned</em></a>
+          </div>
+          <div class="group">
+            <div class="group-title">Checks</div>
+            <a href="#">Route reachability</a>
+            <a href="#">Required fields</a>
+            <a href="#">SEO completeness</a>
+            <a href="#">Image alt text</a>
+            <a href="#">Internal links</a>
+          </div>
+          <div class="group">
+            <div class="group-title">CI</div>
+            <a href="#">GitHub Actions</a>
+            <a href="#">GitLab CI</a>
+            <a href="#">Vercel preview</a>
+          </div>
+        </aside>
+
+        <article class="docs-main">
+          <div class="breadcrumb">Docs / CLI / <strong style="color:var(--ink-2);font-weight:500;">scan</strong></div>
+          <h1><code style="background:none;border:0;padding:0;font-size:36px;color:var(--ink);">cms-lab scan</code></h1>
+          <p class="lede">
+            Fetch CMS documents, resolve their expected routes, probe your site, and run
+            all enabled checks. The default — and only — command you’ll need most days.
+          </p>
+
+          <h2 id="synopsis">Synopsis</h2>
+          <pre class="codeblock">npx cms-lab scan [options]</pre>
+
+          <p>With nothing else, <code>scan</code> reads <code>cms-lab.config.ts</code> from the current directory, hits the configured site URL, and prints a grouped summary.</p>
+
+          <h2 id="quick-examples">Quick examples</h2>
+          <pre class="codeblock"><span class="c-com"># run against your local dev server</span>
+npx cms-lab scan
+
+<span class="c-com"># run against staging instead</span>
+npx cms-lab scan --url https://staging.example.com
+
+<span class="c-com"># filter to a single content type</span>
+npx cms-lab scan --type blog_post
+
+<span class="c-com"># emit JSON for CI</span>
+npx cms-lab scan --ci --json &gt; cms-lab.json
+
+<span class="c-com"># write a static HTML report and open it</span>
+npx cms-lab scan --report</pre>
+
+          <h2 id="options">Options</h2>
+          <table class="flags-table">
+            <thead>
+              <tr><th style="width:200px;">Flag</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--url &lt;url&gt;</code></td>
+                <td><code>config.site.url</code></td>
+                <td>Override the URL cms-lab probes. Useful for staging, previews, or running against a static export over <code>file://</code>.</td>
+              </tr>
+              <tr>
+                <td><code>--config &lt;path&gt;</code></td>
+                <td><code>cms-lab.config.ts</code></td>
+                <td>Path to an alternate config file. Supports <code>.ts</code>, <code>.js</code>, <code>.mjs</code>.</td>
+              </tr>
+              <tr>
+                <td><code>--type &lt;type&gt;</code></td>
+                <td><em>all</em></td>
+                <td>Limit the scan to a single CMS content type. Repeatable.</td>
+              </tr>
+              <tr>
+                <td><code>--only &lt;check&gt;</code></td>
+                <td><em>all</em></td>
+                <td>Run a single check group (<code>routes</code>, <code>seo</code>, <code>a11y</code>, <code>images</code>, <code>fields</code>).</td>
+              </tr>
+              <tr>
+                <td><code>--skip &lt;check&gt;</code></td>
+                <td><em>none</em></td>
+                <td>Inverse of <code>--only</code>. Repeatable.</td>
+              </tr>
+              <tr>
+                <td><code>--json</code></td>
+                <td><code>false</code></td>
+                <td>Print a <code>ScanResult</code> JSON object to stdout instead of the pretty summary.</td>
+              </tr>
+              <tr>
+                <td><code>--report</code></td>
+                <td><code>false</code></td>
+                <td>Write a static <code>.cms-lab/report.html</code> in addition to terminal output.</td>
+              </tr>
+              <tr>
+                
+              <tr>
+                <td><code>--ci</code></td>
+                <td><code>false</code></td>
+                <td>CI mode. Disables spinners, prints stable output, and emits GitHub-style annotations.</td>
+              </tr>
+              <tr>
+                <td><code>--fail-on &lt;sev&gt;</code></td>
+                <td><code>error</code></td>
+                <td>Severity threshold for a non-zero exit. One of <code>error</code>, <code>warning</code>, <code>never</code>.</td>
+              </tr>
+              <tr>
+                <td><code>--concurrency &lt;n&gt;</code></td>
+                <td><code>8</code></td>
+                <td>Parallel route probes. Lower if your local server gets cranky.</td>
+              </tr>
+              <tr>
+                <td><code>--timeout &lt;ms&gt;</code></td>
+                <td><code>5000</code></td>
+                <td>Per-route HTTP timeout.</td>
+              </tr>
+              <tr>
+                <td><code>--no-color</code></td>
+                <td><em>auto</em></td>
+                <td>Disable ANSI colors. Inherits <code>FORCE_COLOR</code> / <code>NO_COLOR</code>.</td>
+              </tr>
+              <tr>
+                <td><code>-h, --help</code></td>
+                <td></td>
+                <td>Print help and exit.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2 id="exit-codes">Exit codes</h2>
+          <table class="flags-table">
+            <thead><tr><th style="width:80px;">Code</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>0</code></td><td>Scan completed and is under the <code>--fail-on</code> threshold.</td></tr>
+              <tr><td><code>1</code></td><td>Diagnostics at or above the threshold (default: any error).</td></tr>
+              <tr><td><code>2</code></td><td>Config error — missing or invalid <code>cms-lab.config.ts</code>.</td></tr>
+              <tr><td><code>3</code></td><td>CMS unreachable or auth failed.</td></tr>
+              <tr><td><code>4</code></td><td>Site unreachable — <code>--url</code> never responded within the timeout.</td></tr>
+              <tr><td><code>130</code></td><td>Interrupted (SIGINT).</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="output">Output</h2>
+          <p>In <code>--pretty</code> mode (default), diagnostics are grouped by check family. Each line shows severity, check code, message, and the responsible CMS document.</p>
+
+          <div class="terminal" style="margin-top:16px;">
+            <div class="terminal-chrome">
+              <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+              <span class="title">cms-lab scan --type blog_post · zsh</span>
+            </div>
+<pre class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npx cms-lab scan --type blog_post</span>
+
+<span class="t-bold">cms-lab</span> <span class="t-mut">scanning blog_post only</span>
+
+<span class="t-mut">routes ─────────────────────────────────────────────────────</span>
+  <span class="t-err">✗</span> CMS-ROUTE-404     <span class="t-bold">/blog/old-launch-post</span>          <span class="t-dim">doc#H1qP · status 404</span>
+  <span class="t-err">✗</span> CMS-ROUTE-404     <span class="t-bold">/blog/preview-test</span>             <span class="t-dim">doc#G7tR · status 404</span>
+  <span class="t-warn">!</span> CMS-ROUTE-SLOW    <span class="t-bold">/blog/state-of-headless-2025</span>   <span class="t-dim">doc#F2lA · 3.1s</span>
+
+<span class="t-mut">content ────────────────────────────────────────────────────</span>
+  <span class="t-err">✗</span> CMS-FIELD-MISSING <span class="t-bold">author</span> required on blog_post  <span class="t-dim">doc#H1qP, doc#G7tR</span>
+  <span class="t-warn">!</span> SEO-META-MISSING  <span class="t-bold">meta_description</span> blank          <span class="t-dim">doc#F2lA, doc#K9oS</span>
+  <span class="t-warn">!</span> A11Y-IMG-ALT      hero_image missing alt text     <span class="t-dim">doc#K9oS · field=hero_image</span>
+
+<span class="t-mut">summary ────────────────────────────────────────────────────</span>
+  errors    <span class="t-err">3</span>
+  warnings  <span class="t-warn">4</span>
+  info      <span class="t-mut">0</span>
+  duration  <span class="t-dim">1.7s</span>
+
+<span class="t-err">×</span> <span class="t-bold">scan failed</span> <span class="t-dim">· 3 errors, 4 warnings</span>
+</pre>
+          </div>
+
+          <h2 id="json-shape">JSON shape</h2>
+          <p>With <code>--json</code>, cms-lab writes a single <code>ScanResult</code> object to stdout. Stable across patch versions.</p>
+          <pre class="codeblock">{
+  <span class="c-str">"project"</span>: {
+    <span class="c-str">"framework"</span>: <span class="c-str">"next"</span>,
+    <span class="c-str">"router"</span>:    <span class="c-str">"app"</span>,
+    <span class="c-str">"cms"</span>:       <span class="c-str">"prismic"</span>,
+    <span class="c-str">"url"</span>:       <span class="c-str">"http://localhost:3000"</span>
+  },
+  <span class="c-str">"documents"</span>: <span class="c-num">142</span>,
+  <span class="c-str">"diagnostics"</span>: [
+    {
+      <span class="c-str">"severity"</span>: <span class="c-str">"error"</span>,
+      <span class="c-str">"code"</span>:     <span class="c-str">"CMS-ROUTE-404"</span>,
+      <span class="c-str">"message"</span>:  <span class="c-str">"Route /blog/old-launch-post returned 404"</span>,
+      <span class="c-str">"path"</span>:     <span class="c-str">"/blog/old-launch-post"</span>,
+      <span class="c-str">"source"</span>:   <span class="c-str">"prismic:blog_post#H1qP"</span>
+    }
+  ],
+  <span class="c-str">"summary"</span>: { <span class="c-str">"errors"</span>: <span class="c-num">7</span>, <span class="c-str">"warnings"</span>: <span class="c-num">9</span>, <span class="c-str">"info"</span>: <span class="c-num">0</span> }
+}</pre>
+
+          <h2 id="check-codes">Check codes</h2>
+          <p>Each diagnostic has a stable code. Use them with <code>--only</code>, <code>--skip</code>, or for filtering in your own tooling.</p>
+          <table class="flags-table">
+            <thead><tr><th>Code</th><th>Severity</th><th>Group</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>CMS-ROUTE-404</code></td><td><span style="color:var(--error);">error</span></td><td>routes</td><td>A CMS document’s expected URL returned 404.</td></tr>
+              <tr><td><code>CMS-ROUTE-500</code></td><td><span style="color:var(--error);">error</span></td><td>routes</td><td>A CMS document’s expected URL returned a 5xx response.</td></tr>
+              <tr><td><code>CMS-ROUTE-SLOW</code></td><td><span style="color:var(--warning);">warning</span></td><td>routes</td><td>Route responded over the configured slow-threshold (default 2.5s).</td></tr>
+              <tr><td><code>CMS-FIELD-MISSING</code></td><td><span style="color:var(--error);">error</span></td><td>fields</td><td>A required field is missing or empty.</td></tr>
+              <tr><td><code>CMS-LINK-DEAD</code></td><td><span style="color:var(--error);">error</span></td><td>links</td><td>An internal CMS link points to a document that doesn’t exist.</td></tr>
+              <tr><td><code>SEO-META-MISSING</code></td><td><span style="color:var(--warning);">warning</span></td><td>seo</td><td>meta_title or meta_description is blank.</td></tr>
+              <tr><td><code>SEO-OG-IMAGE</code></td><td><span style="color:var(--warning);">warning</span></td><td>seo</td><td>og_image field is empty.</td></tr>
+              <tr><td><code>A11Y-IMG-ALT</code></td><td><span style="color:var(--warning);">warning</span></td><td>a11y</td><td>An image field is missing alt text.</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout">
+            <div>
+              <div class="label">Tip</div>
+              <p>Run <code>npx cms-lab explain CMS-ROUTE-404</code> for a longer description, common causes, and a fix snippet for any check code.</p>
+            </div>
+          </div>
+
+          <h2 id="see-also">See also</h2>
+          <ul>
+            <li><a class="ulink" href="docs-overview.html#configure">Configure cms-lab</a></li>
+            <li><a class="ulink" href="report-errors.html">Example HTML report</a></li>
+            <li><a class="ulink" href="docs-overview.html#ci">Use it in CI</a></li>
+          </ul>
+        </article>
+
+        <aside class="toc" aria-label="On this page">
+          <div class="toc-title">On this page</div>
+          <a href="#synopsis">Synopsis</a>
+          <a href="#quick-examples">Quick examples</a>
+          <a href="#options" class="is-active">Options</a>
+          <a href="#exit-codes">Exit codes</a>
+          <a href="#output">Output</a>
+          <a href="#json-shape">JSON shape</a>
+          <a href="#check-codes">Check codes</a>
+          <a href="#see-also">See also</a>
+        </aside>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>cms-lab · MIT</span>
+      <span class="footer-links">
+        <a href="landing.html">Home</a>
+        <a href="docs-overview.html">Docs</a>
+        <a href="report-success.html">Report</a>
+        <a href="#">GitHub</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>

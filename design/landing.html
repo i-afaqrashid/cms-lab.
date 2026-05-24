@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>cms-lab — Catch CMS bugs before deploy</title>
+  <meta name="description" content="cms-lab is a CLI that scans your headless CMS content against your Next.js routes to catch broken pages, missing SEO fields, and bad image alt text before you deploy." />
+  <link rel="icon" href="assets/favicon-64.png" type="image/png" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="page">
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="landing.html">
+        <span class="brand-mark"><img src="assets/favicon-64.png" width="26" height="26" alt="" /></span>
+        <span class="brand-name">cms-lab</span>
+      </a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="docs-overview.html">Docs</a>
+        <a href="docs-scan-command.html">scan</a>
+        <a href="report-success.html">Report</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+      <div class="top-right">
+        <a class="gh-pill" href="#" aria-label="GitHub">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.08.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          <span>github.com/i-afaqrashid/cms-lab</span>
+          <span class="star">unpublished</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-eyebrow">
+          <span class="dot"></span>
+          Public preview · MIT licensed
+        </div>
+        <h1>Catch CMS bugs before&nbsp;deploy.</h1>
+        <p class="hero-sub">
+          <strong>cms-lab</strong> scans your headless CMS content against your Next.js routes
+          and reports broken pages, missing SEO fields, and bad image alt text — locally, in CI,
+          or wherever you ship from.
+        </p>
+
+        <div class="hero-cta">
+          <span class="copyline" role="group" aria-label="Install command">
+            <span class="prompt">$</span><span>npx cms-lab scan</span>
+            <button class="copy-btn" type="button" aria-label="Copy command">copy</button>
+          </span>
+          <a class="btn btn-primary" href="docs-overview.html">Read the docs →</a>
+          <a class="btn" href="report-errors.html">See a report</a>
+        </div>
+
+        <div class="hero-meta" aria-label="At a glance">
+          <span><strong>0</strong> hosted cms-lab services</span>
+          <span><strong>1</strong> command</span>
+          <span><strong>14</strong> built-in checks</span>
+          <span><strong>~3s</strong> on a 150-doc site</span>
+          <span><strong>node</strong> ≥ 20.10</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- TERMINAL HERO -->
+    <section class="section" aria-label="Example output">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="section-tag">01 · Output</span>
+          <h2 class="section-title">One command. Plain output. Real diagnostics.</h2>
+        </div>
+
+        <div class="terminal" role="figure" aria-label="cms-lab scan example terminal output">
+          <div class="terminal-chrome">
+            <span class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></span>
+            <span class="title">~/sites/agency-marketing · zsh</span>
+          </div>
+<pre class="terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">npx cms-lab scan</span>
+
+<span class="t-bold">cms-lab</span> <span class="t-mut">scanning project</span>
+
+<span class="t-mut">→</span> project        <span class="t-info">next.js 14.2.5</span>  <span class="t-dim">app router</span>
+<span class="t-mut">→</span> cms            <span class="t-info">prismic</span>        <span class="t-dim">repo my-agency-cms</span>
+<span class="t-mut">→</span> site           <span class="t-info">http://localhost:3000</span>
+<span class="t-mut">→</span> config         <span class="t-dim">./cms-lab.config.ts</span>
+
+<span class="t-ok">✓</span> config loaded             <span class="t-dim">3 route patterns · 2 content types</span>
+<span class="t-ok">✓</span> cms reachable             <span class="t-dim">142 documents fetched in 612ms</span>
+<span class="t-ok">✓</span> next.js detected          <span class="t-dim">app router · 18 route segments</span>
+<span class="t-ok">✓</span> probing 142 expected routes
+
+<span class="t-mut">routes ─────────────────────────────────────────────────────</span>
+  <span class="t-ok">✓</span> 138 routes ok
+  <span class="t-err">✗</span> 3 routes returned <span class="t-bold">404</span>     <span class="t-dim">/blog/old-launch-post · /case/acme-rebrand · /uses</span>
+  <span class="t-warn">!</span> 1 route returned <span class="t-bold">500</span>      <span class="t-dim">/blog/preview-test (server error)</span>
+
+<span class="t-mut">content ────────────────────────────────────────────────────</span>
+  <span class="t-err">✗</span> 4 documents missing required field      <span class="t-dim">type=blog_post · field=author</span>
+  <span class="t-warn">!</span> 6 images missing alt text               <span class="t-dim">type=page · field=hero_image</span>
+  <span class="t-warn">!</span> 2 documents missing meta_description    <span class="t-dim">type=case_study</span>
+
+<span class="t-mut">summary ────────────────────────────────────────────────────</span>
+  errors    <span class="t-err">7</span>
+  warnings  <span class="t-warn">9</span>
+  info      <span class="t-mut">0</span>
+  duration  <span class="t-dim">3.4s</span>
+
+<span class="t-err">×</span> <span class="t-bold">scan failed</span> <span class="t-dim">· 7 errors, 9 warnings</span>
+  <span class="t-mut">open</span> <span class="t-info">.cms-lab/report.html</span> <span class="t-mut">for details</span>
+<span class="t-prompt">$</span> <span class="cursor"></span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT IT CHECKS -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="section-tag">02 · Checks</span>
+          <h2 class="section-title">What cms-lab looks for.</h2>
+        </div>
+
+        <div class="feat-grid">
+          <div class="feat">
+            <span class="feat-icon">/_</span>
+            <h3>Route reachability</h3>
+            <p>Resolves every CMS document to its expected URL, probes your local site, and flags 404s, 500s, and redirects you didn’t expect.</p>
+            <span class="code-tag">code: CMS-ROUTE-404</span>
+          </div>
+          <div class="feat">
+            <span class="feat-icon">{}</span>
+            <h3>Required fields</h3>
+            <p>Validates documents against your config so missing UIDs, broken relations, and empty required fields surface before they hit prod.</p>
+            <span class="code-tag">code: CMS-FIELD-MISSING</span>
+          </div>
+          <div class="feat">
+            <span class="feat-icon">&lt;/&gt;</span>
+            <h3>SEO completeness</h3>
+            <p>Catches blank meta titles, missing meta descriptions, OG image gaps, and short or duplicate slugs across content types.</p>
+            <span class="code-tag">code: SEO-META-MISSING</span>
+          </div>
+          <div class="feat">
+            <span class="feat-icon">[a]</span>
+            <h3>Image alt text</h3>
+            <p>Walks every CMS image field and flags missing or placeholder alt text — including nested slices and repeatable groups.</p>
+            <span class="code-tag">code: A11Y-IMG-ALT</span>
+          </div>
+          <div class="feat">
+            <span class="feat-icon">⇄</span>
+            <h3>Internal links</h3>
+            <p>Resolves CMS link fields and rich-text links, then checks the target document still exists and resolves to a real route.</p>
+            <span class="code-tag">code: CMS-LINK-DEAD</span>
+          </div>
+          <div class="feat">
+            <span class="feat-icon">CI</span>
+            <h3>CI-friendly output</h3>
+            <p>Exits non-zero on errors, emits JSON for annotations, and produces a single static <code>report.html</code> you can upload as an artifact.</p>
+            <span class="code-tag">code: --ci · --json · --report</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT FITS -->
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="section-tag">03 · Setup</span>
+          <h2 class="section-title">Drop it into a Next.js + headless CMS project.</h2>
+        </div>
+
+        <div class="split">
+          <div>
+            <h3 style="font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">1. Install</h3>
+            <pre class="codeblock"><span class="c-com"># add the CLI to your project</span>
+<span class="c-fn">pnpm</span> add -D @cms-lab/cli @cms-lab/next @cms-lab/prismic
+
+<span class="c-com"># or just run it</span>
+npx cms-lab scan</pre>
+
+            <h3 style="font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:24px 0 8px;">2. Configure</h3>
+            <pre class="codeblock"><span class="c-com">// cms-lab.config.ts</span>
+<span class="c-key">import</span> { <span class="c-fn">defineConfig</span> } <span class="c-key">from</span> <span class="c-str">'@cms-lab/core'</span>
+
+<span class="c-key">export default</span> <span class="c-fn">defineConfig</span>({
+  site:      { url: <span class="c-str">'http://localhost:3000'</span> },
+  framework: { type: <span class="c-str">'next'</span>, router: <span class="c-str">'app'</span> },
+  cms: {
+    provider:       <span class="c-str">'prismic'</span>,
+    repositoryName: <span class="c-str">'my-agency-cms'</span>,
+    accessToken:    process.env.PRISMIC_ACCESS_TOKEN,
+  },
+  routes: [
+    { type: <span class="c-str">'page'</span>,      pattern: <span class="c-str">'/:uid'</span>,        getPath: (d) =&gt; <span class="c-str">`/${d.uid}`</span> },
+    { type: <span class="c-str">'blog_post'</span>, pattern: <span class="c-str">'/blog/:uid'</span>,  getPath: (d) =&gt; <span class="c-str">`/blog/${d.uid}`</span> },
+  ],
+})</pre>
+
+            <h3 style="font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:24px 0 8px;">3. Scan</h3>
+            <pre class="codeblock">npx cms-lab scan
+npx cms-lab scan --url https://staging.example.com
+npx cms-lab scan --ci --json &gt; cms-lab.json</pre>
+          </div>
+
+          <div>
+            <div class="notebox" style="margin-bottom:16px;">
+              <h3>Adapters</h3>
+              <p style="margin-bottom:14px;">cms-lab talks to your CMS through small adapter packages. Bring your own, or use one of these.</p>
+              <div class="adapters">
+                <div class="adapter">
+                  <span class="swatch">Pr</span>
+                  <span class="meta"><span class="name">Prismic</span><span class="status stable">available</span></span>
+                </div>
+                <div class="adapter">
+                  <span class="swatch">St</span>
+                  <span class="meta"><span class="name">Strapi</span><span class="status planned">planned</span></span>
+                </div>
+                <div class="adapter">
+                  <span class="swatch">Sh</span>
+                  <span class="meta"><span class="name">Shopify</span><span class="status planned">planned · v0.4</span></span>
+                </div>
+                <div class="adapter">
+                  <span class="swatch">Sa</span>
+                  <span class="meta"><span class="name">Sanity</span><span class="status planned">planned</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="notebox">
+              <h3>Use it in CI</h3>
+              <p>Exits non-zero on errors, writes JSON to stdout, and uploads a single <code>report.html</code> as an artifact. No hosted cms-lab service.</p>
+              <pre class="codeblock" style="margin-top:14px;"><span class="c-com"># .github/workflows/cms.yml</span>
+<span class="c-tag">- run:</span> <span class="c-str">pnpm build &amp;&amp; pnpm start &amp;</span>
+<span class="c-tag">- run:</span> <span class="c-str">npx wait-on http://localhost:3000</span>
+<span class="c-tag">- run:</span> <span class="c-str">npx cms-lab scan --ci --report</span>
+<span class="c-tag">- uses:</span> actions/upload-artifact@v4
+  <span class="c-tag">with:</span>
+    <span class="c-tag">name:</span> cms-lab-report
+    <span class="c-tag">path:</span> .cms-lab/report.html</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="section" id="roadmap">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="section-tag">04 · Roadmap</span>
+          <h2 class="section-title">Where it’s going.</h2>
+        </div>
+
+        <div class="roadmap">
+          <div class="phase"><span class="pill shipped">available</span><span>CLI</span></div>
+          <div class="row">
+            <h3>CLI · Next.js + Prismic</h3>
+            <p>The <code>scan</code> command, config-first route mapping, terminal + JSON output, and focused checks.</p>
+          </div>
+
+          <div class="phase"><span class="pill now">now</span><span>v0.2</span></div>
+          <div class="row">
+            <h3>HTML reports + public site</h3>
+            <p>Static <code>report.html</code> with grouped diagnostics, filters, and copy-paste fix snippets. Landing page + docs (this site).</p>
+          </div>
+
+          <div class="phase"><span class="pill next">next</span><span>v0.3</span></div>
+          <div class="row">
+            <h3>Strapi adapter</h3>
+            <p>REST-first normalization to <code>CMSDocument</code>, slug + relation checks, route resolution against App Router segments.</p>
+          </div>
+
+          <div class="phase"><span class="pill next">next</span><span>v0.4</span></div>
+          <div class="row">
+            <h3>Shopify adapter</h3>
+            <p>Products, collections, handles, SEO fields, image alt text, and expected storefront routes. Commerce content validation only — not full storefront testing.</p>
+          </div>
+
+          <div class="phase"><span class="pill next">next</span><span>v0.5</span></div>
+          <div class="row">
+            <h3>First-class CI mode</h3>
+            <p><code>scan --ci</code> with annotated GitHub Action output, JSON schema for diagnostics, and a published reusable workflow.</p>
+          </div>
+
+          <div class="phase"><span class="pill next">next</span><span>stability</span></div>
+          <div class="row">
+            <h3>Stable plugin API</h3>
+            <ul>
+              <li>Preview / draft mode checker</li>
+              <li>Broken internal link expansion</li>
+              <li>CMS schema drift detection</li>
+              <li>Public adapter + check plugin API</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ-ish closer -->
+    <section class="section">
+      <div class="wrap">
+        <div class="split">
+          <div>
+            <span class="kicker">FAQ</span>
+            <h2 class="section-title" style="margin-top:8px;">Boring questions, answered.</h2>
+          </div>
+          <div>
+            <div style="display:flex;flex-direction:column;gap:18px;">
+              <div>
+                <h3 style="margin-bottom:4px;">Does it need an account or API key?</h3>
+                <p style="color:var(--muted);font-size:14px;">No. It runs locally against your CMS credentials. There is no hosted cms-lab service or dashboard.</p>
+              </div>
+              <div>
+                <h3 style="margin-bottom:4px;">Does it test rendered pages?</h3>
+                <p style="color:var(--muted);font-size:14px;">It probes the URLs your CMS expects and checks status codes. It doesn’t replace Playwright or Lighthouse — it covers the CMS half.</p>
+              </div>
+              <div>
+                <h3 style="margin-bottom:4px;">What if I don’t use Next.js?</h3>
+                <p style="color:var(--muted);font-size:14px;">The first release ships Next.js-only. The framework adapter is a small interface — Astro and Remix are likely next.</p>
+              </div>
+              <div>
+                <h3 style="margin-bottom:4px;">License?</h3>
+                <p style="color:var(--muted);font-size:14px;">MIT. Use it in commercial work, fork it, vendor it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>cms-lab · MIT · made by people who got tired of broken /blog/[slug] routes</span>
+      <span class="footer-links">
+        <a href="docs-overview.html">Docs</a>
+        <a href="report-success.html">Report</a>
+        <a href="#">GitHub</a>
+        <a href="#">npm</a>
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    // tiny inline: copy command from hero
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.parentElement.querySelector('span:nth-child(2)').textContent.trim();
+        navigator.clipboard?.writeText(text);
+        const old = btn.textContent;
+        btn.textContent = 'copied';
+        setTimeout(() => btn.textContent = old, 1200);
+      });
+    });
+  </script>
+</body>
+</html>

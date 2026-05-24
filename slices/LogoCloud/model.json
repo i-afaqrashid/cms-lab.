@@ -1,0 +1,16 @@
+{
+  "id": "logo_cloud",
+  "type": "SharedSlice",
+  "name": "LogoCloud",
+  "description": "LogoCloud",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": ""
+    }
+  ]
+}
