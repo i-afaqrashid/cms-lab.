@@ -20,15 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 10.33.4
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -36,6 +34,28 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
+
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.4 --activate
+          pnpm --version
+
+      - name: Prepare pnpm store
+        run: |
+          PNPM_STORE_PATH="$(pnpm store path --silent)"
+          mkdir -p "$PNPM_STORE_PATH"
+          echo "PNPM_STORE_PATH=$PNPM_STORE_PATH" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-${{ github.job }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.job }}-node-24-pnpm-
+            ${{ runner.os }}-node-24-pnpm-
+            ${{ runner.os }}-pnpm-
 
       - name: Tool versions
         run: |
