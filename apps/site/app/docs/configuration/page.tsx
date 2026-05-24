@@ -3,8 +3,7 @@ import { CodeBlock, DocsShell } from "../../components";
 
 export const metadata: Metadata = {
   title: "Configuration",
-  description:
-    "cms-lab config reference for Next.js App Router and CMS adapters.",
+  description: "cms-lab config reference for Next.js routers and CMS adapters.",
 };
 
 export default function ConfigurationPage() {
@@ -73,7 +72,8 @@ export default defineConfig({
             </td>
             <td>yes</td>
             <td>
-              Use <code>{`{ type: "next", router: "app" }`}</code>.
+              Use <code>{`{ type: "next", router: "app" }`}</code> or{" "}
+              <code>{`{ type: "next", router: "pages" }`}</code>.
             </td>
           </tr>
           <tr>

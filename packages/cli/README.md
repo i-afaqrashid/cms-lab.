@@ -26,9 +26,10 @@ cms-lab explain CMS-ROUTE-404
 
 ## Scope
 
-cms-lab supports Next.js App Router projects using Prismic, Strapi, Directus,
-and WordPress. It validates configured CMS route mappings, route reachability,
-UID gaps, SEO metadata, image alt text, and project-specific required fields.
+cms-lab supports Next.js App Router and Pages Router projects using Prismic,
+Strapi, Directus, and WordPress. It validates configured CMS route mappings,
+route reachability, UID gaps, SEO metadata, image alt text, and
+project-specific required fields.
 
 Debug logs use stderr and support `--debug` plus `--verbose <0|1|2|3>`, so JSON
 scan output remains clean on stdout. Raw CMS document `data` is redacted from

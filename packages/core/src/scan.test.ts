@@ -97,6 +97,42 @@ test("scanDocuments treats 5xx route responses as errors", async () => {
   });
 });
 
+test("scanDocuments preserves site URL query parameters on route probes", async () => {
+  const requestedUrls: string[] = [];
+
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      site: { url: "http://localhost:3000/?preview=enabled" },
+    },
+    project: {
+      framework: "next",
+      router: "pages",
+      rootDir: "/site",
+      pagesDir: "/site/pages",
+    },
+    documents: [
+      {
+        id: "doc-1",
+        type: "page",
+        uid: "about",
+        status: "published",
+        data: { meta_title: "About", meta_description: "About page" },
+      },
+    ],
+    fetch: async (url) => {
+      requestedUrls.push(String(url));
+      return new Response("ok");
+    },
+  });
+
+  expect(result.summary.errors).toBe(0);
+  expect(requestedUrls).toEqual([
+    "http://localhost:3000/?preview=enabled",
+    "http://localhost:3000/about?preview=enabled",
+  ]);
+});
+
 test("scanDocuments rejects protocol-relative routes before probing", async () => {
   const probedUrls: string[] = [];
 

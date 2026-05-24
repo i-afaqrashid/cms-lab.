@@ -110,7 +110,7 @@ After GitHub, npm, CI, docs, and the outside-app smoke test are green, announce 
 4. Share the package with a small group of Next.js and headless CMS developers before making broader posts.
 5. Ask testers for one concrete result: the CMS provider, framework version, config shape, and first diagnostic they saw.
 
-Do not overclaim. Say what works today: local CLI scans for Next.js App Router projects using Prismic, Strapi, Directus, or WordPress, with terminal, JSON, Markdown, JUnit, Slack, and HTML report output.
+Do not overclaim. Say what works today: local CLI scans for Next.js App Router and Pages Router projects using Prismic, Strapi, Directus, or WordPress, with terminal, JSON, Markdown, JUnit, Slack, and HTML report output.
 
 ## Public Copy
 

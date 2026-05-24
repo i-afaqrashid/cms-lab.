@@ -168,7 +168,7 @@ async function checkRouteReachability(
   const results = await mapLimit(candidates, concurrency, async (candidate) => {
     const diagnostics: Diagnostic[] = [];
     const siteUrl = new URL(config.site.url);
-    const url = new URL(candidate.path, siteUrl);
+    const url = resolveSiteRouteUrl(siteUrl, candidate.path);
     const diagnosticPath = pathForDiagnostic(candidate.path);
     let response: Response;
 
@@ -244,6 +244,15 @@ async function checkRouteReachability(
   });
 
   return results.flat();
+}
+
+function resolveSiteRouteUrl(siteUrl: URL, path: string): URL {
+  const url = new URL(path, siteUrl);
+  if (!url.search && siteUrl.search) {
+    url.search = siteUrl.search;
+  }
+
+  return url;
 }
 
 async function assertSiteReachable(

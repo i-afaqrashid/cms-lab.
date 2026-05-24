@@ -23,9 +23,9 @@ export default function DocsPage() {
       <h1>cms-lab documentation</h1>
       <p className="lede">
         cms-lab is a local CLI for checking the contract between headless CMS
-        content and a Next.js App Router site. It runs from your project,
-        fetches CMS documents, probes expected routes, and produces terminal,
-        JSON, or a local HTML report.
+        content and a Next.js site. It runs from your project, fetches CMS
+        documents, probes expected routes, and produces terminal, JSON, or a
+        local HTML report.
       </p>
 
       <h2 id="how-it-works">How it works</h2>
@@ -39,10 +39,10 @@ export default function DocsPage() {
       </p>
       <div className="callout">
         <strong>Scope</strong>
-        cms-lab supports Next.js App Router with Prismic, Strapi, Directus, and
-        WordPress adapters. Shopify, internal links, and schema drift checks
-        stay out of the default scan until they have adapters, fixtures, and
-        release smoke coverage.
+        cms-lab supports Next.js App Router and Pages Router with Prismic,
+        Strapi, Directus, and WordPress adapters. Shopify, internal links, and
+        schema drift checks stay out of the default scan until they have
+        adapters, fixtures, and release smoke coverage.
       </div>
 
       <h2 id="install">Install</h2>
