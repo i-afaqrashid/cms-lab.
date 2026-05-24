@@ -11,8 +11,8 @@ test("fetchWordPressDocuments normalizes WordPress REST posts and pages", async 
       provider: "wordpress",
       url: "http://localhost:8080",
       contentTypes: [
-        { type: "page", endpoint: "pages" },
-        { type: "post", endpoint: "posts" },
+        { type: "page", endpoint: "///pages///" },
+        { type: "post", endpoint: "///posts///" },
       ],
     },
     {
