@@ -26,9 +26,8 @@ export async function fetchWordPressDocuments(
 
   for (const contentType of config.contentTypes ?? defaultContentTypes) {
     let page = 1;
-    let totalPages = 1;
 
-    do {
+    while (true) {
       const url = new URL(
         `/wp-json/wp/v2/${trimSlashes(contentType.endpoint)}`,
         config.url,
@@ -40,9 +39,14 @@ export async function fetchWordPressDocuments(
       documents.push(
         ...rows.map((row) => normalizeWordPressItem(contentType.type, row)),
       );
-      totalPages = pages;
+      const totalPages = pages;
+
+      if (page >= totalPages) {
+        break;
+      }
+
       page += 1;
-    } while (page <= totalPages);
+    }
   }
 
   return documents;

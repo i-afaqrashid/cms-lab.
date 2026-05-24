@@ -28,9 +28,8 @@ export async function fetchStrapiDocuments(
 
   for (const collection of config.collections) {
     let page = 1;
-    let pageCount = 1;
 
-    do {
+    while (true) {
       const url = new URL(
         `/api/${trimSlashes(collection.endpoint)}`,
         config.url,
@@ -49,9 +48,14 @@ export async function fetchStrapiDocuments(
           normalizeStrapiItem(collection.type, item),
         ),
       );
-      pageCount = response.meta?.pagination?.pageCount ?? page;
+      const pageCount = response.meta?.pagination?.pageCount ?? page;
+
+      if (page >= pageCount) {
+        break;
+      }
+
       page += 1;
-    } while (page <= pageCount);
+    }
   }
 
   return documents;
