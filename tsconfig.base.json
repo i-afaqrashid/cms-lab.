@@ -15,10 +15,12 @@
     "baseUrl": ".",
     "paths": {
       "@cms-lab/core": ["packages/core/src/index.ts"],
+      "@cms-lab/contentful": ["packages/contentful/src/index.ts"],
       "@cms-lab/directus": ["packages/directus/src/index.ts"],
       "@cms-lab/next": ["packages/next/src/index.ts"],
       "@cms-lab/prismic": ["packages/prismic/src/index.ts"],
       "@cms-lab/reporter": ["packages/reporter/src/index.ts"],
+      "@cms-lab/sanity": ["packages/sanity/src/index.ts"],
       "@cms-lab/strapi": ["packages/strapi/src/index.ts"],
       "@cms-lab/wordpress": ["packages/wordpress/src/index.ts"],
       "@cms-lab/cli": ["packages/cli/src/index.ts"]

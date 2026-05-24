@@ -63,6 +63,30 @@ test("validateConfig accepts local CMS provider configs", () => {
       },
     }).cms.provider,
   ).toBe("wordpress");
+
+  expect(
+    validateConfig({
+      ...base,
+      cms: {
+        provider: "contentful",
+        spaceId: "space123",
+        accessToken: "delivery-token",
+        contentTypes: [{ type: "page", contentType: "page" }],
+      },
+    }).cms.provider,
+  ).toBe("contentful");
+
+  expect(
+    validateConfig({
+      ...base,
+      cms: {
+        provider: "sanity",
+        projectId: "project123",
+        dataset: "production",
+        contentTypes: [{ type: "page", documentType: "page" }],
+      },
+    }).cms.provider,
+  ).toBe("sanity");
 });
 
 test("validateConfig accepts required field check rules", () => {

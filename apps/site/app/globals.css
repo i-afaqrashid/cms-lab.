@@ -519,6 +519,14 @@ code {
   color: #21759b;
 }
 
+.adapterLogoContentful {
+  color: #2478cc;
+}
+
+.adapterLogoSanity {
+  color: #f03e2f;
+}
+
 .cmsLogoSvg {
   fill: currentColor;
 }

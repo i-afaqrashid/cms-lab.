@@ -15,8 +15,10 @@
   },
   "keywords": [
     "cms",
+    "contentful",
     "nextjs",
     "prismic",
+    "sanity",
     "strapi",
     "directus",
     "wordpress",
@@ -46,11 +48,13 @@
     "build": "tsup src/index.ts src/bin.ts --format esm --dts --clean --tsconfig ../../tsconfig.base.json"
   },
   "dependencies": {
+    "@cms-lab/contentful": "workspace:*",
     "@cms-lab/core": "workspace:*",
     "@cms-lab/directus": "workspace:*",
     "@cms-lab/next": "workspace:*",
     "@cms-lab/prismic": "workspace:*",
     "@cms-lab/reporter": "workspace:*",
+    "@cms-lab/sanity": "workspace:*",
     "@cms-lab/strapi": "workspace:*",
     "@cms-lab/wordpress": "workspace:*",
     "commander": "^14.0.2",

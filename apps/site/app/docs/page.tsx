@@ -40,9 +40,9 @@ export default function DocsPage() {
       <div className="callout">
         <strong>Scope</strong>
         cms-lab supports Next.js App Router and Pages Router with Prismic,
-        Strapi, Directus, and WordPress adapters. Shopify, internal links, and
-        schema drift checks stay out of the default scan until they have
-        adapters, fixtures, and release smoke coverage.
+        Strapi, Directus, WordPress, Contentful, and Sanity adapters. Shopify,
+        internal links, and schema drift checks stay out of the default scan
+        until they have adapters, fixtures, and release smoke coverage.
       </div>
 
       <h2 id="install">Install</h2>

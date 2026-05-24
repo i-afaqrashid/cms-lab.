@@ -8,7 +8,7 @@ cms-lab currently focuses on:
 
 - Next.js App Router projects.
 - Config-first CMS route mapping.
-- Prismic, Strapi, Directus, and WordPress adapters.
+- Prismic, Strapi, Directus, WordPress, Contentful, and Sanity adapters.
 - Terminal output, JSON output, local HTML reports, debug logs, tests, and benchmarks.
 
 Avoid adding hosted-service assumptions, fake product claims, hidden network dependencies, or UI/report features that the CLI cannot actually produce.
@@ -41,6 +41,8 @@ packages/prismic    Prismic adapter
 packages/strapi     Strapi adapter
 packages/directus   Directus adapter
 packages/wordpress  WordPress REST adapter
+packages/contentful Contentful adapter
+packages/sanity     Sanity adapter
 packages/reporter   local HTML report renderer
 apps/site           marketing and docs site
 benchmarks          Vitest benchmark suite

@@ -81,7 +81,10 @@ export default defineConfig({
               <code>cms</code>
             </td>
             <td>yes</td>
-            <td>Prismic, Strapi, Directus, and WordPress provider settings.</td>
+            <td>
+              Prismic, Strapi, Directus, WordPress, Contentful, and Sanity
+              provider settings.
+            </td>
           </tr>
           <tr>
             <td>
@@ -106,10 +109,10 @@ export default defineConfig({
       <h2 id="adapter-examples">Adapter examples</h2>
       <p>
         Adapter configs use the same route and check model. Strapi and Directus
-        declare collections; WordPress declares REST content types. The adapters
-        preserve native CMS fields in <code>document.data</code>, so route
-        mappings and required-field checks can use provider-specific values when
-        your app needs them.
+        declare collections; WordPress, Contentful, and Sanity declare content
+        or document types. The adapters preserve native CMS fields in{" "}
+        <code>document.data</code>, so route mappings and required-field checks
+        can use provider-specific values when your app needs them.
       </p>
       <CodeBlock>{`cms: {
   provider: "strapi",
@@ -129,6 +132,20 @@ cms: {
   provider: "wordpress",
   url: "http://localhost:8080",
   contentTypes: [{ type: "post", endpoint: "posts" }],
+}
+
+cms: {
+  provider: "contentful",
+  spaceId: "my-space",
+  accessToken: process.env.CONTENTFUL_DELIVERY_TOKEN,
+  contentTypes: [{ type: "page", contentType: "page" }],
+}
+
+cms: {
+  provider: "sanity",
+  projectId: "my-project",
+  dataset: "production",
+  contentTypes: [{ type: "page", documentType: "page" }],
 }`}</CodeBlock>
 
       <h2 id="required-fields">Required fields</h2>
@@ -161,8 +178,9 @@ cms: {
         SEO and image checks understand the common native shapes from the
         bundled adapters, including Strapi <code>seo.metaTitle</code>, Directus{" "}
         <code>seo.title</code>, WordPress <code>yoast_head_json</code>, Strapi{" "}
-        <code>alternativeText</code>, Directus image descriptions, and WordPress{" "}
-        <code>alt_text</code>.
+        <code>alternativeText</code>, Directus image descriptions, WordPress{" "}
+        <code>alt_text</code>, Contentful asset descriptions, and Sanity image{" "}
+        <code>alt</code> fields.
       </div>
     </DocsShell>
   );

@@ -11,9 +11,10 @@ typed config files, tests, and adapter/report integrations.
 
 `scanDocuments` understands the shared `CMSDocument` contract plus provider
 field shapes from the bundled adapters. SEO checks recognize common Prismic,
-Strapi, Directus, and WordPress SEO fields, while image checks recognize native
-alt fields such as Strapi `alternativeText`, Directus file `description`, and
-WordPress `alt_text`.
+Strapi, Directus, WordPress, Contentful, and Sanity SEO fields, while image
+checks recognize native alt fields such as Strapi `alternativeText`, Directus
+file `description`, WordPress `alt_text`, Contentful asset descriptions, and
+Sanity image `alt` fields.
 
 ## Open Source
 

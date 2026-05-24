@@ -41,6 +41,8 @@ body:
         - Strapi adapter
         - Directus adapter
         - WordPress adapter
+        - Contentful adapter
+        - Sanity adapter
         - HTML report
         - Docs/site
         - Other
