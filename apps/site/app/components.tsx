@@ -13,6 +13,7 @@ export const docsNav: Array<{ title: string; links: DocLink[] }> = [
       { href: "/docs", label: "Overview" },
       { href: "/docs/configuration", label: "Configuration" },
       { href: "/docs/scan", label: "Scan command" },
+      { href: "/docs/agent-context", label: "Agent context" },
     ],
   },
   {

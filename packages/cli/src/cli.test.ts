@@ -174,6 +174,160 @@ test("runCli scans Next.js Pages Router projects", async () => {
   expect(result.summary).toEqual({ errors: 0, warnings: 0, info: 0 });
 });
 
+test("runCli agent-context writes safe AI agent handoff files", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'https://preview.example.com?secret=top-secret' },
+        framework: { type: 'next', router: 'app' },
+        cms: {
+          provider: 'prismic',
+          repositoryName: 'demo-repo',
+          accessToken: 'top-secret-token',
+        },
+        routes: [
+          { type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid },
+          { type: 'article', pattern: '/articles/:uid', getPath: (doc) => '/articles/' + doc.uid },
+        ],
+        checks: {
+          routes: true,
+          seo: true,
+          a11y: { imgAlt: true },
+          fields: { required: [{ type: 'page', path: 'title' }] },
+        },
+      })
+    `,
+  );
+
+  let stdout = "";
+  const exitCode = await runCli(["agent-context", "--config", configPath], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+  });
+
+  const agents = await readFile(join(cwd, "AGENTS.md"), "utf8");
+  const context = await readFile(
+    join(cwd, ".cms-lab/agent-context.md"),
+    "utf8",
+  );
+  const prompt = await readFile(join(cwd, ".cms-lab/agent-prompt.md"), "utf8");
+  const combined = [agents, context, prompt, stdout].join("\n");
+
+  expect(exitCode).toBe(0);
+  expect(stdout).toContain("created AGENTS.md");
+  expect(stdout).toContain("created .cms-lab/agent-context.md");
+  expect(stdout).toContain("created .cms-lab/agent-prompt.md");
+  expect(agents).toContain("Read `.cms-lab/agent-context.md`");
+  expect(context).toContain("Framework: Next.js App Router");
+  expect(context).toContain("CMS provider: prismic");
+  expect(context).toContain("Repository: demo-repo");
+  expect(context).toContain("page -> /:uid");
+  expect(context).toContain("article -> /articles/:uid");
+  expect(prompt).toContain("Claude Code");
+  expect(prompt).toContain("Codex");
+  expect(prompt).toContain("Gemini CLI");
+  expect(prompt).toContain("Antigravity");
+  expect(prompt).toContain("OpenCode");
+  expect(combined).toContain("https://github.com/i-afaqrashid/cms-lab");
+  expect(combined).toContain("https://www.npmjs.com/package/@cms-lab/cli");
+  expect(combined).toContain("https://cmslab.afaqrashid.com/docs");
+  expect(combined).toContain("npx @cms-lab/cli@latest doctor");
+  expect(combined).not.toContain(cwd);
+  expect(combined).not.toContain("preview.example.com");
+  expect(combined).not.toContain("top-secret");
+  expect(combined).not.toContain("top-secret-token");
+});
+
+test("runCli agent-context refuses to overwrite existing files without force", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+  await writeFile(join(cwd, "AGENTS.md"), "existing team instructions");
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let stderr = "";
+  const exitCode = await runCli(["agent-context", "--config", configPath], {
+    cwd,
+    stdout: () => {},
+    stderr: (text) => {
+      stderr += text;
+    },
+  });
+
+  expect(exitCode).toBe(2);
+  expect(stderr).toContain("AGENTS.md already exists");
+  await expect(
+    readFile(join(cwd, ".cms-lab/agent-context.md"), "utf8"),
+  ).rejects.toThrow();
+  expect(await readFile(join(cwd, "AGENTS.md"), "utf8")).toBe(
+    "existing team instructions",
+  );
+});
+
+test("runCli agent-context overwrites generated files with force", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+  await mkdir(join(cwd, ".cms-lab"), { recursive: true });
+  await writeFile(join(cwd, "AGENTS.md"), "old agents");
+  await writeFile(join(cwd, ".cms-lab/agent-context.md"), "old context");
+  await writeFile(join(cwd, ".cms-lab/agent-prompt.md"), "old prompt");
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'strapi', url: 'http://localhost:1337', collections: [{ type: 'page', endpoint: 'pages' }] },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  const exitCode = await runCli(
+    ["agent-context", "--config", configPath, "--force"],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: () => {},
+    },
+  );
+
+  expect(exitCode).toBe(0);
+  expect(await readFile(join(cwd, "AGENTS.md"), "utf8")).toContain(
+    "cms-lab agent handoff",
+  );
+  expect(
+    await readFile(join(cwd, ".cms-lab/agent-context.md"), "utf8"),
+  ).toContain("CMS provider: strapi");
+  expect(
+    await readFile(join(cwd, ".cms-lab/agent-prompt.md"), "utf8"),
+  ).toContain("npx @cms-lab/cli@latest scan");
+});
+
 test("runCli pretty output respects --no-color and suggests the next explain command", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "app"), { recursive: true });

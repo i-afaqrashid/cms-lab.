@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander";
 import { access, mkdir, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { performance } from "node:perf_hooks";
 import {
   type CheckGroup,
@@ -29,6 +29,7 @@ import {
   renderSlackPayload,
   type ScanStatus,
 } from "./exporters.js";
+import { renderAgentContextFiles } from "./agent-context.js";
 import { formatPrettyResult } from "./output.js";
 
 export type CliDependencies = {
@@ -84,6 +85,13 @@ type InitCommandOptions = {
   url?: string;
 };
 
+type AgentContextCommandOptions = {
+  config?: string;
+  out?: string;
+  force?: boolean;
+  agentsMd?: boolean;
+};
+
 export async function runCli(
   argv: string[],
   dependencies: CliDependencies = {},
@@ -106,6 +114,7 @@ Examples:
   cms-lab init
   cms-lab doctor --config cms-lab.config.ts
   cms-lab scan --ci --report
+  cms-lab agent-context
   cms-lab explain CMS-ROUTE-404
 `,
   );
@@ -256,6 +265,30 @@ Examples:
     )
     .action(async (options: InitCommandOptions) => {
       exitCode = await runInit(options, dependencies);
+    });
+
+  program
+    .command("agent-context")
+    .description("Generate AI-agent handoff files for cms-lab projects.")
+    .option("--config <path>", "Path to cms-lab config file")
+    .option(
+      "--out <dir>",
+      "Directory for generated cms-lab agent files",
+      ".cms-lab",
+    )
+    .option("--force", "Overwrite existing generated files")
+    .option("--no-agents-md", "Do not create or update AGENTS.md")
+    .addHelpText(
+      "after",
+      `
+Examples:
+  cms-lab agent-context
+  cms-lab agent-context --config cms-lab.config.ts
+  cms-lab agent-context --out .cms-lab --force
+`,
+    )
+    .action(async (options: AgentContextCommandOptions) => {
+      exitCode = await runAgentContext(options, dependencies);
     });
 
   try {
@@ -620,6 +653,71 @@ async function runInit(
     return 0;
   } catch (error) {
     writeStderr(dependencies, `Config error: ${messageFrom(error)}\n`);
+    return 2;
+  }
+}
+
+async function runAgentContext(
+  options: AgentContextCommandOptions,
+  dependencies: CliDependencies,
+): Promise<number> {
+  const cwd = dependencies.cwd ?? process.cwd();
+
+  try {
+    const loaded = await loadCmsLabConfig({ cwd, configPath: options.config });
+    const project = await detectNextProject(cwd);
+    assertConfiguredRouterMatchesProject(
+      loaded.config.framework.router,
+      project,
+    );
+    const files = renderAgentContextFiles({
+      config: loaded.config,
+      project,
+      configFile: safeRelativePath(cwd, loaded.configFile),
+      outputDir: options.out ?? ".cms-lab",
+      includeAgentsMd: options.agentsMd !== false,
+    });
+    const existingFiles: string[] = [];
+
+    for (const file of files) {
+      const target = resolve(cwd, file.path);
+      if (!isInsideDirectory(cwd, target)) {
+        throw new ConfigLoadError(
+          `Refusing to write outside the project: ${file.path}`,
+        );
+      }
+
+      if (!options.force && (await fileExists(target))) {
+        existingFiles.push(file.path);
+      }
+    }
+
+    if (existingFiles.length > 0) {
+      writeStderr(
+        dependencies,
+        `Config error: ${existingFiles.join(", ")} already exists. Use --force to overwrite it.\n`,
+      );
+      return 2;
+    }
+
+    for (const file of files) {
+      const target = resolve(cwd, file.path);
+      await mkdir(dirname(target), { recursive: true });
+      await writeFile(target, file.content, "utf8");
+      writeStdout(dependencies, `created ${file.path}\n`);
+    }
+
+    return 0;
+  } catch (error) {
+    if (error instanceof ConfigLoadError) {
+      writeStderr(
+        dependencies,
+        `Config error: ${redactSensitive(error.message)}\n`,
+      );
+      return 2;
+    }
+
+    writeStderr(dependencies, `Config error: ${safeMessageFrom(error)}\n`);
     return 2;
   }
 }
@@ -1241,6 +1339,34 @@ function assertConfiguredRouterMatchesProject(
 
 function projectDirectory(project: ProjectInfo): string {
   return project.appDir ?? project.pagesDir ?? project.rootDir;
+}
+
+function safeRelativePath(cwd: string, path: string | undefined): string {
+  if (!path) {
+    return "cms-lab config";
+  }
+
+  const relativePath = relative(cwd, path);
+  if (
+    relativePath &&
+    !relativePath.startsWith("..") &&
+    !isAbsolute(relativePath) &&
+    !relativePath.includes(`..${sep}`)
+  ) {
+    return relativePath.split(sep).join("/");
+  }
+
+  return "custom cms-lab config";
+}
+
+function isInsideDirectory(cwd: string, target: string): boolean {
+  const relativePath = relative(cwd, target);
+  return (
+    relativePath === "" ||
+    (!relativePath.startsWith("..") &&
+      !isAbsolute(relativePath) &&
+      !relativePath.includes(`..${sep}`))
+  );
 }
 
 async function fileExists(path: string): Promise<boolean> {
