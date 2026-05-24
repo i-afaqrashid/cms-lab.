@@ -30,6 +30,8 @@
     "smoke:pack": "node scripts/smoke-pack.mjs",
     "smoke:pack:live": "node scripts/smoke-pack.mjs --live",
     "release:check": "pnpm verify && pnpm audit && pnpm smoke:pack:live && pnpm live:doctor && pnpm live:scan",
+    "release:verify-tag": "node scripts/verify-release-tag.mjs",
+    "release:publish-tarballs": "node scripts/publish-packages.mjs",
     "prepublishOnly": "pnpm verify",
     "live:doctor": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js doctor",
     "live:scan": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js scan --ci --report --only routes,fields",

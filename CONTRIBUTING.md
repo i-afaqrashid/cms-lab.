@@ -16,7 +16,7 @@ Avoid adding hosted-service assumptions, fake product claims, hidden network dep
 ## Prerequisites
 
 - Node.js `>=20.10`
-- pnpm `11.2.2`
+- pnpm `10.33.4`
 - Docker Desktop, only if you are testing local real CMS fixtures.
 
 Install dependencies:
