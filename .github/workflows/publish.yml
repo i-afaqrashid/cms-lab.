@@ -1,0 +1,73 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish packages
+    if: github.repository == 'i-afaqrashid/cms-lab'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Tool versions
+        run: |
+          node --version
+          npm --version
+          pnpm --version
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify release tag
+        run: pnpm release:verify-tag
+
+      - name: Verify workspace
+        run: pnpm verify
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level moderate
+
+      - name: Smoke packaged CLI
+        run: pnpm smoke:pack -- --skip-build
+
+      - name: Pack packages
+        run: |
+          mkdir -p .release-packages
+          pnpm -r --filter './packages/*' pack --pack-destination .release-packages
+
+      - name: Publish packages
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -n "${NPM_TOKEN:-}" ]; then
+            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+          fi
+          pnpm release:publish-tarballs .release-packages
