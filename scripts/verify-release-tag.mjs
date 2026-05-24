@@ -8,13 +8,13 @@ const tagName = normalizeTag(
 );
 
 if (!tagName) {
-  fail("Release tag is missing. Run on a tag such as v1.0.2.");
+  fail("Release tag is missing. Run on a tag such as v1.0.3.");
 }
 
 const match = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(tagName);
 
 if (!match) {
-  fail(`Release tag "${tagName}" must match vX.Y.Z, for example v1.0.2.`);
+  fail(`Release tag "${tagName}" must match vX.Y.Z, for example v1.0.3.`);
 }
 
 const version = tagName.slice(1);

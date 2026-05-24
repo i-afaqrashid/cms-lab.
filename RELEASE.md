@@ -1,6 +1,6 @@
 # Release Checklist
 
-Publishing is tag-driven. The npm publish workflow runs only when a maintainer pushes a tag shaped like `v1.0.2`; the workflow then verifies that every publishable package has the same version as the tag before it can publish.
+Publishing is tag-driven. The npm publish workflow runs only when a maintainer pushes a tag shaped like `v1.0.3`; the workflow then verifies that every publishable package has the same version as the tag before it can publish.
 
 ## Local checks
 
@@ -48,8 +48,8 @@ For the first publish, npm requires package ownership before Trusted Publishing 
 ```sh
 git checkout main
 git pull --ff-only origin main
-git tag -a v1.0.2 -m "v1.0.2"
-git push origin v1.0.2
+git tag -a v1.0.3 -m "v1.0.3"
+git push origin v1.0.3
 ```
 
 The workflow publishes from the tag only. Do not publish from a branch.
