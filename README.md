@@ -2,29 +2,25 @@
 
 Catch CMS bugs before deploy.
 
-`cms-lab` is a focused CLI for scanning headless CMS content against Next.js routes. It supports Next.js App Router, config-first route mapping, Prismic/Strapi/Directus/WordPress adapters, terminal output, JSON output, local HTML reports, and release readiness checks.
+`cms-lab` is a CLI for checking headless CMS content against the routes and fields your Next.js app expects. It runs locally, reads your config, fetches CMS entries, probes your site, and writes terminal, JSON, Markdown, JUnit, Slack, and HTML report output.
 
-No hosted cms-lab service is involved. The CLI runs inside your project and talks to your CMS with the credentials you provide.
-
-## Status
-
-The project targets Next.js App Router sites that pull content from Prismic, Strapi, Directus, or WordPress. The `apps/site` package is the production marketing/docs implementation.
+There is no hosted cms-lab service. The CLI runs inside your project and talks directly to the CMS endpoints you configure.
 
 ## Install
 
 ```sh
-pnpm add -D @cms-lab/cli @cms-lab/core @cms-lab/next @cms-lab/prismic @cms-lab/strapi @cms-lab/directus @cms-lab/wordpress
+pnpm add -D @cms-lab/cli @cms-lab/core
 ```
 
-Or run without installing after publishing:
+You can also run it without adding it to the project:
 
 ```sh
-npx @cms-lab/cli scan
+npx @cms-lab/cli@latest scan
 ```
 
-## Configure
+## Quick Start
 
-Create `cms-lab.config.ts` in your Next.js project:
+Create `cms-lab.config.ts` in a Next.js project:
 
 ```ts
 import { defineConfig } from "@cms-lab/core";
@@ -56,7 +52,32 @@ export default defineConfig({
 });
 ```
 
-Other CMS adapters use the same route/check model:
+Run your Next.js app, then scan it:
+
+```sh
+pnpm next dev
+pnpm cms-lab scan
+```
+
+For CI:
+
+```sh
+pnpm cms-lab scan --ci --report --markdown --junit
+```
+
+## CMS Adapters
+
+Prismic:
+
+```ts
+cms: {
+  provider: "prismic",
+  repositoryName: "my-repo",
+  accessToken: process.env.PRISMIC_ACCESS_TOKEN,
+}
+```
+
+Strapi:
 
 ```ts
 cms: {
@@ -65,14 +86,22 @@ cms: {
   token: process.env.STRAPI_TOKEN,
   collections: [{ type: "page", endpoint: "pages" }],
 }
+```
 
+Directus:
+
+```ts
 cms: {
   provider: "directus",
   url: "http://localhost:8055",
   token: process.env.DIRECTUS_TOKEN,
   collections: [{ type: "page", collection: "pages" }],
 }
+```
 
+WordPress:
+
+```ts
 cms: {
   provider: "wordpress",
   url: "http://localhost:8080",
@@ -83,113 +112,79 @@ cms: {
 }
 ```
 
-## Use
+All adapters normalize content into the same scan model, so route checks, field checks, SEO checks, report output, and CI behavior stay consistent.
+
+## Commands
 
 ```sh
+cms-lab init
+cms-lab doctor
 cms-lab scan
+cms-lab explain CMS-ROUTE-404
+```
+
+Useful scan options:
+
+```sh
 cms-lab scan --url https://staging.example.com
+cms-lab scan --config ./cms-lab.config.ts
 cms-lab scan --json
-cms-lab scan --json --include-sensitive-output
 cms-lab scan --ci
 cms-lab scan --report
 cms-lab scan --markdown
 cms-lab scan --junit
 cms-lab scan --slack-webhook "$CMS_LAB_SLACK_WEBHOOK"
-cms-lab scan --fail-on warning
-cms-lab scan --max-warnings 0
-cms-lab scan --max-info 0
-cms-lab scan --strict
 cms-lab scan --type page
 cms-lab scan --only routes
 cms-lab scan --skip seo --skip a11y
+cms-lab scan --fail-on warning
+cms-lab scan --max-warnings 0
+cms-lab scan --strict
 cms-lab scan --timeout 10000
 cms-lab scan --concurrency 4
 cms-lab scan --retries 2
-cms-lab scan --no-color
-cms-lab scan --debug
-cms-lab scan --verbose 2
-cms-lab doctor
-cms-lab doctor --debug --verbose 3
-cms-lab explain CMS-ROUTE-404
-cms-lab init
+cms-lab scan --debug --verbose 2
 ```
 
-Checks:
+## Checks
 
-- CMS documents with missing UID values for `:uid` route patterns
+cms-lab currently checks:
+
+- CMS documents that cannot produce a configured route
 - Expected CMS routes that return `404`
 - Expected CMS routes that return `5xx`
 - Route probes that fail after the site is reachable
-- Missing SEO title or description fields, including common Prismic,
-  Strapi, Directus, and WordPress SEO field shapes
-- Missing or placeholder image alt text, including Prismic `alt`, Strapi
-  `alternativeText`, Directus image file `description`, and WordPress
-  `alt_text`
+- Missing SEO titles and descriptions
+- Missing or placeholder image alt text
 - Custom required fields declared in `checks.fields.required`
 
-Adapter normalization keeps the original CMS payload in `document.data`, sets a
-stable `id`, uses slug-like fields as `uid` where available, preserves public
-permalinks as `url` when the provider exposes one, and treats non-public
-statuses such as drafts, archived content, and scheduled WordPress posts as
-`draft`.
+The scanner keeps the original CMS payload in `document.data`, preserves public permalinks when a CMS exposes them, uses slug-like fields as `uid` where available, and treats non-public entries such as drafts, archived content, and scheduled WordPress posts as `draft`.
 
-`--json` redacts raw CMS document `data`, document URLs, document UIDs, and
-absolute project paths by default so CI logs do not leak CMS content or local
-machine details. Use `--include-sensitive-output` only when a private script
-explicitly needs full document payloads and raw paths.
+## Output And Privacy
 
-`--report` writes `.cms-lab/report.html` by default. Use `--report path/to/report.html` to choose a different file.
+By default, `--json` redacts raw CMS document data, document URLs, document UIDs, and absolute project paths. Use `--include-sensitive-output` only for private automation that needs full payloads.
 
-`--markdown` writes `.cms-lab/summary.md` by default for GitHub step summaries,
-PR comments, and release notes. `--junit` writes `.cms-lab/junit.xml` by
-default for CI systems that understand test reports.
+Report outputs:
 
-`--slack-webhook <url>` posts a compact, redacted summary to a Slack incoming
-webhook. It sends counts and diagnostic codes only; it does not send raw CMS
-document data, local project paths, webhook URLs, CMS tokens, or full JSON
-output. Use `--notify-on always`, `--notify-on failure`, or
-`--notify-on diagnostics` to control when the message is sent. The default is
-`failure`.
+- `--report` writes `.cms-lab/report.html`
+- `--markdown` writes `.cms-lab/summary.md`
+- `--junit` writes `.cms-lab/junit.xml`
+- `--slack-webhook` sends a compact redacted Slack summary
 
-`--fail-on` controls the exit threshold:
+Slack summaries include counts and diagnostic codes. They do not include CMS tokens, webhook URLs, raw CMS payloads, local project paths, or full JSON output.
 
-- `error` default: exit `1` when errors exist
-- `warning`: exit `1` when errors or warnings exist
-- `never`: always exit `0` after a completed scan
+## Exit Behavior
 
-For stricter CI gates, use numeric diagnostic budgets:
+`cms-lab scan` exits:
 
-- `--max-warnings <count>`: exit `1` when warnings exceed the count
-- `--max-info <count>`: exit `1` when info diagnostics exceed the count
-- `--strict`: fail on warnings and info diagnostics, equivalent to `--fail-on warning --max-info 0`
+- `0` when the scan completed under the configured failure threshold
+- `1` when diagnostics exceed the threshold
+- `2` for config, load, or validation errors
+- `3` when the CMS is unreachable or authentication fails
+- `4` when the site is unreachable
+- `130` when interrupted
 
-Pretty terminal output uses color only when stdout is an interactive terminal.
-Use `--no-color`, set `NO_COLOR`, set `TERM=dumb`, or use `--ci` for plain
-output. When diagnostics are present outside CI mode, the terminal output
-suggests the first `cms-lab explain <code>` command to run next.
-
-Debug output is written to stderr, so `--json` remains safe to parse from stdout.
-`--debug` enables level `1`. `--verbose <level>` accepts:
-
-- `0`: off
-- `1`: command phases, config path, CMS provider, document count, summary
-- `2`: level 1 plus option details and phase timings
-- `3`: level 2 plus document type counts
-
-## Workspace
-
-```txt
-packages/core      config, types, diagnostics, checks
-packages/cli       cms-lab binary and output
-packages/next      Next.js project detection
-packages/prismic   Prismic document adapter
-packages/strapi    Strapi document adapter
-packages/directus  Directus document adapter
-packages/wordpress WordPress REST document adapter
-packages/reporter  local HTML report renderer
-apps/site          marketing site and docs
-test-fixtures/     live public Prismic fixture
-```
+Use `--fail-on never` when you want artifacts without failing the job. Use `--strict` when warnings and info diagnostics should fail CI.
 
 ## Development
 
@@ -205,13 +200,13 @@ pnpm verify
 pnpm smoke:pack
 ```
 
-Run the marketing/docs site locally on port 2677:
+Run the docs site locally:
 
 ```sh
 pnpm site:dev
 ```
 
-To run against a real public Prismic repository and deployed Next.js starter:
+Run the public Prismic smoke fixture:
 
 ```sh
 pnpm build
@@ -220,18 +215,27 @@ pnpm live:scan
 pnpm smoke:pack:live
 ```
 
-`pnpm smoke:pack` packs the publishable packages, installs the tarballs into a clean temporary app, and runs the installed `cms-lab` binary. `pnpm smoke:pack:live` does the same package smoke and then runs the installed binary against the real public Prismic fixture.
+`pnpm smoke:pack` packs the publishable packages, installs them into a clean temporary app, and runs the installed `cms-lab` binary. `pnpm smoke:pack:live` does the same package smoke and then scans the public Prismic fixture.
 
-`pnpm bench` runs the Vitest benchmark suite for scan orchestration, CMS adapter normalization, and HTML report rendering. Benchmark output is intentionally local-only and not used as a release gate.
+## Repository
 
-## Local Testing
+```txt
+packages/core       config, types, diagnostics, checks
+packages/cli        cms-lab binary and output
+packages/next       Next.js project detection
+packages/prismic    Prismic adapter
+packages/strapi     Strapi adapter
+packages/directus   Directus adapter
+packages/wordpress  WordPress adapter
+packages/reporter   local HTML report renderer
+apps/site           marketing site and docs
+test-fixtures/      public Prismic fixture
+```
 
-See [TESTING.md](./TESTING.md) for the local tester workflow, including how to run the built CLI against a real Next.js project.
+## Launch And Maintenance
 
-## Contributing
+Read [LAUNCH.md](./LAUNCH.md) for the release checklist, npm publish flow, post-release verification, and launch-day notes.
 
-Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a PR. Security reports go through [SECURITY.md](./SECURITY.md), and project conduct is covered in [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
+Read [TESTING.md](./TESTING.md) for local tester workflows. Read [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md), [SUPPORT.md](./SUPPORT.md), and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) before opening public issues or PRs.
 
-## Open Source
-
-cms-lab is MIT licensed. See [LICENSE](./LICENSE) for the full license text, [OPEN_SOURCE.md](./OPEN_SOURCE.md) for open-source project expectations, [SUPPORT.md](./SUPPORT.md) for support paths, and [GOVERNANCE.md](./GOVERNANCE.md) for maintainer/release ownership.
+cms-lab is MIT licensed. See [LICENSE](./LICENSE).
