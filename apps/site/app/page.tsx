@@ -52,6 +52,8 @@ const adapters = [
   { logo: "strapi" as const, name: "Strapi" },
   { logo: "directus" as const, name: "Directus" },
   { logo: "wordpress" as const, name: "WordPress" },
+  { logo: "contentful" as const, name: "Contentful" },
+  { logo: "sanity" as const, name: "Sanity" },
 ];
 
 export default function HomePage() {

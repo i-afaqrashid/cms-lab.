@@ -31,10 +31,12 @@ await run(
 const tarballs = await readdir(packDir);
 const installTarballs = [
   findTarball(tarballs, /^cms-lab-core-\d.*\.tgz$/),
+  findTarball(tarballs, /^cms-lab-contentful-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-directus-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-next-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-prismic-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-reporter-\d.*\.tgz$/),
+  findTarball(tarballs, /^cms-lab-sanity-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-strapi-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-wordpress-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-cli-\d.*\.tgz$/),

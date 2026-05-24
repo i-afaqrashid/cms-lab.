@@ -1714,3 +1714,126 @@ test("runCli scans non-Prismic CMS configs through the generic CMS loader", asyn
   expect(result.documents).toHaveLength(1);
   expect(result.summary).toEqual({ errors: 0, warnings: 0, info: 0 });
 });
+
+test("runCli scans Contentful configs through the bundled adapter", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: {
+          provider: 'contentful',
+          spaceId: 'space123',
+          accessToken: 'delivery-token',
+          contentTypes: [{ type: 'page', contentType: 'page' }],
+        },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let stdout = "";
+  const exitCode = await runCli(["scan", "--config", configPath, "--json"], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+    fetch: async (url) => {
+      if (String(url).startsWith("https://cdn.contentful.com/")) {
+        return Response.json({
+          skip: 0,
+          limit: 100,
+          total: 1,
+          items: [
+            {
+              sys: { id: "entry-1", updatedAt: "2026-01-01T00:00:00Z" },
+              fields: {
+                slug: "about",
+                meta_title: "About",
+                meta_description: "About page",
+              },
+            },
+          ],
+        });
+      }
+
+      return new Response("ok");
+    },
+  });
+
+  const result = JSON.parse(stdout);
+
+  expect(exitCode).toBe(0);
+  expect(result.documents).toHaveLength(1);
+  expect(result.documents[0].type).toBe("page");
+  expect(result.summary).toEqual({ errors: 0, warnings: 0, info: 0 });
+});
+
+test("runCli scans Sanity configs through the bundled adapter", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: {
+          provider: 'sanity',
+          projectId: 'project123',
+          dataset: 'production',
+          contentTypes: [{ type: 'page', documentType: 'page' }],
+        },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let stdout = "";
+  const exitCode = await runCli(["scan", "--config", configPath, "--json"], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+    fetch: async (url) => {
+      if (new URL(String(url)).hostname === "project123.api.sanity.io") {
+        return Response.json({
+          result: [
+            {
+              _id: "page-about",
+              _type: "page",
+              slug: { current: "about" },
+              seo: { title: "About", description: "About page" },
+            },
+          ],
+        });
+      }
+
+      return new Response("ok");
+    },
+  });
+
+  const result = JSON.parse(stdout);
+
+  expect(exitCode).toBe(0);
+  expect(result.documents).toHaveLength(1);
+  expect(result.documents[0].type).toBe("page");
+  expect(result.summary).toEqual({ errors: 0, warnings: 0, info: 0 });
+});

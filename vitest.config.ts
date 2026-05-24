@@ -13,6 +13,10 @@ export default defineConfig({
     alias: {
       "@cms-lab/core": new URL("./packages/core/src/index.ts", import.meta.url)
         .pathname,
+      "@cms-lab/contentful": new URL(
+        "./packages/contentful/src/index.ts",
+        import.meta.url,
+      ).pathname,
       "@cms-lab/directus": new URL(
         "./packages/directus/src/index.ts",
         import.meta.url,
@@ -25,6 +29,10 @@ export default defineConfig({
       ).pathname,
       "@cms-lab/reporter": new URL(
         "./packages/reporter/src/index.ts",
+        import.meta.url,
+      ).pathname,
+      "@cms-lab/sanity": new URL(
+        "./packages/sanity/src/index.ts",
         import.meta.url,
       ).pathname,
       "@cms-lab/strapi": new URL(

@@ -86,7 +86,7 @@ const explanations: DiagnosticExplanation[] = [
     severity: "warning",
     title: "SEO metadata is missing",
     meaning:
-      "A document is missing one or more configured SEO fields. cms-lab checks common provider fields such as Prismic meta fields, Strapi/Directus seo objects, and WordPress SEO plugin JSON.",
+      "A document is missing one or more configured SEO fields. cms-lab checks common provider fields such as Prismic meta fields, Strapi/Directus seo objects, WordPress SEO plugin JSON, and Contentful/Sanity SEO fields.",
     fix: "Fill the missing CMS fields or disable the SEO check if this content type intentionally does not use metadata.",
   },
   {
@@ -94,7 +94,7 @@ const explanations: DiagnosticExplanation[] = [
     severity: "warning",
     title: "Image alt text is missing",
     meaning:
-      "An image-like CMS field has no useful alt text, or uses a placeholder such as image, photo, or picture. Native fields such as Prismic alt, Strapi alternativeText, Directus file description, and WordPress alt_text are checked.",
+      "An image-like CMS field has no useful alt text, or uses a placeholder such as image, photo, or picture. Native fields such as Prismic alt, Strapi alternativeText, Directus file description, WordPress alt_text, Contentful asset descriptions, and Sanity image alt fields are checked.",
     fix: "Add meaningful alt text in the CMS, or leave decorative images out of content fields that require editorial alt text.",
   },
   {

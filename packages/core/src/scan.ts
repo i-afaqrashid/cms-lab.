@@ -560,6 +560,18 @@ function imageAltCandidate(
     return { isImage: true, value: record.description };
   }
 
+  if (provider === "contentful" && isContentfulImageRecord(record)) {
+    return { isImage: true, value: record.description ?? record.title };
+  }
+
+  if (
+    provider === "sanity" &&
+    "asset" in record &&
+    (asRecord(record.asset)?._ref || asRecord(record.asset)?._id)
+  ) {
+    return { isImage: true, value: record.alt };
+  }
+
   return { isImage: false, value: undefined };
 }
 
@@ -577,6 +589,25 @@ function hasImageExtension(value: unknown): boolean {
     typeof value === "string" &&
     /\.(?:avif|gif|jpe?g|png|svg|webp)$/i.test(value)
   );
+}
+
+function isContentfulImageRecord(record: Record<string, unknown>): boolean {
+  const file = asRecord(record.file);
+  return (
+    (typeof file?.url === "string" &&
+      (isContentfulImageHost(file.url) || hasImageExtension(file.url))) ||
+    hasImageExtension(file?.fileName)
+  );
+}
+
+function isContentfulImageHost(value: string): boolean {
+  const normalized = value.startsWith("//") ? `https:${value}` : value;
+
+  try {
+    return new URL(normalized).hostname === "images.ctfassets.net";
+  } catch {
+    return false;
+  }
 }
 
 function isCheckEnabled(value: unknown, defaultValue: boolean): boolean {

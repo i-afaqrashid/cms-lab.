@@ -267,6 +267,22 @@ function cmsDetails(config: CmsProviderConfig): string {
 - Collections: ${config.collections.map((collection) => `${collection.type} (${collection.collection})`).join(", ")}`;
   }
 
+  if (config.provider === "contentful") {
+    return `## CMS details
+
+- Space: ${config.spaceId}
+- Environment: ${config.environment ?? "master"}
+- Content types: ${config.contentTypes.map((contentType) => `${contentType.type} (${contentType.contentType})`).join(", ")}`;
+  }
+
+  if (config.provider === "sanity") {
+    return `## CMS details
+
+- Project: ${config.projectId}
+- Dataset: ${config.dataset}
+- Document types: ${config.contentTypes.map((contentType) => `${contentType.type} (${contentType.documentType})`).join(", ")}`;
+  }
+
   return `## CMS details
 
 - Content types: ${(

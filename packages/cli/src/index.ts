@@ -16,10 +16,12 @@ import {
   type ProjectInfo,
   type ScanResult,
 } from "@cms-lab/core";
+import { fetchContentfulDocuments as defaultFetchContentfulDocuments } from "@cms-lab/contentful";
 import { fetchDirectusDocuments as defaultFetchDirectusDocuments } from "@cms-lab/directus";
 import { detectNextProject } from "@cms-lab/next";
 import { fetchPrismicDocuments as defaultFetchPrismicDocuments } from "@cms-lab/prismic";
 import { renderHtmlReport } from "@cms-lab/reporter";
+import { fetchSanityDocuments as defaultFetchSanityDocuments } from "@cms-lab/sanity";
 import { fetchStrapiDocuments as defaultFetchStrapiDocuments } from "@cms-lab/strapi";
 import { fetchWordPressDocuments as defaultFetchWordPressDocuments } from "@cms-lab/wordpress";
 import {
@@ -978,6 +980,18 @@ function describeCms(config: CmsProviderConfig): string {
     )}`;
   }
 
+  if (config.provider === "contentful") {
+    return `contentful space=${config.spaceId} environment=${config.environment ?? "master"} contentTypes=${formatList(
+      config.contentTypes.map((contentType) => contentType.contentType),
+    )}`;
+  }
+
+  if (config.provider === "sanity") {
+    return `sanity project=${config.projectId} dataset=${config.dataset} documentTypes=${formatList(
+      config.contentTypes.map((contentType) => contentType.documentType),
+    )}`;
+  }
+
   return `wordpress url=${safeUrl(config.url)} contentTypes=${formatList(
     config.contentTypes?.map((contentType) => contentType.endpoint) ?? [
       "pages",
@@ -1053,6 +1067,16 @@ async function fetchCmsDocuments(
 
   if (config.provider === "directus") {
     return defaultFetchDirectusDocuments(config, { fetch: dependencies.fetch });
+  }
+
+  if (config.provider === "contentful") {
+    return defaultFetchContentfulDocuments(config, {
+      fetch: dependencies.fetch,
+    });
+  }
+
+  if (config.provider === "sanity") {
+    return defaultFetchSanityDocuments(config, { fetch: dependencies.fetch });
   }
 
   return defaultFetchWordPressDocuments(config, { fetch: dependencies.fetch });

@@ -89,11 +89,43 @@ export type WordPressCmsProviderConfig = {
   contentTypes?: WordPressContentTypeConfig[];
 };
 
+export type ContentfulContentTypeConfig = {
+  type: string;
+  contentType: string;
+};
+
+export type ContentfulCmsProviderConfig = {
+  provider: "contentful";
+  spaceId: string;
+  accessToken: string;
+  environment?: string;
+  apiUrl?: string;
+  contentTypes: ContentfulContentTypeConfig[];
+};
+
+export type SanityContentTypeConfig = {
+  type: string;
+  documentType: string;
+};
+
+export type SanityCmsProviderConfig = {
+  provider: "sanity";
+  projectId: string;
+  dataset: string;
+  apiVersion?: string;
+  token?: string;
+  useCdn?: boolean;
+  perspective?: "published" | "drafts" | "raw";
+  contentTypes: SanityContentTypeConfig[];
+};
+
 export type CmsProviderConfig =
   | PrismicCmsProviderConfig
   | StrapiCmsProviderConfig
   | DirectusCmsProviderConfig
-  | WordPressCmsProviderConfig;
+  | WordPressCmsProviderConfig
+  | ContentfulCmsProviderConfig
+  | SanityCmsProviderConfig;
 
 export type CmsLabConfig = {
   site: {

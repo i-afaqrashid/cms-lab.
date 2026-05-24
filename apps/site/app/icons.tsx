@@ -8,10 +8,23 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { IconType } from "react-icons";
-import { SiDirectus, SiPrismic, SiStrapi, SiWordpress } from "react-icons/si";
+import {
+  SiContentful,
+  SiDirectus,
+  SiPrismic,
+  SiSanity,
+  SiStrapi,
+  SiWordpress,
+} from "react-icons/si";
 
 type IconName = "routes" | "fields" | "seo" | "images" | "uid" | "ci";
-type CmsLogoName = "prismic" | "strapi" | "directus" | "wordpress";
+type CmsLogoName =
+  | "prismic"
+  | "strapi"
+  | "directus"
+  | "wordpress"
+  | "contentful"
+  | "sanity";
 
 const featureIcons = {
   routes: Route,
@@ -27,6 +40,8 @@ const cmsLogos = {
   strapi: SiStrapi,
   directus: SiDirectus,
   wordpress: SiWordpress,
+  contentful: SiContentful,
+  sanity: SiSanity,
 } satisfies Record<CmsLogoName, IconType>;
 
 export function FeatureIcon({ name }: { name: IconName }) {

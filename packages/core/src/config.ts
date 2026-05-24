@@ -80,11 +80,55 @@ const wordpressConfigSchema = z
   })
   .strict();
 
+const contentfulConfigSchema = z
+  .object({
+    provider: z.literal("contentful"),
+    spaceId: z.string().min(1),
+    accessToken: z.string().min(1),
+    environment: z.string().min(1).optional(),
+    apiUrl: z.string().url().optional(),
+    contentTypes: z
+      .array(
+        z
+          .object({
+            type: z.string().min(1),
+            contentType: z.string().min(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+const sanityConfigSchema = z
+  .object({
+    provider: z.literal("sanity"),
+    projectId: z.string().min(1),
+    dataset: z.string().min(1),
+    apiVersion: z.string().min(1).optional(),
+    token: z.string().optional(),
+    useCdn: z.boolean().optional(),
+    perspective: z.enum(["published", "drafts", "raw"]).optional(),
+    contentTypes: z
+      .array(
+        z
+          .object({
+            type: z.string().min(1),
+            documentType: z.string().min(1),
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
 const cmsConfigSchema = z.discriminatedUnion("provider", [
   prismicConfigSchema,
   strapiConfigSchema,
   directusConfigSchema,
   wordpressConfigSchema,
+  contentfulConfigSchema,
+  sanityConfigSchema,
 ]);
 
 const requiredFieldRuleSchema = z.object({

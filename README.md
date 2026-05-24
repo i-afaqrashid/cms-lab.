@@ -112,6 +112,31 @@ cms: {
 }
 ```
 
+Contentful:
+
+```ts
+cms: {
+  provider: "contentful",
+  spaceId: "my-space",
+  environment: "master",
+  accessToken: process.env.CONTENTFUL_DELIVERY_TOKEN,
+  contentTypes: [{ type: "page", contentType: "page" }],
+}
+```
+
+Sanity:
+
+```ts
+cms: {
+  provider: "sanity",
+  projectId: "my-project",
+  dataset: "production",
+  apiVersion: "2025-02-19",
+  token: process.env.SANITY_READ_TOKEN,
+  contentTypes: [{ type: "page", documentType: "page" }],
+}
+```
+
 All adapters normalize content into the same scan model, so route checks, field checks, SEO checks, report output, and CI behavior stay consistent.
 
 ## Commands
@@ -251,6 +276,8 @@ packages/prismic    Prismic adapter
 packages/strapi     Strapi adapter
 packages/directus   Directus adapter
 packages/wordpress  WordPress adapter
+packages/contentful Contentful adapter
+packages/sanity     Sanity adapter
 packages/reporter   local HTML report renderer
 apps/site           marketing site and docs
 test-fixtures/      public Prismic fixture
