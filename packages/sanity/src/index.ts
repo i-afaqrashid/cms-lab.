@@ -1,8 +1,10 @@
 import {
   CmsFetchError,
+  readCmsDataPath,
   type CMSDocument,
   type FetchLike,
   type SanityCmsProviderConfig,
+  type SanityContentTypeConfig,
 } from "@cms-lab/core";
 
 type SanityResponse = {
@@ -35,9 +37,7 @@ export async function fetchSanityDocuments(
     );
     const rows = Array.isArray(response.result) ? response.result : [];
     documents.push(
-      ...rows.map((document) =>
-        normalizeSanityDocument(contentType.type, document),
-      ),
+      ...rows.map((document) => normalizeSanityDocument(contentType, document)),
     );
   }
 
@@ -45,16 +45,20 @@ export async function fetchSanityDocuments(
 }
 
 export function normalizeSanityDocument(
-  type: string,
+  contentType: string | SanityContentTypeConfig,
   document: unknown,
 ): CMSDocument {
+  const config = contentTypeConfig(contentType);
   const data = asRecord(document);
   const id = stringFrom(data._id, "Sanity document is missing _id");
 
   return {
     id,
-    type,
-    uid: optionalString(data.uid ?? slugValue(data.slug)),
+    type: config.type,
+    uid: optionalString(
+      mappedValue(data, config.uidField) ?? data.uid ?? slugValue(data.slug),
+    ),
+    url: optionalString(mappedValue(data, config.urlField)),
     status: id.startsWith("drafts.") ? "draft" : "published",
     data,
   };
@@ -144,4 +148,19 @@ function optionalString(value: unknown): string | undefined {
   }
 
   return undefined;
+}
+
+function contentTypeConfig(
+  contentType: string | SanityContentTypeConfig,
+): SanityContentTypeConfig {
+  return typeof contentType === "string"
+    ? { type: contentType, documentType: contentType }
+    : contentType;
+}
+
+function mappedValue(
+  data: Record<string, unknown>,
+  path: string | undefined,
+): unknown {
+  return path ? readCmsDataPath(data, path) : undefined;
 }

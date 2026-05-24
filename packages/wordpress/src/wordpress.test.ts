@@ -174,6 +174,35 @@ test("normalizeWordPressItem keeps permalink, SEO, and media fields while treati
   });
 });
 
+test("normalizeWordPressItem supports configured uid and url fields", () => {
+  expect(
+    normalizeWordPressItem(
+      {
+        type: "post",
+        endpoint: "posts",
+        uidField: "acf.handle",
+        urlField: "acf.permalink",
+      },
+      {
+        id: 46,
+        slug: "ignored-slug",
+        link: "https://example.com/ignored-slug/",
+        status: "publish",
+        acf: {
+          handle: "custom-post",
+          permalink: "https://example.com/custom-post/",
+        },
+      },
+    ),
+  ).toMatchObject({
+    id: "46",
+    type: "post",
+    uid: "custom-post",
+    url: "https://example.com/custom-post/",
+    status: "published",
+  });
+});
+
 test("fetchWordPressDocuments reports HTTP failures", async () => {
   await expect(
     fetchWordPressDocuments(

@@ -38,7 +38,14 @@ test("validateConfig accepts local CMS provider configs", () => {
       cms: {
         provider: "strapi",
         url: "http://localhost:1337",
-        collections: [{ type: "page", endpoint: "pages" }],
+        collections: [
+          {
+            type: "page",
+            endpoint: "pages",
+            uidField: "metadata.handle",
+            urlField: "metadata.path",
+          },
+        ],
       },
     }).cms.provider,
   ).toBe("strapi");
@@ -49,7 +56,14 @@ test("validateConfig accepts local CMS provider configs", () => {
       cms: {
         provider: "directus",
         url: "http://localhost:8055",
-        collections: [{ type: "page", collection: "pages" }],
+        collections: [
+          {
+            type: "page",
+            collection: "pages",
+            uidField: "routing.slug",
+            urlField: "routing.url",
+          },
+        ],
       },
     }).cms.provider,
   ).toBe("directus");
@@ -60,6 +74,14 @@ test("validateConfig accepts local CMS provider configs", () => {
       cms: {
         provider: "wordpress",
         url: "http://localhost:8080",
+        contentTypes: [
+          {
+            type: "post",
+            endpoint: "posts",
+            uidField: "acf.handle",
+            urlField: "acf.permalink",
+          },
+        ],
       },
     }).cms.provider,
   ).toBe("wordpress");
@@ -71,7 +93,14 @@ test("validateConfig accepts local CMS provider configs", () => {
         provider: "contentful",
         spaceId: "space123",
         accessToken: "delivery-token",
-        contentTypes: [{ type: "page", contentType: "page" }],
+        contentTypes: [
+          {
+            type: "page",
+            contentType: "page",
+            uidField: "routing.slug",
+            urlField: "routing.url",
+          },
+        ],
       },
     }).cms.provider,
   ).toBe("contentful");
@@ -83,7 +112,14 @@ test("validateConfig accepts local CMS provider configs", () => {
         provider: "sanity",
         projectId: "project123",
         dataset: "production",
-        contentTypes: [{ type: "page", documentType: "page" }],
+        contentTypes: [
+          {
+            type: "page",
+            documentType: "page",
+            uidField: "slug.current",
+            urlField: "seo.canonical",
+          },
+        ],
       },
     }).cms.provider,
   ).toBe("sanity");

@@ -84,7 +84,14 @@ cms: {
   provider: "strapi",
   url: "http://localhost:1337",
   token: process.env.STRAPI_TOKEN,
-  collections: [{ type: "page", endpoint: "pages" }],
+  collections: [
+    {
+      type: "page",
+      endpoint: "pages",
+      uidField: "routing.slug",
+      urlField: "routing.url",
+    },
+  ],
 }
 ```
 
@@ -95,7 +102,14 @@ cms: {
   provider: "directus",
   url: "http://localhost:8055",
   token: process.env.DIRECTUS_TOKEN,
-  collections: [{ type: "page", collection: "pages" }],
+  collections: [
+    {
+      type: "page",
+      collection: "pages",
+      uidField: "routing.slug",
+      urlField: "routing.url",
+    },
+  ],
 }
 ```
 
@@ -107,7 +121,12 @@ cms: {
   url: "http://localhost:8080",
   contentTypes: [
     { type: "page", endpoint: "pages" },
-    { type: "post", endpoint: "posts" },
+    {
+      type: "post",
+      endpoint: "posts",
+      uidField: "acf.handle",
+      urlField: "acf.permalink",
+    },
   ],
 }
 ```
@@ -120,7 +139,14 @@ cms: {
   spaceId: "my-space",
   environment: "master",
   accessToken: process.env.CONTENTFUL_DELIVERY_TOKEN,
-  contentTypes: [{ type: "page", contentType: "page" }],
+  contentTypes: [
+    {
+      type: "page",
+      contentType: "page",
+      uidField: "routing.slug",
+      urlField: "routing.url",
+    },
+  ],
 }
 ```
 
@@ -133,11 +159,22 @@ cms: {
   dataset: "production",
   apiVersion: "2025-02-19",
   token: process.env.SANITY_READ_TOKEN,
-  contentTypes: [{ type: "page", documentType: "page" }],
+  contentTypes: [
+    {
+      type: "page",
+      documentType: "page",
+      uidField: "slug.current",
+      urlField: "seo.canonical",
+    },
+  ],
 }
 ```
 
-All adapters normalize content into the same scan model, so route checks, field checks, SEO checks, report output, and CI behavior stay consistent.
+All adapters normalize content into the same scan model, so route checks, field
+checks, SEO checks, report output, and CI behavior stay consistent. Use
+`uidField` when your CMS does not expose a plain `uid` or `slug` field. Use
+`urlField` when the CMS already stores the public permalink. Both fields read
+dotted paths from `document.data`.
 
 ## Commands
 

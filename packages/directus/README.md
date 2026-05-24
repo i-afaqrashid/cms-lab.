@@ -7,7 +7,14 @@ cms: {
   provider: "directus",
   url: "http://localhost:8055",
   token: process.env.DIRECTUS_TOKEN,
-  collections: [{ type: "page", collection: "pages" }],
+  collections: [
+    {
+      type: "page",
+      collection: "pages",
+      uidField: "routing.slug",
+      urlField: "routing.url",
+    },
+  ],
 }
 ```
 
@@ -15,6 +22,9 @@ The adapter reads Directus REST items and normalizes them into cms-lab
 `CMSDocument` objects. It keeps native SEO/file fields in `document.data`, uses
 `id`, `uid`, or `slug` as stable identity values, and treats non-published
 statuses such as archived content as `draft`.
+
+Use `uidField` or `urlField` when your project stores route values in custom
+fields. Both options read dotted paths from `document.data`.
 
 ## Open Source
 

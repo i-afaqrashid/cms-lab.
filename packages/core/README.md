@@ -16,6 +16,9 @@ checks recognize native alt fields such as Strapi `alternativeText`, Directus
 file `description`, WordPress `alt_text`, Contentful asset descriptions, and
 Sanity image `alt` fields.
 
+`readCmsDataPath` is exported for adapters that need to read dotted paths from
+normalized CMS payloads, for example custom `uidField` and `urlField` mapping.
+
 ## Open Source
 
 MIT licensed. See the repository [license](https://github.com/i-afaqrashid/cms-lab/blob/main/LICENSE), [contributing guide](https://github.com/i-afaqrashid/cms-lab/blob/main/CONTRIBUTING.md), and [support guide](https://github.com/i-afaqrashid/cms-lab/blob/main/SUPPORT.md).

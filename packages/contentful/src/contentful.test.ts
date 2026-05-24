@@ -143,6 +143,39 @@ test("normalizeContentfulEntry flattens localized top-level fields", () => {
   });
 });
 
+test("normalizeContentfulEntry supports configured uid and url fields", () => {
+  expect(
+    normalizeContentfulEntry(
+      {
+        type: "page",
+        contentType: "page",
+        uidField: "routing.handle",
+        urlField: "routing.path",
+      },
+      {
+        sys: {
+          id: "entry-custom-route",
+          contentType: { sys: { id: "page" } },
+          publishedVersion: 3,
+        },
+        fields: {
+          slug: "ignored-slug",
+          routing: {
+            handle: "custom-page",
+            path: "/custom-page",
+          },
+        },
+      },
+    ),
+  ).toMatchObject({
+    id: "entry-custom-route",
+    type: "page",
+    uid: "custom-page",
+    url: "/custom-page",
+    status: "published",
+  });
+});
+
 test("fetchContentfulDocuments reports HTTP failures", async () => {
   await expect(
     fetchContentfulDocuments(

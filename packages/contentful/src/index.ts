@@ -1,7 +1,9 @@
 import {
   CmsFetchError,
+  readCmsDataPath,
   type CMSDocument,
   type ContentfulCmsProviderConfig,
+  type ContentfulContentTypeConfig,
   type FetchLike,
 } from "@cms-lab/core";
 
@@ -56,9 +58,7 @@ export async function fetchContentfulDocuments(
       );
       const rows = response.items ?? [];
       documents.push(
-        ...rows.map((entry) =>
-          normalizeContentfulEntry(contentType.type, entry),
-        ),
+        ...rows.map((entry) => normalizeContentfulEntry(contentType, entry)),
       );
 
       skip += rows.length;
@@ -74,16 +74,20 @@ export async function fetchContentfulDocuments(
 }
 
 export function normalizeContentfulEntry(
-  type: string,
+  contentType: string | ContentfulContentTypeConfig,
   entry: unknown,
 ): CMSDocument {
+  const config = contentTypeConfig(contentType);
   const record = asContentfulEntry(entry);
   const data = normalizeFields(record.fields ?? {});
 
   return {
     id: stringFrom(record.sys?.id, "Contentful entry is missing id"),
-    type,
-    uid: optionalString(data.uid ?? data.slug),
+    type: config.type,
+    uid: optionalString(
+      mappedValue(data, config.uidField) ?? data.uid ?? data.slug,
+    ),
+    url: optionalString(mappedValue(data, config.urlField)),
     status: normalizeStatus(record.sys),
     data,
   };
@@ -176,6 +180,21 @@ function optionalString(value: unknown): string | undefined {
   }
 
   return undefined;
+}
+
+function contentTypeConfig(
+  contentType: string | ContentfulContentTypeConfig,
+): ContentfulContentTypeConfig {
+  return typeof contentType === "string"
+    ? { type: contentType, contentType }
+    : contentType;
+}
+
+function mappedValue(
+  data: Record<string, unknown>,
+  path: string | undefined,
+): unknown {
+  return path ? readCmsDataPath(data, path) : undefined;
 }
 
 function normalizeStatus(sys: ContentfulEntry["sys"]): CMSDocument["status"] {
