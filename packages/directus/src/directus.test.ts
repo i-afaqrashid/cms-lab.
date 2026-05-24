@@ -10,7 +10,7 @@ test("fetchDirectusDocuments normalizes Directus items", async () => {
     {
       provider: "directus",
       url: "http://localhost:8055",
-      collections: [{ type: "page", collection: "pages" }],
+      collections: [{ type: "page", collection: "///pages///" }],
     },
     {
       fetch: async (url) => {

@@ -103,7 +103,18 @@ function authHeaders(token: string | undefined): Record<string, string> {
 }
 
 function trimSlashes(value: string): string {
-  return value.replace(/^\/+|\/+$/g, "");
+  let start = 0;
+  let end = value.length;
+
+  while (start < end && value.charCodeAt(start) === 47) {
+    start += 1;
+  }
+
+  while (end > start && value.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+
+  return value.slice(start, end);
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

@@ -140,7 +140,7 @@ test("fetchStrapiDocuments uses numeric ids and slugs when documentId is absent"
     {
       provider: "strapi",
       url: "http://localhost:1337",
-      collections: [{ type: "page", endpoint: "/api-pages/" }],
+      collections: [{ type: "page", endpoint: "///api-pages///" }],
     },
     {
       fetch: async (url) => {

@@ -212,7 +212,7 @@ test("renderHtmlReport filter script hides non-matching diagnostics", () => {
     ],
     summary: { errors: 1, warnings: 1, info: 1 },
   });
-  const script = html.match(/<script>\s*([\s\S]*?)\s*<\/script>/)?.[1];
+  const script = extractSingleScriptContent(html);
   expect(script).toBeTruthy();
 
   const reportDom = createFilterDom();
@@ -236,6 +236,25 @@ test("renderHtmlReport filter script hides non-matching diagnostics", () => {
     "seo-warning",
   ]);
 });
+
+function extractSingleScriptContent(html: string): string | undefined {
+  const openingTag = "<script>";
+  const closingTag = "</script>";
+  const start = html.indexOf(openingTag);
+
+  if (start === -1) {
+    return undefined;
+  }
+
+  const contentStart = start + openingTag.length;
+  const end = html.indexOf(closingTag, contentStart);
+
+  if (end === -1) {
+    return undefined;
+  }
+
+  return html.slice(contentStart, end).trim();
+}
 
 type TestElement = {
   classList: {
