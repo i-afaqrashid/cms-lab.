@@ -73,9 +73,8 @@ export async function fetchPrismicDocuments(
     `${endpoint.replace(/\/$/, "")}/documents/search`;
   const documents: CMSDocument[] = [];
   let page = 1;
-  let totalPages = 1;
 
-  do {
+  while (true) {
     const url = new URL(action);
     url.searchParams.set("ref", ref);
     url.searchParams.set("pageSize", "100");
@@ -90,9 +89,14 @@ export async function fetchPrismicDocuments(
       headers,
     );
     documents.push(...(response.results ?? []).map(normalizePrismicDocument));
-    totalPages = response.total_pages ?? response.page ?? page;
+    const totalPages = response.total_pages ?? response.page ?? page;
+
+    if (page >= totalPages) {
+      break;
+    }
+
     page += 1;
-  } while (page <= totalPages);
+  }
 
   return documents;
 }
