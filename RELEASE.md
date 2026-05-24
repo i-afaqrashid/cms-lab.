@@ -1,6 +1,6 @@
 # Release Checklist
 
-Publishing is tag-driven. The npm publish workflow runs only when a maintainer pushes a tag shaped like `v1.0.0`; the workflow then verifies that every publishable package has the same version as the tag before it can publish.
+Publishing is tag-driven. The npm publish workflow runs only when a maintainer pushes a tag shaped like `v1.0.1`; the workflow then verifies that every publishable package has the same version as the tag before it can publish.
 
 ## Local checks
 
@@ -26,9 +26,9 @@ The pack smoke installs the tarballs into a clean temporary app before running t
 
 ## First npm publish
 
-The public npm names are currently unclaimed:
+The public npm packages are:
 
-- `cms-lab`
+- `@cms-lab/cli`
 - `@cms-lab/core`
 - `@cms-lab/next`
 - `@cms-lab/prismic`
@@ -48,8 +48,8 @@ For the first publish, npm requires package ownership before Trusted Publishing 
 ```sh
 git checkout main
 git pull --ff-only origin main
-git tag -a v1.0.0 -m "v1.0.0"
-git push origin v1.0.0
+git tag -a v1.0.1 -m "v1.0.1"
+git push origin v1.0.1
 ```
 
 The workflow publishes from the tag only. Do not publish from a branch.
@@ -78,6 +78,6 @@ npm Trusted Publishing requires npm CLI `11.5.1` or newer and Node `22.14.0` or 
 4. Run `pnpm audit --audit-level moderate`.
 5. Run the packaged CLI smoke test.
 6. Pack all publishable packages into `.release-packages/`.
-7. Publish tarballs in dependency order: core packages first, `cms-lab` last.
+7. Publish tarballs in dependency order: core packages first, `@cms-lab/cli` last.
 
 The workflow refuses to publish if any `name@version` already exists on npm.

@@ -42,7 +42,7 @@ jobs:
       - run: pnpm build
       - run: pnpm start &
       - run: npx wait-on http://localhost:3000
-      - run: npx cms-lab scan --ci --report
+      - run: npx @cms-lab/cli scan --ci --report
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -54,12 +54,12 @@ jobs:
         By default, errors fail the job and warnings do not. Tighten that after
         the project has a baseline.
       </p>
-      <CodeBlock>{`npx cms-lab scan --ci --fail-on error
-npx cms-lab scan --ci --fail-on warning
-npx cms-lab scan --ci --max-warnings 0
-npx cms-lab scan --ci --max-info 0
-npx cms-lab scan --ci --strict
-npx cms-lab scan --ci --fail-on never`}</CodeBlock>
+      <CodeBlock>{`npx @cms-lab/cli scan --ci --fail-on error
+npx @cms-lab/cli scan --ci --fail-on warning
+npx @cms-lab/cli scan --ci --max-warnings 0
+npx @cms-lab/cli scan --ci --max-info 0
+npx @cms-lab/cli scan --ci --strict
+npx @cms-lab/cli scan --ci --fail-on never`}</CodeBlock>
 
       <h2 id="artifacts">Artifacts</h2>
       <p>

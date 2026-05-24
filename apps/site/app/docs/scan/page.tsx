@@ -29,9 +29,9 @@ export default function ScanPage() {
         This is the basic command. Add flags when you need JSON, a local HTML
         report, stricter CI behavior, or a different config file.
       </p>
-      <CodeBlock>{`npx cms-lab scan [options]`}</CodeBlock>
+      <CodeBlock>{`npx @cms-lab/cli scan [options]`}</CodeBlock>
       <Terminal title="scan example">
-        <span className="tMuted">$</span> npx cms-lab scan --ci --only
+        <span className="tMuted">$</span> npx @cms-lab/cli scan --ci --only
         routes,fields{"\n\n"}
         cms-lab{"\n"}project next app{"\n"}documents 6{"\n\n"}
         <span className="tInfo">info</span>

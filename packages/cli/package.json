@@ -1,6 +1,6 @@
 {
-  "name": "cms-lab",
-  "version": "1.0.0",
+  "name": "@cms-lab/cli",
+  "version": "1.0.1",
   "type": "module",
   "description": "Catch CMS bugs before deploy.",
   "license": "MIT",

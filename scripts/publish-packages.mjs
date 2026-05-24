@@ -11,7 +11,7 @@ const packageOrder = [
   "@cms-lab/reporter",
   "@cms-lab/strapi",
   "@cms-lab/wordpress",
-  "cms-lab",
+  "@cms-lab/cli",
 ];
 
 const args = process.argv.slice(2);
