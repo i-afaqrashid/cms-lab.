@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | cms-lab",
   },
   description:
-    "cms-lab is a CLI that scans headless CMS content against Next.js App Router routes before deploy.",
+    "cms-lab is a CLI that scans headless CMS content against Next.js routes before deploy.",
   icons: {
     icon: [{ url: "/assets/icon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/assets/icon.svg", sizes: "any" }],

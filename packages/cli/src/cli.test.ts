@@ -127,6 +127,53 @@ test("runCli can opt in to raw document data in JSON output", async () => {
   );
 });
 
+test("runCli scans Next.js Pages Router projects", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "pages"), { recursive: true });
+  await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'pages' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let stdout = "";
+  const exitCode = await runCli(["scan", "--config", configPath, "--json"], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+    fetchPrismicDocuments: async () => [
+      {
+        id: "doc-1",
+        type: "page",
+        uid: "about",
+        status: "published",
+        data: { meta_title: "About", meta_description: "About page" },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  const result = JSON.parse(stdout);
+
+  expect(exitCode).toBe(0);
+  expect(result.project.router).toBe("pages");
+  expect(result.project.pagesDir).toBe(
+    "[redacted: pass --include-sensitive-output to emit raw project paths]",
+  );
+  expect(result.summary).toEqual({ errors: 0, warnings: 0, info: 0 });
+});
+
 test("runCli pretty output respects --no-color and suggests the next explain command", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "app"), { recursive: true });
@@ -1126,6 +1173,49 @@ test("runCli doctor validates config, project, site, and CMS connectivity", asyn
   expect(exitCode).toBe(0);
   expect(stdout).toContain("config ok");
   expect(stdout).toContain("next app ok");
+  expect(stdout).toContain("site ok");
+  expect(stdout).toContain("cms ok - 1 document");
+});
+
+test("runCli doctor accepts Next.js Pages Router projects", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "pages"), { recursive: true });
+  await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'pages' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let stdout = "";
+  const exitCode = await runCli(["doctor", "--config", configPath], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+    fetchPrismicDocuments: async () => [
+      {
+        id: "page-1",
+        type: "page",
+        uid: "about",
+        status: "published",
+        data: {},
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(exitCode).toBe(0);
+  expect(stdout).toContain("next pages ok");
   expect(stdout).toContain("site ok");
   expect(stdout).toContain("cms ok - 1 document");
 });

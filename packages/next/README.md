@@ -7,7 +7,7 @@ import { detectNextProject } from "@cms-lab/next";
 ```
 
 The detector identifies Next.js projects and distinguishes App Router from
-Pages Router. The CLI accepts App Router projects for scans.
+Pages Router. The CLI accepts both routers for scans.
 
 ## Open Source
 

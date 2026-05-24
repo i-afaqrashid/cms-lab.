@@ -13,6 +13,7 @@ import {
   type CMSDocument,
   type CmsProviderConfig,
   type FetchLike,
+  type ProjectInfo,
   type ScanResult,
 } from "@cms-lab/core";
 import { fetchDirectusDocuments as defaultFetchDirectusDocuments } from "@cms-lab/directus";
@@ -328,23 +329,13 @@ async function runScan(
     debug.log(1, `site ${config.site.url}`);
     debug.log(1, `cms ${describeCms(config.cms)}`);
 
-    if (config.framework.router !== "app") {
-      throw new ConfigLoadError(
-        "cms-lab only supports Next.js App Router projects",
-      );
-    }
-
     const endProject = debug.time("project detection", 2);
     const project = await detectNextProject(cwd);
     endProject();
-    if (project.router !== "app") {
-      throw new ConfigLoadError(
-        "cms-lab only supports Next.js App Router projects",
-      );
-    }
+    assertConfiguredRouterMatchesProject(config.framework.router, project);
     debug.log(
       1,
-      `project next ${project.router} appDir=${project.appDir ?? "none"}`,
+      `project next ${project.router} dir=${projectDirectory(project)}`,
     );
 
     const endCms = debug.time("cms fetch", 2);
@@ -517,27 +508,17 @@ async function runDoctor(
       `config ok${loaded.configFile ? ` - ${loaded.configFile}` : ""}\n`,
     );
 
-    if (config.framework.router !== "app") {
-      throw new ConfigLoadError(
-        "cms-lab only supports Next.js App Router projects",
-      );
-    }
-
     const endProject = debug.time("project detection", 2);
     const project = await detectNextProject(cwd);
     endProject();
-    if (project.router !== "app") {
-      throw new ConfigLoadError(
-        "cms-lab only supports Next.js App Router projects",
-      );
-    }
+    assertConfiguredRouterMatchesProject(config.framework.router, project);
     debug.log(
       1,
-      `project next ${project.router} appDir=${project.appDir ?? "none"}`,
+      `project next ${project.router} dir=${projectDirectory(project)}`,
     );
     writeStdout(
       dependencies,
-      `next app ok - ${project.appDir ?? project.rootDir}\n`,
+      `next ${project.router} ok - ${projectDirectory(project)}\n`,
     );
 
     const endSite = debug.time("site probe", 2);
@@ -1245,6 +1226,21 @@ function parseNotifyOn(value: string | undefined): NotifyOn {
   throw new ConfigLoadError(
     "--notify-on must be one of: always, failure, diagnostics",
   );
+}
+
+function assertConfiguredRouterMatchesProject(
+  configuredRouter: ProjectInfo["router"],
+  project: ProjectInfo,
+): void {
+  if (configuredRouter !== project.router) {
+    throw new ConfigLoadError(
+      `cms-lab config declares Next.js ${configuredRouter} router but detected ${project.router} router`,
+    );
+  }
+}
+
+function projectDirectory(project: ProjectInfo): string {
+  return project.appDir ?? project.pagesDir ?? project.rootDir;
 }
 
 async function fileExists(path: string): Promise<boolean> {
