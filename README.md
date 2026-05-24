@@ -224,12 +224,6 @@ pnpm smoke:pack:live
 
 `pnpm bench` runs the Vitest benchmark suite for scan orchestration, CMS adapter normalization, and HTML report rendering. Benchmark output is intentionally local-only and not used as a release gate.
 
-To run Prismic's official local Slice Machine UI:
-
-```sh
-pnpm prismic:local
-```
-
 ## Local Testing
 
 See [TESTING.md](./TESTING.md) for the local tester workflow, including how to run the built CLI against a real Next.js project.
