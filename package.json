@@ -34,8 +34,7 @@
     "release:publish-tarballs": "node scripts/publish-packages.mjs",
     "prepublishOnly": "pnpm verify",
     "live:doctor": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js doctor",
-    "live:scan": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js scan --ci --report --only routes,fields",
-    "prismic:local": "start-slicemachine --port 2675"
+    "live:scan": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js scan --ci --report --only routes,fields"
   },
   "engines": {
     "node": ">=20.10"
@@ -43,11 +42,9 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@next/eslint-plugin-next": "^16.2.6",
-    "@slicemachine/adapter-next": "^0.3.96",
     "@types/node": "^25.9.1",
     "eslint": "^10.4.0",
     "prettier": "^3.7.4",
-    "slice-machine-ui": "^2.21.3",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.49.0",

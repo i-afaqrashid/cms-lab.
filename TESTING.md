@@ -156,15 +156,6 @@ node ../../packages/cli/dist/bin.js scan --config ../../.cms-lab/runtime/local-c
 node ../../packages/cli/dist/bin.js scan --config ../../.cms-lab/runtime/local-cms/configs/wordpress.config.ts --ci --report ../../.cms-lab/runtime/local-cms/reports/wordpress-report.html --url http://127.0.0.1:2689
 ```
 
-## Official Local Prismic Tooling
-
-Prismic is hosted SaaS, not a self-hosted CMS. The official local Prismic tool is Slice Machine for content modeling. Start it with:
-
-```sh
-cd "$CMS_LAB_ROOT"
-pnpm prismic:local
-```
-
 ## Example Config
 
 Copy [examples/next-prismic/cms-lab.config.ts](./examples/next-prismic/cms-lab.config.ts) into your Next.js project and edit:

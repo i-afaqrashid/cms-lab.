@@ -32,18 +32,18 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: pnpm
+      - run: corepack enable
+      - run: corepack prepare pnpm@10.33.4 --activate
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm start &
-      - run: npx wait-on http://localhost:3000
+      - run: pnpm dlx wait-on http://localhost:3000
       - run: npx @cms-lab/cli scan --ci --report
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: cms-lab-report

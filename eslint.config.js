@@ -21,8 +21,6 @@ export default tseslint.config(
       "apps/site/.next/**",
       "apps/site/next-env.d.ts",
       "node_modules/**",
-      "prismicio-types.d.ts",
-      "slices/**",
     ],
   },
   {
