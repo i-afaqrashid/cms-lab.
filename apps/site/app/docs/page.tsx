@@ -74,6 +74,9 @@ export default function DocsPage() {
           <Link href="/docs/scan">Read the scan command reference</Link>
         </li>
         <li>
+          <Link href="/docs/agent-context">Generate agent context files</Link>
+        </li>
+        <li>
           <Link href="/docs/ci">Wire it into CI</Link>
         </li>
         <li>

@@ -120,6 +120,7 @@ All adapters normalize content into the same scan model, so route checks, field 
 cms-lab init
 cms-lab doctor
 cms-lab scan
+cms-lab agent-context
 cms-lab explain CMS-ROUTE-404
 ```
 
@@ -145,6 +146,21 @@ cms-lab scan --concurrency 4
 cms-lab scan --retries 2
 cms-lab scan --debug --verbose 2
 ```
+
+Generate context files for coding agents:
+
+```sh
+cms-lab agent-context
+cms-lab agent-context --force
+cms-lab agent-context --no-agents-md
+cms-lab agent-context --out .cms-lab
+```
+
+The command writes `AGENTS.md`, `.cms-lab/agent-context.md`, and
+`.cms-lab/agent-prompt.md`. The generated files point agents to the cms-lab
+GitHub repository, npm package, docs, local command examples, configured route
+patterns, and safe project facts without including tokens, raw CMS payloads,
+private URLs, webhook URLs, or local absolute paths.
 
 ## Checks
 
