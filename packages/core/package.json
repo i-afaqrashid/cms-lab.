@@ -1,0 +1,46 @@
+{
+  "name": "@cms-lab/core",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Core config, scan, diagnostics, and checks for cms-lab.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-afaqrashid/cms-lab.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://cms-lab.dev",
+  "bugs": {
+    "url": "https://github.com/i-afaqrashid/cms-lab/issues"
+  },
+  "keywords": [
+    "cms",
+    "nextjs",
+    "prismic",
+    "testing"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.10"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --tsconfig ../../tsconfig.base.json"
+  },
+  "dependencies": {
+    "c12": "^3.3.0",
+    "zod": "^4.1.13"
+  },
+  "author": "Afaq Rashid"
+}

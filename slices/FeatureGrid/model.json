@@ -1,0 +1,16 @@
+{
+  "id": "feature_grid",
+  "type": "SharedSlice",
+  "name": "FeatureGrid",
+  "description": "FeatureGrid",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": ""
+    }
+  ]
+}

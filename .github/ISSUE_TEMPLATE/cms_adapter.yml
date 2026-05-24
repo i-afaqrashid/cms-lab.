@@ -1,0 +1,38 @@
+name: CMS Adapter Request
+description: Request or scope support for a CMS adapter.
+title: "[Adapter]: "
+labels:
+  - adapter
+  - enhancement
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: CMS Provider
+      placeholder: "Example: Contentful, Sanity, Payload"
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: API Shape
+      description: Link docs and describe auth, pagination, draft/published state, slug fields, and content type metadata.
+    validations:
+      required: true
+  - type: textarea
+    id: routes
+    attributes:
+      label: Route Mapping Needs
+      description: How do documents map to Next.js routes?
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Useful Checks
+      description: What CMS-specific checks should cms-lab eventually support?
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Test Fixture
+      description: Can this be tested against a public repo, local container, mocked REST fixture, or demo dataset?

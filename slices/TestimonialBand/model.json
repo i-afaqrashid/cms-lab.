@@ -1,0 +1,16 @@
+{
+  "id": "testimonial_band",
+  "type": "SharedSlice",
+  "name": "TestimonialBand",
+  "description": "TestimonialBand",
+  "variations": [
+    {
+      "id": "default",
+      "name": "Default",
+      "docURL": "...",
+      "version": "initial",
+      "description": "Default",
+      "imageUrl": ""
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "@cms-lab/strapi",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Strapi document adapter for cms-lab.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-afaqrashid/cms-lab.git",
+    "directory": "packages/strapi"
+  },
+  "homepage": "https://cms-lab.dev",
+  "bugs": {
+    "url": "https://github.com/i-afaqrashid/cms-lab/issues"
+  },
+  "keywords": [
+    "cms",
+    "strapi",
+    "testing"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.10"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --tsconfig ../../tsconfig.base.json"
+  },
+  "dependencies": {
+    "@cms-lab/core": "workspace:*"
+  },
+  "author": "Afaq Rashid"
+}

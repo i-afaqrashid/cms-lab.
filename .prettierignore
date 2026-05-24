@@ -1,0 +1,10 @@
+node_modules
+dist
+apps/site/.next
+design
+coverage
+.cms-lab
+LICENSE
+customtypes
+prismicio-types.d.ts
+slices

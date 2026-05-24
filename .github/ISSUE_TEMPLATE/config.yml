@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/i-afaqrashid/cms-lab/security/advisories/new
+    about: Report vulnerabilities privately instead of opening a public issue.
+  - name: Support guide
+    url: https://github.com/i-afaqrashid/cms-lab/blob/main/SUPPORT.md
+    about: Read where to ask questions and what details to include.

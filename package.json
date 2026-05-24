@@ -1,0 +1,61 @@
+{
+  "name": "cms-lab-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.2.2",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-afaqrashid/cms-lab.git"
+  },
+  "homepage": "https://cms-lab.dev",
+  "bugs": {
+    "url": "https://github.com/i-afaqrashid/cms-lab/issues"
+  },
+  "scripts": {
+    "build": "pnpm -r --filter './packages/*' build",
+    "site:dev": "pnpm --filter @cms-lab/site dev",
+    "site:build": "pnpm --filter @cms-lab/site build",
+    "site:start": "pnpm --filter @cms-lab/site start",
+    "cli:built": "node packages/cli/dist/bin.js",
+    "typecheck": "tsc -p tsconfig.base.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "vitest bench --run",
+    "lint": "eslint .",
+    "format:check": "prettier --check .",
+    "audit": "pnpm audit --audit-level moderate",
+    "verify": "pnpm test && pnpm typecheck && pnpm build && pnpm site:build && pnpm lint && pnpm format:check",
+    "smoke:pack": "node scripts/smoke-pack.mjs",
+    "smoke:pack:live": "node scripts/smoke-pack.mjs --live",
+    "release:check": "pnpm verify && pnpm audit && pnpm smoke:pack:live && pnpm live:doctor && pnpm live:scan",
+    "prepublishOnly": "pnpm verify",
+    "live:doctor": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js doctor",
+    "live:scan": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js scan --ci --report --only routes,fields",
+    "prismic:local": "start-slicemachine --port 2675"
+  },
+  "engines": {
+    "node": ">=20.10"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@next/eslint-plugin-next": "^15.5.18",
+    "@slicemachine/adapter-next": "^0.3.96",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "slice-machine-ui": "^2.21.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.49.0",
+    "vitest": "^4.0.15"
+  },
+  "dependencies": {
+    "c12": "^3.3.0",
+    "commander": "^14.0.2",
+    "picocolors": "^1.1.1",
+    "zod": "^4.1.13"
+  },
+  "author": "Afaq Rashid"
+}
