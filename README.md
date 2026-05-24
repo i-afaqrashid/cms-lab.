@@ -151,16 +151,24 @@ Generate context files for coding agents:
 
 ```sh
 cms-lab agent-context
+cms-lab agent-context --preset all
+cms-lab agent-context --preset claude
+cms-lab agent-context --preset gemini
+cms-lab agent-context --preset copilot
 cms-lab agent-context --force
 cms-lab agent-context --no-agents-md
 cms-lab agent-context --out .cms-lab
 ```
 
-The command writes `AGENTS.md`, `.cms-lab/agent-context.md`, and
-`.cms-lab/agent-prompt.md`. The generated files point agents to the cms-lab
-GitHub repository, npm package, docs, local command examples, configured route
-patterns, and safe project facts without including tokens, raw CMS payloads,
-private URLs, webhook URLs, or local absolute paths.
+The default preset writes `AGENTS.md`, `.cms-lab/agent-context.md`, and
+`.cms-lab/agent-prompt.md`. Tool-specific presets can also write `CLAUDE.md`,
+`GEMINI.md`, `.github/copilot-instructions.md`, and
+`.github/prompts/cms-lab-fix.prompt.md`.
+
+The generated files point agents to the cms-lab GitHub repository, npm package,
+docs, local command examples, configured route patterns, and safe project facts
+without including tokens, raw CMS payloads, private URLs, webhook URLs, or local
+absolute paths.
 
 ## Checks
 

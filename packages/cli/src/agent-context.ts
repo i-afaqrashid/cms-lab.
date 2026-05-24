@@ -9,12 +9,21 @@ export type AgentContextFile = {
   content: string;
 };
 
+export type AgentContextPreset =
+  | "generic"
+  | "codex"
+  | "claude"
+  | "gemini"
+  | "copilot"
+  | "all";
+
 export type AgentContextOptions = {
   config: CmsLabConfig;
   project: ProjectInfo;
   configFile: string;
   outputDir: string;
   includeAgentsMd: boolean;
+  preset: AgentContextPreset;
 };
 
 const GITHUB_URL = "https://github.com/i-afaqrashid/cms-lab";
@@ -27,7 +36,48 @@ export function renderAgentContextFiles(
   const outputDir = trimSlashes(options.outputDir || ".cms-lab") || ".cms-lab";
   const contextPath = `${outputDir}/agent-context.md`;
   const promptPath = `${outputDir}/agent-prompt.md`;
-  const files: AgentContextFile[] = [
+  const files: AgentContextFile[] = [];
+  const includeAgentsMd =
+    options.includeAgentsMd &&
+    (options.preset === "generic" ||
+      options.preset === "codex" ||
+      options.preset === "all");
+
+  if (includeAgentsMd) {
+    files.push({
+      path: "AGENTS.md",
+      content: renderAgentsMd(contextPath, promptPath),
+    });
+  }
+
+  if (options.preset === "claude" || options.preset === "all") {
+    files.push({
+      path: "CLAUDE.md",
+      content: renderClaudeMd(contextPath, promptPath),
+    });
+  }
+
+  if (options.preset === "gemini" || options.preset === "all") {
+    files.push({
+      path: "GEMINI.md",
+      content: renderGeminiMd(contextPath, promptPath),
+    });
+  }
+
+  if (options.preset === "copilot" || options.preset === "all") {
+    files.push(
+      {
+        path: ".github/copilot-instructions.md",
+        content: renderCopilotInstructions(contextPath, promptPath),
+      },
+      {
+        path: ".github/prompts/cms-lab-fix.prompt.md",
+        content: renderCopilotPrompt(contextPath, promptPath),
+      },
+    );
+  }
+
+  files.push(
     {
       path: contextPath,
       content: renderContextFile(options),
@@ -36,14 +86,7 @@ export function renderAgentContextFiles(
       path: promptPath,
       content: renderPromptFile(options),
     },
-  ];
-
-  if (options.includeAgentsMd) {
-    files.unshift({
-      path: "AGENTS.md",
-      content: renderAgentsMd(contextPath, promptPath),
-    });
-  }
+  );
 
   return files;
 }
@@ -66,6 +109,63 @@ Before changing code for CMS-related failures:
 6. Use \`npx @cms-lab/cli@latest explain <CODE>\` for diagnostic details.
 
 Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
+`;
+}
+
+function renderClaudeMd(contextPath: string, promptPath: string): string {
+  return `# cms-lab Claude Code context
+
+@${contextPath}
+@${promptPath}
+
+Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx @cms-lab/cli@latest doctor\` first when connecting a project, then run \`npx @cms-lab/cli@latest scan --ci --report\` to reproduce the current diagnostics.
+
+Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
+`;
+}
+
+function renderGeminiMd(contextPath: string, promptPath: string): string {
+  return `# cms-lab Gemini CLI context
+
+@${contextPath}
+@${promptPath}
+
+Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx @cms-lab/cli@latest doctor\` first when connecting a project, then run \`npx @cms-lab/cli@latest scan --ci --report\` to reproduce the current diagnostics.
+
+Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
+`;
+}
+
+function renderCopilotInstructions(
+  contextPath: string,
+  promptPath: string,
+): string {
+  return `# cms-lab Copilot instructions
+
+This project uses cms-lab to check CMS content against the routes and fields the Next.js app expects.
+
+- Read \`${contextPath}\` before changing code for CMS diagnostics.
+- Use \`${promptPath}\` when asked to investigate a cms-lab failure.
+- Prefer reproducing with \`npx @cms-lab/cli@latest scan --ci --report\` before editing application code.
+- Use \`npx @cms-lab/cli@latest explain <CODE>\` before deciding where a diagnostic should be fixed.
+- Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
+`;
+}
+
+function renderCopilotPrompt(contextPath: string, promptPath: string): string {
+  return `# Fix cms-lab diagnostics
+
+Use this prompt when investigating cms-lab diagnostics in this repository.
+
+1. Read \`${contextPath}\`.
+2. Read \`${promptPath}\`.
+3. Run \`npx @cms-lab/cli@latest doctor\`.
+4. Run \`npx @cms-lab/cli@latest scan --ci --report\`.
+5. For each diagnostic code, run \`npx @cms-lab/cli@latest explain <CODE>\`.
+6. Decide whether the fix belongs in CMS content, cms-lab route mapping, or application code.
+7. Make the smallest verifiable change and rerun cms-lab.
+
+Do not expose CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
 }
 
