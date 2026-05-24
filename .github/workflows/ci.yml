@@ -75,6 +75,14 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Cache Next.js build
+        uses: actions/cache@v5
+        with:
+          path: apps/site/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/site/**/*.js', 'apps/site/**/*.jsx', 'apps/site/**/*.ts', 'apps/site/**/*.tsx', 'apps/site/**/*.css', 'apps/site/**/*.mdx', 'apps/site/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-
+
       - name: Build packages
         run: pnpm build
 
