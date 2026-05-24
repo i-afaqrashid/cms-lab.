@@ -8,7 +8,6 @@ on:
 permissions:
   contents: read
   id-token: write
-  packages: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -92,9 +91,6 @@ jobs:
           mkdir -p .release-packages
           pnpm -r --filter './packages/*' pack --pack-destination .release-packages
 
-      - name: Pack GitHub package
-        run: node scripts/pack-github-package.mjs .release-github-package
-
       - name: Publish packages
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -103,15 +99,3 @@ jobs:
             export NODE_AUTH_TOKEN="$NPM_TOKEN"
           fi
           pnpm release:publish-tarballs .release-packages
-
-      - name: Publish GitHub package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm_config="$(mktemp)"
-          {
-            echo "@i-afaqrashid:registry=https://npm.pkg.github.com"
-            echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}"
-          } > "$npm_config"
-          NPM_CONFIG_USERCONFIG="$npm_config" npm publish .release-github-package/tarballs/*.tgz --registry=https://npm.pkg.github.com --access public
-          rm -f "$npm_config"
