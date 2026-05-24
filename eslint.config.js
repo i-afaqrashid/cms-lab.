@@ -19,6 +19,7 @@ export default tseslint.config(
       "design/**",
       "examples/**",
       "apps/site/.next/**",
+      "apps/site/out/**",
       "apps/site/next-env.d.ts",
       "node_modules/**",
     ],
