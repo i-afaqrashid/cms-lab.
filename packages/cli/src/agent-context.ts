@@ -27,7 +27,7 @@ export type AgentContextOptions = {
 };
 
 const GITHUB_URL = "https://github.com/i-afaqrashid/cms-lab";
-const NPM_URL = "https://www.npmjs.com/package/@cms-lab/cli";
+const NPM_URL = "https://www.npmjs.com/package/cms-lab";
 const DOCS_URL = "https://cmslab.afaqrashid.com/docs";
 
 export function renderAgentContextFiles(
@@ -104,9 +104,9 @@ Before changing code for CMS-related failures:
    - GitHub: ${GITHUB_URL}
    - npm: ${NPM_URL}
    - Docs: ${DOCS_URL}
-4. Run \`npx @cms-lab/cli@latest doctor\` before a first scan.
-5. Run \`npx @cms-lab/cli@latest scan --ci --report\` to reproduce diagnostics.
-6. Use \`npx @cms-lab/cli@latest explain <CODE>\` for diagnostic details.
+4. Run \`npx cms-lab doctor\` before a first scan.
+5. Run \`npx cms-lab scan --ci --report\` to reproduce diagnostics.
+6. Use \`npx cms-lab explain <CODE>\` for diagnostic details.
 
 Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
@@ -118,7 +118,7 @@ function renderClaudeMd(contextPath: string, promptPath: string): string {
 @${contextPath}
 @${promptPath}
 
-Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx @cms-lab/cli@latest doctor\` first when connecting a project, then run \`npx @cms-lab/cli@latest scan --ci --report\` to reproduce the current diagnostics.
+Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx cms-lab doctor\` first when connecting a project, then run \`npx cms-lab scan --ci --report\` to reproduce the current diagnostics.
 
 Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
@@ -130,7 +130,7 @@ function renderGeminiMd(contextPath: string, promptPath: string): string {
 @${contextPath}
 @${promptPath}
 
-Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx @cms-lab/cli@latest doctor\` first when connecting a project, then run \`npx @cms-lab/cli@latest scan --ci --report\` to reproduce the current diagnostics.
+Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx cms-lab doctor\` first when connecting a project, then run \`npx cms-lab scan --ci --report\` to reproduce the current diagnostics.
 
 Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
@@ -146,8 +146,8 @@ This project uses cms-lab to check CMS content against the routes and fields the
 
 - Read \`${contextPath}\` before changing code for CMS diagnostics.
 - Use \`${promptPath}\` when asked to investigate a cms-lab failure.
-- Prefer reproducing with \`npx @cms-lab/cli@latest scan --ci --report\` before editing application code.
-- Use \`npx @cms-lab/cli@latest explain <CODE>\` before deciding where a diagnostic should be fixed.
+- Prefer reproducing with \`npx cms-lab scan --ci --report\` before editing application code.
+- Use \`npx cms-lab explain <CODE>\` before deciding where a diagnostic should be fixed.
 - Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
 }
@@ -159,9 +159,9 @@ Use this prompt when investigating cms-lab diagnostics in this repository.
 
 1. Read \`${contextPath}\`.
 2. Read \`${promptPath}\`.
-3. Run \`npx @cms-lab/cli@latest doctor\`.
-4. Run \`npx @cms-lab/cli@latest scan --ci --report\`.
-5. For each diagnostic code, run \`npx @cms-lab/cli@latest explain <CODE>\`.
+3. Run \`npx cms-lab doctor\`.
+4. Run \`npx cms-lab scan --ci --report\`.
+5. For each diagnostic code, run \`npx cms-lab explain <CODE>\`.
 6. Decide whether the fix belongs in CMS content, cms-lab route mapping, or application code.
 7. Make the smallest verifiable change and rerun cms-lab.
 
@@ -200,10 +200,10 @@ ${checksSummary(options.config)}
 ## Recommended commands
 
 \`\`\`sh
-npx @cms-lab/cli@latest doctor
-npx @cms-lab/cli@latest scan --ci --report
-npx @cms-lab/cli@latest scan --json
-npx @cms-lab/cli@latest explain CMS-ROUTE-404
+npx cms-lab doctor
+npx cms-lab scan --ci --report
+npx cms-lab scan --json
+npx cms-lab explain CMS-ROUTE-404
 \`\`\`
 
 ## Agent workflow
@@ -232,8 +232,8 @@ Start here:
 5. Run:
 
 \`\`\`sh
-npx @cms-lab/cli@latest doctor
-npx @cms-lab/cli@latest scan --ci --report
+npx cms-lab doctor
+npx cms-lab scan --ci --report
 \`\`\`
 
 Project facts:
@@ -242,7 +242,7 @@ Project facts:
 - CMS provider: ${options.config.cms.provider}
 - Route mappings: ${options.config.routes.map((route) => `${route.type} -> ${route.pattern}`).join(", ")}
 
-When diagnostics appear, use \`npx @cms-lab/cli@latest explain <CODE>\` before deciding whether the fix belongs in CMS content, route mapping, or application code.
+When diagnostics appear, use \`npx cms-lab explain <CODE>\` before deciding whether the fix belongs in CMS content, route mapping, or application code.
 
 Never reveal CMS tokens, private site URLs, webhook URLs, raw CMS payloads, or local absolute paths in commits, issues, pull requests, logs, or summaries.
 `;
