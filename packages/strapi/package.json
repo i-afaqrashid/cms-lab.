@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/strapi",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "Strapi document adapter for cms-lab.",
   "license": "MIT",

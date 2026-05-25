@@ -70,11 +70,6 @@ for (const name of packageOrder) {
 
   console.log(`Publishing ${name}@${entry.packageJson.version}`);
   run("npm", args);
-
-  if (!dryRun && name.startsWith("@")) {
-    console.log(`Setting ${name} access to public`);
-    run("npm", ["access", "set", "status=public", name]);
-  }
 }
 
 function readPackageJson(tarball) {
