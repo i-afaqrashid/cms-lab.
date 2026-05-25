@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/directus",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "module",
   "description": "Directus document adapter for cms-lab.",
   "license": "MIT",
