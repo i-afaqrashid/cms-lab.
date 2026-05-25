@@ -2,6 +2,9 @@
 
 ## Current
 
+- Added the short `cms-lab` npm wrapper package for `npx cms-lab scan`.
+- Added a broken public Prismic demo fixture for launch/testing screenshots.
+- Added growth plan, launch post drafts, and a GitHub social preview asset.
 - Added production CLI commands: `scan`, `doctor`, `init`, and `explain`.
 - Added Prismic REST adapter with pagination, master ref lookup, and access-token query support.
 - Added Next.js App Router project detection.

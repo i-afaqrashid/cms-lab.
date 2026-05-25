@@ -29,12 +29,15 @@ The pack smoke installs the tarballs into a clean temporary app before running t
 The public npm packages are:
 
 - `@cms-lab/cli`
+- `cms-lab`
 - `@cms-lab/core`
 - `@cms-lab/next`
 - `@cms-lab/prismic`
 - `@cms-lab/strapi`
 - `@cms-lab/directus`
 - `@cms-lab/wordpress`
+- `@cms-lab/contentful`
+- `@cms-lab/sanity`
 - `@cms-lab/reporter`
 
 For the first publish, npm requires package ownership before Trusted Publishing can be configured for those packages. Use this one-time setup:
@@ -78,6 +81,6 @@ npm Trusted Publishing requires npm CLI `11.5.1` or newer and Node `22.14.0` or 
 4. Run `pnpm audit --audit-level moderate`.
 5. Run the packaged CLI smoke test.
 6. Pack all publishable packages into `.release-packages/`.
-7. Publish tarballs in dependency order: core packages first, `@cms-lab/cli` last.
+7. Publish tarballs in dependency order: adapter/core packages first, `@cms-lab/cli` next, and the short `cms-lab` wrapper last.
 
 The workflow refuses to publish if any `name@version` already exists on npm.

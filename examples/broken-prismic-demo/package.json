@@ -1,0 +1,8 @@
+{
+  "name": "cms-lab-broken-prismic-demo",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "next": "^15.0.0"
+  }
+}

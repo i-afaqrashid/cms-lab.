@@ -5,13 +5,16 @@ import { join } from "node:path";
 
 const packageOrder = [
   "@cms-lab/core",
+  "@cms-lab/contentful",
   "@cms-lab/directus",
   "@cms-lab/next",
   "@cms-lab/prismic",
   "@cms-lab/reporter",
+  "@cms-lab/sanity",
   "@cms-lab/strapi",
   "@cms-lab/wordpress",
   "@cms-lab/cli",
+  "cms-lab",
 ];
 
 const args = process.argv.slice(2);

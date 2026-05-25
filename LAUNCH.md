@@ -5,7 +5,7 @@ This is the practical launch checklist for cms-lab. Keep it boring: release from
 ## What Is Live
 
 - GitHub repository: `i-afaqrashid/cms-lab`
-- npm packages: `@cms-lab/cli`, `@cms-lab/core`, `@cms-lab/next`, `@cms-lab/prismic`, `@cms-lab/strapi`, `@cms-lab/directus`, `@cms-lab/wordpress`, `@cms-lab/reporter`
+- npm packages: `cms-lab`, `@cms-lab/cli`, `@cms-lab/core`, `@cms-lab/next`, `@cms-lab/prismic`, `@cms-lab/strapi`, `@cms-lab/directus`, `@cms-lab/wordpress`, `@cms-lab/contentful`, `@cms-lab/sanity`, `@cms-lab/reporter`
 - Docs site target: `https://cmslab.afaqrashid.com`
 - License: MIT
 - Maintainer identity: Afaq Rashid
@@ -53,19 +53,23 @@ Check the GitHub Actions publish run first. Then verify npm:
 ```sh
 npm view @cms-lab/cli version
 npm dist-tag ls @cms-lab/cli
+npm view cms-lab version
+npm dist-tag ls cms-lab
 npm view @cms-lab/core version
 npm view @cms-lab/prismic version
 npm view @cms-lab/strapi version
 npm view @cms-lab/directus version
 npm view @cms-lab/wordpress version
+npm view @cms-lab/contentful version
+npm view @cms-lab/sanity version
 npm view @cms-lab/reporter version
 ```
 
 Check the published CLI through npm:
 
 ```sh
-npx @cms-lab/cli@latest --version
-npx @cms-lab/cli@latest --help
+npx cms-lab --version
+npx cms-lab --help
 ```
 
 Run the public fixture after npm has propagated:
@@ -125,7 +129,7 @@ Longer description:
 Install copy:
 
 ```sh
-pnpm add -D @cms-lab/cli @cms-lab/core
+pnpm add -D cms-lab @cms-lab/core
 pnpm cms-lab init
 pnpm cms-lab doctor
 pnpm cms-lab scan --ci --report
@@ -140,6 +144,7 @@ If a publish is bad:
 3. Deprecate the bad npm version with a direct message.
 
 ```sh
+npm deprecate cms-lab@X.Y.Z "Use X.Y.Z+1 instead."
 npm deprecate @cms-lab/cli@X.Y.Z "Use X.Y.Z+1 instead."
 ```
 

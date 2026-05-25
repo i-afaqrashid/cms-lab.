@@ -85,7 +85,7 @@ function SiteFooter() {
         <span className="footerLinks">
           <Link href="/docs">Docs</Link>
           <Link href="/docs/scan">Scan</Link>
-          <a href="https://www.npmjs.com/package/@cms-lab/cli">npm</a>
+          <a href="https://www.npmjs.com/package/cms-lab">npm</a>
         </span>
       </div>
     </footer>

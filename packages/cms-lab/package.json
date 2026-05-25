@@ -1,0 +1,50 @@
+{
+  "name": "cms-lab",
+  "version": "1.0.4",
+  "type": "module",
+  "description": "Catch CMS bugs before deploy.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-afaqrashid/cms-lab.git",
+    "directory": "packages/cms-lab"
+  },
+  "homepage": "https://cmslab.afaqrashid.com",
+  "bugs": {
+    "url": "https://github.com/i-afaqrashid/cms-lab/issues"
+  },
+  "keywords": [
+    "cms",
+    "headless-cms",
+    "nextjs",
+    "prismic",
+    "strapi",
+    "directus",
+    "wordpress",
+    "contentful",
+    "sanity",
+    "cli",
+    "testing",
+    "ci",
+    "seo",
+    "accessibility",
+    "content-validation"
+  ],
+  "bin": {
+    "cms-lab": "./bin.mjs"
+  },
+  "files": [
+    "bin.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.10"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@cms-lab/cli": "workspace:*"
+  },
+  "author": "Afaq Rashid"
+}

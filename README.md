@@ -9,13 +9,13 @@ There is no hosted cms-lab service. The CLI runs inside your project and talks d
 ## Install
 
 ```sh
-pnpm add -D @cms-lab/cli @cms-lab/core
+pnpm add -D cms-lab @cms-lab/core
 ```
 
 You can also run it without adding it to the project:
 
 ```sh
-npx @cms-lab/cli@latest scan
+npx cms-lab scan
 ```
 
 ## Quick Start
@@ -307,6 +307,7 @@ pnpm smoke:pack:live
 
 ```txt
 packages/core       config, types, diagnostics, checks
+packages/cms-lab    short npm wrapper for npx cms-lab
 packages/cli        cms-lab binary and output
 packages/next       Next.js project detection
 packages/prismic    Prismic adapter
