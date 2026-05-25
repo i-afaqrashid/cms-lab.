@@ -31,18 +31,18 @@ export default function AgentContextPage() {
         Run the command from the Next.js project that has a{" "}
         <code>cms-lab.config.ts</code> file.
       </p>
-      <CodeBlock>{`npx cms-lab agent-context`}</CodeBlock>
+      <CodeBlock>{`npx @cms-lab/cli agent-context`}</CodeBlock>
       <p>
         Use flags when you need a custom config path or an intentional rewrite.
       </p>
-      <CodeBlock>{`npx cms-lab agent-context --config ./cms-lab.config.ts
-npx cms-lab agent-context --preset all
-npx cms-lab agent-context --preset claude
-npx cms-lab agent-context --preset gemini
-npx cms-lab agent-context --preset copilot
-npx cms-lab agent-context --force
-npx cms-lab agent-context --no-agents-md
-npx cms-lab agent-context --out .cms-lab`}</CodeBlock>
+      <CodeBlock>{`npx @cms-lab/cli agent-context --config ./cms-lab.config.ts
+npx @cms-lab/cli agent-context --preset all
+npx @cms-lab/cli agent-context --preset claude
+npx @cms-lab/cli agent-context --preset gemini
+npx @cms-lab/cli agent-context --preset copilot
+npx @cms-lab/cli agent-context --force
+npx @cms-lab/cli agent-context --no-agents-md
+npx @cms-lab/cli agent-context --out .cms-lab`}</CodeBlock>
 
       <h2 id="presets">Presets</h2>
       <p>

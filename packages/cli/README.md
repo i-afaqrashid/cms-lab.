@@ -3,7 +3,7 @@
 CLI for catching CMS-driven Next.js failures before deploy.
 
 ```sh
-npx cms-lab scan
+npx @cms-lab/cli scan
 ```
 
 ## Commands

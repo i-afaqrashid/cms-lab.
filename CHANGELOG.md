@@ -2,7 +2,7 @@
 
 ## Current
 
-- Added the short `cms-lab` npm wrapper package for `npx cms-lab scan`.
+- Removed the blocked unscoped npm wrapper and documented `npx @cms-lab/cli scan` as the supported one-off command.
 - Added a broken public Prismic demo fixture for launch/testing screenshots.
 - Added growth plan, launch post drafts, and a GitHub social preview asset.
 - Added production CLI commands: `scan`, `doctor`, `init`, and `explain`.

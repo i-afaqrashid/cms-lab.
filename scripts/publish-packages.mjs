@@ -14,12 +14,18 @@ const packageOrder = [
   "@cms-lab/strapi",
   "@cms-lab/wordpress",
   "@cms-lab/cli",
-  "cms-lab",
 ];
 
 const args = process.argv.slice(2);
 const tarballDir = args.find((arg) => !arg.startsWith("--"));
 const dryRun = process.argv.includes("--dry-run");
+const unsupportedNpmEnvKeys = new Set([
+  "npm_config__jsr_registry",
+  "npm_config_npm_globalconfig",
+  "npm_config_overrides",
+  "npm_config_peer_dependency_rules",
+  "npm_config_verify_deps_before_run",
+]);
 
 if (!tarballDir || !existsSync(tarballDir)) {
   console.error("Usage: node scripts/publish-packages.mjs <tarball-dir>");
@@ -86,6 +92,7 @@ function readPackageJson(tarball) {
 function awaitPackageExists(name, version) {
   const result = spawnSync("npm", ["view", `${name}@${version}`, "version"], {
     encoding: "utf8",
+    env: npmEnv(),
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -102,7 +109,10 @@ function awaitPackageExists(name, version) {
 }
 
 function run(command, args) {
-  const result = spawnSync(command, args, { stdio: "inherit" });
+  const result = spawnSync(command, args, {
+    env: command === "npm" ? npmEnv() : process.env,
+    stdio: "inherit",
+  });
 
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
@@ -112,4 +122,16 @@ function run(command, args) {
 function fail(message) {
   console.error(message);
   process.exit(1);
+}
+
+function npmEnv() {
+  const env = { ...process.env };
+
+  for (const key of Object.keys(env)) {
+    if (unsupportedNpmEnvKeys.has(key.toLowerCase())) {
+      delete env[key];
+    }
+  }
+
+  return env;
 }

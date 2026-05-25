@@ -5,11 +5,11 @@ This is a practical launch and growth plan for cms-lab. The goal is useful distr
 ## Current Position
 
 - Repository: `i-afaqrashid/cms-lab`
-- Package users should install after the next release: `cms-lab`
+- Package users should install after the next release: `@cms-lab/cli`
 - Current launch command:
 
 ```sh
-npx cms-lab scan
+npx @cms-lab/cli scan
 ```
 
 - Site: `https://cmslab.afaqrashid.com`
@@ -34,26 +34,20 @@ cms-lab should not launch like a generic SaaS landing page. It is a developer to
 
 The project should spread through useful artifacts: CI failures, report screenshots, copyable config examples, CMS-specific docs, and developer community feedback.
 
-## High-Leverage Fix Before Launch
+## Public CLI Command
 
-Keep the unscoped npm package named `cms-lab` as the primary public entry point.
-
-The scoped package remains the implementation package, but launch copy should use:
+npm rejected the unscoped `cms-lab` package because it is too similar to an existing package named `cmslab`. Use the scoped package as the public one-off command:
 
 ```sh
-npx cms-lab scan
+npx @cms-lab/cli scan
 ```
 
-Recommended implementation:
+Keep launch copy consistent:
 
-- Publish a tiny package as `cms-lab`.
-- Keep the binary name `cms-lab`.
-- Depend on or forward to `@cms-lab/cli`.
-- Do not fork CLI behavior.
-- Publish it from the same release workflow.
-- Keep `@cms-lab/cli` as the real implementation package.
-
-This matters because every post, README snippet, and demo becomes simpler.
+- `@cms-lab/cli` is the npm package.
+- `cms-lab` is the installed binary name.
+- One-off runs should use `npx @cms-lab/cli ...`.
+- Installed project scripts can use `cms-lab ...`.
 
 ## Demo Requirement
 
@@ -75,9 +69,9 @@ Minimum demo commands:
 
 ```sh
 npm install
-npx cms-lab scan --ci --report
-npx cms-lab scan --ci --json
-npx cms-lab doctor
+npx @cms-lab/cli scan --ci --report
+npx @cms-lab/cli scan --ci --json
+npx @cms-lab/cli doctor
 ```
 
 The demo is the thing to share on Hacker News, Product Hunt, CMS forums, and social posts. Do not send people to a vague landing page first.
@@ -287,22 +281,21 @@ Each article must include:
 
 These features are worth considering because they make cms-lab easier to share or adopt:
 
-1. `cms-lab` unscoped npm wrapper.
-2. GitHub Action wrapper: `cms-lab/action`.
-3. Redacted report mode for sharing screenshots safely.
-4. `cms-lab init --cms prismic --framework next`.
-5. `cms-lab demo` to scaffold a broken demo locally.
-6. Provider-specific starter configs.
-7. Report badge for README/CI.
-8. `--github-annotations` output.
-9. Better Slack summary templates.
-10. Public examples for each CMS adapter.
+1. GitHub Action wrapper: `cms-lab/action`.
+2. Redacted report mode for sharing screenshots safely.
+3. `cms-lab init --cms prismic --framework next`.
+4. `cms-lab demo` to scaffold a broken demo locally.
+5. Provider-specific starter configs.
+6. Report badge for README/CI.
+7. `--github-annotations` output.
+8. Better Slack summary templates.
+9. Public examples for each CMS adapter.
 
 ## Launch Timeline
 
 ### Day 0
 
-- Add unscoped `cms-lab` npm package.
+- Standardize launch copy on `npx @cms-lab/cli`.
 - Add GitHub social preview image.
 - Create public demo.
 - Add report screenshot to README.

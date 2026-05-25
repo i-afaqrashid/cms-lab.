@@ -238,9 +238,9 @@ test("runCli agent-context writes safe AI agent handoff files", async () => {
   expect(prompt).toContain("Antigravity");
   expect(prompt).toContain("OpenCode");
   expect(combined).toContain("https://github.com/i-afaqrashid/cms-lab");
-  expect(combined).toContain("https://www.npmjs.com/package/cms-lab");
+  expect(combined).toContain("https://www.npmjs.com/package/@cms-lab/cli");
   expect(combined).toContain("https://cmslab.afaqrashid.com/docs");
-  expect(combined).toContain("npx cms-lab doctor");
+  expect(combined).toContain("npx @cms-lab/cli doctor");
   expect(combined).not.toContain(cwd);
   expect(combined).not.toContain("preview.example.com");
   expect(combined).not.toContain("top-secret");
@@ -325,7 +325,7 @@ test("runCli agent-context overwrites generated files with force", async () => {
   ).toContain("CMS provider: strapi");
   expect(
     await readFile(join(cwd, ".cms-lab/agent-prompt.md"), "utf8"),
-  ).toContain("npx cms-lab scan");
+  ).toContain("npx @cms-lab/cli scan");
 });
 
 test("runCli agent-context supports tool-specific presets", async () => {
@@ -772,7 +772,7 @@ test("runCli supports version output", async () => {
   });
 
   expect(exitCode).toBe(0);
-  expect(stdout).toContain("1.0.5");
+  expect(stdout).toContain("1.0.6");
 });
 
 test("runCli scan help includes examples and color controls", async () => {

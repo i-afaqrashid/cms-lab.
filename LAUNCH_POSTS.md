@@ -21,7 +21,7 @@ It currently supports Prismic, Strapi, Directus, WordPress, Contentful, and Sani
 
 Try it:
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 
 The thing I want most is real setup feedback: CMS provider, Next.js router type, config shape, and the first diagnostic that helped or confused you.
 ```
@@ -64,7 +64,7 @@ It can catch things like:
 
 Try:
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 
 I am looking for real Prismic + Next.js setups that break it or produce confusing diagnostics. Useful feedback: router type, content type shape, route mapping, and the first diagnostic you saw.
 ```
@@ -78,7 +78,7 @@ It scans configured collections, maps entries to expected URLs, probes the site,
 
 Try:
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 
 I am especially looking for feedback from Strapi projects with nested slug fields, dynamic zones, or custom SEO objects.
 ```
@@ -92,7 +92,7 @@ It is config-first: you tell it which collections map to which URLs, and it repo
 
 Try:
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 
 I am looking for Directus feedback around nested fields, custom permalink fields, and collection-specific route mapping.
 ```
@@ -106,7 +106,7 @@ It fetches configured content types, maps entries to URLs, probes the running si
 
 Try:
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 
 I am looking for feedback from Contentful projects with localized fields, custom slug fields, and SEO field groups.
 ```
@@ -120,7 +120,7 @@ It can scan configured document types, map them to expected URLs, probe the site
 
 Try:
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 
 I am looking for Sanity feedback around GROQ projections, slug paths, portable text/image fields, and route mapping.
 ```
@@ -136,7 +136,7 @@ Useful for teams using Next.js with Prismic, Strapi, Directus, WordPress, Conten
 
 Try:
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 
 I am looking for real setup feedback, especially from teams with messy CMS route mapping.
 ```
@@ -148,7 +148,7 @@ I built cms-lab: an open-source CLI that catches CMS-driven Next.js bugs before 
 
 It checks mapped routes, required fields, SEO fields, and image alt text, then writes terminal/CI/local HTML report output.
 
-npx cms-lab scan --ci --report
+npx @cms-lab/cli scan --ci --report
 ```
 
 ## Dev.to / Blog Outline
@@ -165,7 +165,7 @@ Outline:
 2. Common failures: route 404s, route 500s, missing required fields, SEO gaps, empty alt text.
 3. Config-first route mapping.
 4. Run the app locally or against staging.
-5. Run `npx cms-lab scan --ci --report`.
+5. Run `npx @cms-lab/cli scan --ci --report`.
 6. Read terminal and HTML report output.
 7. Add the GitHub Actions snippet.
 8. What cms-lab does not do yet.
