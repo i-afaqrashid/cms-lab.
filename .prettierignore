@@ -9,3 +9,4 @@ LICENSE
 customtypes
 prismicio-types.d.ts
 slices
+scripts/github-action.sh

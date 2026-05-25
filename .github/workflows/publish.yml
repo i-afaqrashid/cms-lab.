@@ -18,6 +18,7 @@ jobs:
     name: Publish packages
     if: github.repository == 'i-afaqrashid/cms-lab'
     runs-on: ubuntu-latest
+    environment: npm
     timeout-minutes: 30
     steps:
       - name: Configure git defaults
@@ -41,22 +42,6 @@ jobs:
           corepack prepare pnpm@10.33.4 --activate
           pnpm --version
 
-      - name: Prepare pnpm store
-        run: |
-          PNPM_STORE_PATH="$(pnpm store path --silent)"
-          mkdir -p "$PNPM_STORE_PATH"
-          echo "PNPM_STORE_PATH=$PNPM_STORE_PATH" >> "$GITHUB_ENV"
-
-      - name: Cache pnpm store
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ runner.os }}-${{ github.job }}-node-24-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ github.job }}-node-24-pnpm-
-            ${{ runner.os }}-node-24-pnpm-
-            ${{ runner.os }}-pnpm-
-
       - name: Tool versions
         run: |
           node --version
@@ -65,14 +50,6 @@ jobs:
 
       - name: Install
         run: pnpm install --frozen-lockfile
-
-      - name: Cache Next.js build
-        uses: actions/cache@v5
-        with:
-          path: apps/site/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/site/**/*.js', 'apps/site/**/*.jsx', 'apps/site/**/*.ts', 'apps/site/**/*.tsx', 'apps/site/**/*.css', 'apps/site/**/*.mdx', 'apps/site/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-
 
       - name: Verify release tag
         run: pnpm release:verify-tag
@@ -92,10 +69,4 @@ jobs:
           pnpm -r --filter './packages/*' pack --pack-destination .release-packages
 
       - name: Publish packages
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [ -n "${NPM_TOKEN:-}" ]; then
-            export NODE_AUTH_TOKEN="$NPM_TOKEN"
-          fi
-          pnpm release:publish-tarballs .release-packages
+        run: pnpm release:publish-tarballs .release-packages

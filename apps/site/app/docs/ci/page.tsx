@@ -25,6 +25,13 @@ export default function CiPage() {
       </p>
 
       <h2 id="github-actions">GitHub Actions</h2>
+      <CodeBlock>{`- uses: i-afaqrashid/cms-lab@v1
+  with:
+    config: cms-lab.config.ts
+    report: true
+    fail-on: error`}</CodeBlock>
+
+      <p>For teams that prefer explicit shell steps:</p>
       <CodeBlock>{`name: cms-lab
 on: [pull_request]
 
