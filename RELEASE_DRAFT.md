@@ -13,17 +13,17 @@ cms-lab vX.Y.Z
 ````md
 ## Highlights
 
-- Added the short `cms-lab` npm package so users can run `npx cms-lab scan`.
+- Use `npx @cms-lab/cli scan` for one-off runs.
 - Added a no-secret broken Prismic demo for screenshots and launch testing.
 - Added launch post drafts and growth planning docs.
 - Added a GitHub social preview asset at `assets/social-preview.png`.
-- Updated docs and site examples to use the short CLI command.
+- Updated docs and site examples to use the scoped npm CLI command.
 
 ## Try It
 
 ```sh
-npx cms-lab doctor
-npx cms-lab scan --ci --report
+npx @cms-lab/cli doctor
+npx @cms-lab/cli scan --ci --report
 ```
 ````
 
@@ -31,15 +31,15 @@ npx cms-lab scan --ci --report
 
 ```sh
 cd examples/broken-prismic-demo
-npx cms-lab doctor
-npx cms-lab scan --ci --report --fail-on never
+npx @cms-lab/cli doctor
+npx @cms-lab/cli scan --ci --report --fail-on never
 ```
 
 ## Notes
 
-`@cms-lab/cli` remains the implementation package. The unscoped `cms-lab`
-package is the short public entry point and should be used in launch copy,
-README snippets, docs, and demos.
+`@cms-lab/cli` is the public npm package and provides the installed `cms-lab`
+binary. Use `npx @cms-lab/cli ...` for one-off launch copy, README snippets,
+docs, and demos.
 
 ```
 

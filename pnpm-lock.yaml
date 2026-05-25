@@ -125,12 +125,6 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
 
-  packages/cms-lab:
-    dependencies:
-      "@cms-lab/cli":
-        specifier: workspace:*
-        version: link:../cli
-
   packages/contentful:
     dependencies:
       "@cms-lab/core":

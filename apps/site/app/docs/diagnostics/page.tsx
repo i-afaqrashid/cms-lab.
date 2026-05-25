@@ -101,7 +101,7 @@ export default function DiagnosticsPage() {
 
       <h2 id="explain">Explain a code</h2>
       <p>Use the CLI when you want the short fix guidance in your terminal.</p>
-      <pre className="codeblock">npx cms-lab explain CMS-ROUTE-404</pre>
+      <pre className="codeblock">npx @cms-lab/cli explain CMS-ROUTE-404</pre>
     </DocsShell>
   );
 }

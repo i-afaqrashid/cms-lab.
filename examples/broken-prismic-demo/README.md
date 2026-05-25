@@ -5,8 +5,8 @@ This is a no-secret demo for launch posts and local smoke testing. It uses the p
 Run from this folder after building the workspace, or use the published package after the next release:
 
 ```sh
-npx cms-lab doctor
-npx cms-lab scan --ci --report --markdown --junit --json --fail-on never
+npx @cms-lab/cli doctor
+npx @cms-lab/cli scan --ci --report --markdown --junit --json --fail-on never
 ```
 
 Expected behavior:
@@ -21,5 +21,5 @@ The demo does not need `PRISMIC_ACCESS_TOKEN`. You can override the public targe
 ```sh
 CMS_LAB_DEMO_SITE_URL=https://example.com \
 CMS_LAB_DEMO_PRISMIC_REPOSITORY=your-repo \
-npx cms-lab scan --ci --report --fail-on never
+npx @cms-lab/cli scan --ci --report --fail-on never
 ```

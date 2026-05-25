@@ -47,9 +47,9 @@ export default function DocsPage() {
 
       <h2 id="install">Install</h2>
       <p>Run without installing:</p>
-      <CodeBlock>{`npx cms-lab scan`}</CodeBlock>
+      <CodeBlock>{`npx @cms-lab/cli scan`}</CodeBlock>
       <p>Or pin it in a project:</p>
-      <CodeBlock>{`pnpm add -D cms-lab @cms-lab/core`}</CodeBlock>
+      <CodeBlock>{`pnpm add -D @cms-lab/cli @cms-lab/core`}</CodeBlock>
 
       <h2 id="first-scan">Your first scan</h2>
       <p>
@@ -57,12 +57,12 @@ export default function DocsPage() {
         <code>doctor</code> first when connecting a repo for the first time.
       </p>
       <Terminal title="first run">
-        <span className="tMuted">$</span> npx cms-lab doctor{"\n"}
+        <span className="tMuted">$</span> npx @cms-lab/cli doctor{"\n"}
         <span className="tOk">config ok</span> - cms-lab.config.ts{"\n"}
         <span className="tOk">next app ok</span> - app{"\n"}
         <span className="tOk">site ok</span> - http://localhost:3000{"\n"}
         <span className="tOk">cms ok</span> - 6 documents{"\n\n"}
-        <span className="tMuted">$</span> npx cms-lab scan --report
+        <span className="tMuted">$</span> npx @cms-lab/cli scan --report
       </Terminal>
 
       <h2 id="next">Where to next</h2>
