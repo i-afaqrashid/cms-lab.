@@ -331,6 +331,10 @@ test-fixtures/      public Prismic fixture
 
 ## Launch And Maintenance
 
+Read [CHANGELOG.md](./CHANGELOG.md) and
+[GitHub Releases](https://github.com/i-afaqrashid/cms-lab/releases) for
+version-by-version release history.
+
 Read [LAUNCH.md](./LAUNCH.md) for the release checklist, npm publish flow, post-release verification, and launch-day notes.
 
 Read [TESTING.md](./TESTING.md) for local tester workflows. Read [CONTRIBUTING.md](./CONTRIBUTING.md), [SECURITY.md](./SECURITY.md), [SUPPORT.md](./SUPPORT.md), and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) before opening public issues or PRs.
