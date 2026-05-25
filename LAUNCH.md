@@ -112,10 +112,40 @@ After GitHub, npm, CI, docs, and the outside-app smoke test are green, announce 
 1. Publish a GitHub Release with the exact package version and short changelog.
 2. Update the repo description, topics, and website URL.
 3. Deploy the docs site to `cmslab.afaqrashid.com`.
-4. Share the package with a small group of Next.js and headless CMS developers before making broader posts.
-5. Ask testers for one concrete result: the CMS provider, framework version, config shape, and first diagnostic they saw.
+4. Publish the GitHub Action to GitHub Marketplace.
+5. Share the package with a small group of Next.js and headless CMS developers before making broader posts.
+6. Ask testers for one concrete result: the CMS provider, framework version, config shape, and first diagnostic they saw.
 
 Do not overclaim. Say what works today: local CLI scans for Next.js App Router and Pages Router projects using Prismic, Strapi, Directus, or WordPress, with terminal, JSON, Markdown, JUnit, Slack, and HTML report output.
+
+## GitHub Marketplace Follow-Up
+
+Publishing the GitHub Action is highly recommended because it makes the CI path
+discoverable from GitHub's Actions UI, not only from README snippets.
+
+Current action entrypoint:
+
+```yaml
+- uses: i-afaqrashid/cms-lab@v1
+  with:
+    config: cms-lab.config.ts
+    report: true
+```
+
+Before publishing:
+
+- Use the latest stable version tag, not a partial or superseded tag.
+- Keep `v1` pointing at the same commit as the latest stable release.
+- Confirm `action.yml` still has accurate `name`, `description`, `author`,
+  inputs, outputs, and branding.
+- Use categories such as `Continuous integration` and `Code quality`.
+- Do not create a discussion by default; keep release discussion in GitHub
+  Discussions unless there is a clear reason to split comments per release.
+
+If GitHub blocks Marketplace publishing from the monorepo because it contains
+workflow files, create a small dedicated `i-afaqrashid/cms-lab-action`
+repository that contains only the action metadata, wrapper script, license, and
+README, then publish that repository to Marketplace.
 
 ## Public Copy
 
