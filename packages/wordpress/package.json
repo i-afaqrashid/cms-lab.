@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/wordpress",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "description": "WordPress REST document adapter for cms-lab.",
   "license": "MIT",

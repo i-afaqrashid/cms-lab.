@@ -772,7 +772,7 @@ test("runCli supports version output", async () => {
   });
 
   expect(exitCode).toBe(0);
-  expect(stdout).toContain("1.0.4");
+  expect(stdout).toContain("1.0.5");
 });
 
 test("runCli scan help includes examples and color controls", async () => {
