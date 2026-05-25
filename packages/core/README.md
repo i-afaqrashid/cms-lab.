@@ -19,6 +19,12 @@ Sanity image `alt` fields.
 `readCmsDataPath` is exported for adapters that need to read dotted paths from
 normalized CMS payloads, for example custom `uidField` and `urlField` mapping.
 
+## Release History
+
+See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)
+and [GitHub Releases](https://github.com/i-afaqrashid/cms-lab/releases) for
+version-by-version notes.
+
 ## Open Source
 
 MIT licensed. See the repository [license](https://github.com/i-afaqrashid/cms-lab/blob/main/LICENSE), [contributing guide](https://github.com/i-afaqrashid/cms-lab/blob/main/CONTRIBUTING.md), and [support guide](https://github.com/i-afaqrashid/cms-lab/blob/main/SUPPORT.md).

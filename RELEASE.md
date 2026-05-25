@@ -87,3 +87,15 @@ The workflow does not use dependency or Next.js caches during release publishes.
 It refuses to publish if any `name@version` already exists on npm.
 Use `npx @cms-lab/cli ...` for one-off runs; npm rejected the unscoped
 `cms-lab` package name as too similar to an existing package.
+
+## Release notes
+
+Keep release notes in sync across:
+
+- `CHANGELOG.md` in the repository
+- the GitHub Release body for the tag
+- package README links published to npm
+
+For ordinary releases, copy the matching `CHANGELOG.md` entry into the GitHub
+Release and add verification details after npm publishes. If a tag is partial
+or superseded, document that plainly instead of hiding the tag.

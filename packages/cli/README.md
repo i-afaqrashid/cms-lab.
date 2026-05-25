@@ -64,6 +64,12 @@ Create `cms-lab.config.ts` in the target Next.js project. Import
 
 See the repository README for full setup, CI, and live Prismic testing.
 
+## Release History
+
+See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)
+and [GitHub Releases](https://github.com/i-afaqrashid/cms-lab/releases) for
+version-by-version notes.
+
 ## Open Source
 
 MIT licensed. See the repository [license](https://github.com/i-afaqrashid/cms-lab/blob/main/LICENSE), [contributing guide](https://github.com/i-afaqrashid/cms-lab/blob/main/CONTRIBUTING.md), and [support guide](https://github.com/i-afaqrashid/cms-lab/blob/main/SUPPORT.md).

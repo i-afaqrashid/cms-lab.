@@ -1,11 +1,13 @@
-# Next GitHub Release Draft
+# GitHub Release Template
 
-Use this after the branch is merged, versions are bumped, and the release tag exists.
+Use this template after the release PR is merged and the `vX.Y.Z` tag exists.
+The GitHub release body should match the same version entry in
+`CHANGELOG.md`.
 
 ## Title
 
 ```txt
-cms-lab vX.Y.Z
+vX.Y.Z
 ```
 
 ## Body
@@ -13,34 +15,45 @@ cms-lab vX.Y.Z
 ````md
 ## Highlights
 
-- Use `npx @cms-lab/cli scan` for one-off runs.
-- Added a no-secret broken Prismic demo for screenshots and launch testing.
-- Added launch post drafts and growth planning docs.
-- Added a GitHub social preview asset at `assets/social-preview.png`.
-- Updated docs and site examples to use the scoped npm CLI command.
+- Short user-facing change.
+- Short user-facing change.
+- Short user-facing change.
 
-## Try It
+## Install
 
 ```sh
-npx @cms-lab/cli doctor
-npx @cms-lab/cli scan --ci --report
+npx @cms-lab/cli@latest --version
+npx @cms-lab/cli scan
 ```
+
+## Published Packages
+
+- `@cms-lab/cli`
+- `@cms-lab/core`
+- `@cms-lab/next`
+- `@cms-lab/prismic`
+- `@cms-lab/strapi`
+- `@cms-lab/directus`
+- `@cms-lab/wordpress`
+- `@cms-lab/contentful`
+- `@cms-lab/sanity`
+- `@cms-lab/reporter`
+
+## Verification
+
+- GitHub publish workflow completed successfully.
+- npm shows `X.Y.Z` as latest for all public packages.
+- `npx -y @cms-lab/cli@latest --version` returns `X.Y.Z`.
+
+## Changelog
+
+See [`CHANGELOG.md`](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md).
 ````
 
-## Demo
+## Checklist
 
-```sh
-cd examples/broken-prismic-demo
-npx @cms-lab/cli doctor
-npx @cms-lab/cli scan --ci --report --fail-on never
-```
-
-## Notes
-
-`@cms-lab/cli` is the public npm package and provides the installed `cms-lab`
-binary. Use `npx @cms-lab/cli ...` for one-off launch copy, README snippets,
-docs, and demos.
-
-```
-
-```
+- Copy the matching `CHANGELOG.md` entry.
+- Mention package availability honestly if a tag was partial or superseded.
+- Keep install commands scoped to `@cms-lab/cli`.
+- Do not mention private URLs, local paths, internal notes, or secrets.
+- Verify npm before saying packages are published.
