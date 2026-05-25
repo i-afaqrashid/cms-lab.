@@ -1,0 +1,135 @@
+name: cms-lab
+description: Scan CMS content against configured site routes before deploy.
+author: Afaq Rashid
+
+branding:
+  icon: search
+  color: green
+
+inputs:
+  version:
+    description: npm version or dist-tag for @cms-lab/cli.
+    required: false
+    default: latest
+  working-directory:
+    description: Directory that contains cms-lab.config.ts.
+    required: false
+    default: "."
+  config:
+    description: Path to cms-lab config.
+    required: false
+    default: cms-lab.config.ts
+  url:
+    description: Override the site URL from the config.
+    required: false
+    default: ""
+  report:
+    description: Write a local HTML report.
+    required: false
+    default: "true"
+  report-path:
+    description: HTML report path.
+    required: false
+    default: .cms-lab/report.html
+  markdown:
+    description: Write a Markdown summary.
+    required: false
+    default: "false"
+  markdown-path:
+    description: Markdown summary path.
+    required: false
+    default: .cms-lab/summary.md
+  junit:
+    description: Write a JUnit XML report.
+    required: false
+    default: "false"
+  junit-path:
+    description: JUnit XML report path.
+    required: false
+    default: .cms-lab/junit.xml
+  fail-on:
+    description: Diagnostic threshold for a failing run. Use error, warning, or never.
+    required: false
+    default: error
+  only:
+    description: Comma-separated check groups to run.
+    required: false
+    default: ""
+  skip:
+    description: Comma-separated check groups to skip.
+    required: false
+    default: ""
+  type:
+    description: CMS document type filter.
+    required: false
+    default: ""
+  timeout:
+    description: Per-route HTTP timeout in milliseconds.
+    required: false
+    default: "10000"
+  retries:
+    description: Retry transient route probe failures.
+    required: false
+    default: "1"
+  concurrency:
+    description: Maximum concurrent route probes.
+    required: false
+    default: ""
+  strict:
+    description: Fail on warning and info diagnostics.
+    required: false
+    default: "false"
+  max-warnings:
+    description: Maximum allowed warning diagnostics.
+    required: false
+    default: ""
+  max-info:
+    description: Maximum allowed info diagnostics.
+    required: false
+    default: ""
+
+outputs:
+  report-path:
+    description: Absolute path to the HTML report.
+    value: ${{ steps.scan.outputs.report-path }}
+  summary-path:
+    description: Absolute path to the Markdown summary.
+    value: ${{ steps.scan.outputs.summary-path }}
+  junit-path:
+    description: Absolute path to the JUnit XML report.
+    value: ${{ steps.scan.outputs.junit-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        package-manager-cache: false
+
+    - name: Run cms-lab
+      id: scan
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        CMS_LAB_VERSION: ${{ inputs.version }}
+        CMS_LAB_CONFIG: ${{ inputs.config }}
+        CMS_LAB_URL: ${{ inputs.url }}
+        CMS_LAB_REPORT: ${{ inputs.report }}
+        CMS_LAB_REPORT_PATH: ${{ inputs.report-path }}
+        CMS_LAB_MARKDOWN: ${{ inputs.markdown }}
+        CMS_LAB_MARKDOWN_PATH: ${{ inputs.markdown-path }}
+        CMS_LAB_JUNIT: ${{ inputs.junit }}
+        CMS_LAB_JUNIT_PATH: ${{ inputs.junit-path }}
+        CMS_LAB_FAIL_ON: ${{ inputs.fail-on }}
+        CMS_LAB_ONLY: ${{ inputs.only }}
+        CMS_LAB_SKIP: ${{ inputs.skip }}
+        CMS_LAB_TYPE: ${{ inputs.type }}
+        CMS_LAB_TIMEOUT: ${{ inputs.timeout }}
+        CMS_LAB_RETRIES: ${{ inputs.retries }}
+        CMS_LAB_CONCURRENCY: ${{ inputs.concurrency }}
+        CMS_LAB_STRICT: ${{ inputs.strict }}
+        CMS_LAB_MAX_WARNINGS: ${{ inputs.max-warnings }}
+        CMS_LAB_MAX_INFO: ${{ inputs.max-info }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/github-action.sh"

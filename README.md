@@ -65,6 +65,15 @@ For CI:
 pnpm cms-lab scan --ci --report --markdown --junit
 ```
 
+Or use the GitHub Action:
+
+```yaml
+- uses: i-afaqrashid/cms-lab@v1
+  with:
+    config: cms-lab.config.ts
+    report: true
+```
+
 ## CMS Adapters
 
 Prismic:

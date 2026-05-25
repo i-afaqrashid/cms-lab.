@@ -64,11 +64,16 @@ After the first publish succeeds, configure npm Trusted Publishing for each pack
 - Organization/user: `i-afaqrashid`
 - Repository: `cms-lab`
 - Workflow filename: `publish.yml`
+- Environment name: `npm`
 - Allowed action: `npm publish`
 
-Then remove the GitHub `NPM_TOKEN` secret and revoke the temporary npm token. For maximum security, set each npm package to require two-factor authentication and disallow tokens after Trusted Publishing is working.
+Then remove the GitHub `NPM_TOKEN` secret and revoke the temporary npm token.
+For maximum security, keep npm two-factor authentication enabled for account
+changes and package publishing.
 
-npm Trusted Publishing requires npm CLI `11.5.1` or newer and Node `22.14.0` or newer. The GitHub workflow uses Node `24` and npm's OIDC flow, with `id-token: write` enabled. npm automatically generates provenance for Trusted Publishing from a public repository; the workflow also passes `--provenance` for token-based first publishes from GitHub Actions.
+npm Trusted Publishing requires npm CLI `11.5.1` or newer and Node `22.14.0`
+or newer. The GitHub workflow uses Node `24`, an `npm` environment, and npm's
+OIDC flow with `id-token: write` enabled.
 
 ## Release workflow
 
@@ -82,6 +87,7 @@ npm Trusted Publishing requires npm CLI `11.5.1` or newer and Node `22.14.0` or 
 6. Pack all publishable packages into `.release-packages/`.
 7. Publish tarballs in dependency order: adapter/core packages first, `@cms-lab/cli` next.
 
-The workflow refuses to publish if any `name@version` already exists on npm.
+The workflow does not use dependency or Next.js caches during release publishes.
+It refuses to publish if any `name@version` already exists on npm.
 Use `npx @cms-lab/cli ...` for one-off runs; npm rejected the unscoped
 `cms-lab` package name as too similar to an existing package.

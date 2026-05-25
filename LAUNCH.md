@@ -45,6 +45,9 @@ git push origin vX.Y.Z
 ```
 
 The `Publish to npm` workflow publishes only from tags that look like `vX.Y.Z`.
+It uses npm Trusted Publishing through the `npm` GitHub environment, so do not
+push release tags until npm has trusted `i-afaqrashid/cms-lab` and
+`.github/workflows/publish.yml` for every `@cms-lab/*` package.
 
 ## Post-Release Verification
 
