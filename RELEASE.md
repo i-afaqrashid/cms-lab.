@@ -24,7 +24,7 @@ pnpm -r --filter './packages/*' pack --pack-destination /tmp/cms-lab-pack
 
 The pack smoke installs the tarballs into a clean temporary app before running the CLI. The live fixture runs route and required-field checks against a real public Prismic repository and should exit `0` unless the public starter repo or deployment changes.
 
-## First npm publish
+## Published packages
 
 The public npm packages are:
 
@@ -39,13 +39,10 @@ The public npm packages are:
 - `@cms-lab/sanity`
 - `@cms-lab/reporter`
 
-For the first publish, npm requires package ownership before Trusted Publishing can be configured for those packages. Use this one-time setup:
+These packages are published from GitHub Actions using npm Trusted Publishing.
+Do not add npm publish tokens to the repository.
 
-1. Log in to npm as Afaq Rashid.
-2. Create or claim the npm organization/scope `cms-lab` so `@cms-lab/*` packages can be published.
-3. Create a short-lived npm automation/granular token with publish rights for the first release only.
-4. Add that token as the GitHub repository secret `NPM_TOKEN`.
-5. Push the release tag:
+To release, update package versions, merge to `main`, then push the release tag:
 
 ```sh
 git checkout main
@@ -58,7 +55,7 @@ The workflow publishes from the tag only. Do not publish from a branch.
 
 ## Trusted Publishing
 
-After the first publish succeeds, configure npm Trusted Publishing for each package:
+Each package must keep this npm Trusted Publishing configuration:
 
 - Provider: GitHub Actions
 - Organization/user: `i-afaqrashid`
@@ -67,13 +64,12 @@ After the first publish succeeds, configure npm Trusted Publishing for each pack
 - Environment name: `npm`
 - Allowed action: `npm publish`
 
-Then remove the GitHub `NPM_TOKEN` secret and revoke the temporary npm token.
 For maximum security, keep npm two-factor authentication enabled for account
 changes and package publishing.
 
-npm Trusted Publishing requires npm CLI `11.5.1` or newer and Node `22.14.0`
-or newer. The GitHub workflow uses Node `24`, an `npm` environment, and npm's
-OIDC flow with `id-token: write` enabled.
+Use npm CLI `11.10.0` or newer when managing Trusted Publisher settings from
+the terminal. The GitHub workflow uses Node `24`, an `npm` environment, and
+npm's OIDC flow with `id-token: write` enabled.
 
 ## Release workflow
 
