@@ -101,6 +101,10 @@ function resolveRouteCandidates(
       (candidate) => candidate.type === document.type,
     );
     if (!route) {
+      if (document.routable === false) {
+        continue;
+      }
+
       diagnostics.push(
         createDiagnostic({
           severity: "info",

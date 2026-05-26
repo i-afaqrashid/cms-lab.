@@ -54,6 +54,22 @@ test("validateConfig accepts local CMS provider configs", () => {
     validateConfig({
       ...base,
       cms: {
+        provider: "strapi",
+        url: "http://localhost:1337",
+        singleTypes: [
+          {
+            type: "navbar",
+            endpoint: "navbar",
+          },
+        ],
+      },
+    }).cms.provider,
+  ).toBe("strapi");
+
+  expect(
+    validateConfig({
+      ...base,
+      cms: {
         provider: "directus",
         url: "http://localhost:8055",
         collections: [

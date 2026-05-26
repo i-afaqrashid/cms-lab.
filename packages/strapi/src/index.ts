@@ -5,6 +5,7 @@ import {
   type FetchLike,
   type StrapiCmsProviderConfig,
   type StrapiCollectionConfig,
+  type StrapiSingleTypeConfig,
 } from "@cms-lab/core";
 
 type StrapiResponse = {
@@ -15,6 +16,10 @@ type StrapiResponse = {
       pageCount?: number;
     };
   };
+};
+
+type StrapiSingleTypeResponse = {
+  data?: unknown;
 };
 
 export type FetchStrapiDocumentsOptions = {
@@ -28,14 +33,11 @@ export async function fetchStrapiDocuments(
   const fetchImpl = options.fetch ?? fetch;
   const documents: CMSDocument[] = [];
 
-  for (const collection of config.collections) {
+  for (const collection of config.collections ?? []) {
     let page = 1;
 
     while (true) {
-      const url = new URL(
-        `/api/${trimSlashes(collection.endpoint)}`,
-        config.url,
-      );
+      const url = strapiEndpointUrl(config.url, collection.endpoint);
       url.searchParams.set("pagination[pageSize]", "100");
       url.searchParams.set("pagination[page]", String(page));
       url.searchParams.set("populate", "*");
@@ -60,12 +62,33 @@ export async function fetchStrapiDocuments(
     }
   }
 
+  for (const singleType of config.singleTypes ?? []) {
+    const url = strapiEndpointUrl(config.url, singleType.endpoint);
+    url.searchParams.set("populate", "*");
+
+    const response = await fetchJson<StrapiSingleTypeResponse>(
+      fetchImpl,
+      url,
+      authHeaders(config.token),
+    );
+
+    if (response.data != null) {
+      documents.push(
+        normalizeStrapiItem(singleType, response.data, {
+          fallbackUid: false,
+          routable: false,
+        }),
+      );
+    }
+  }
+
   return documents;
 }
 
 export function normalizeStrapiItem(
-  collection: string | StrapiCollectionConfig,
+  collection: string | StrapiCollectionConfig | StrapiSingleTypeConfig,
   item: unknown,
+  options: { fallbackUid?: boolean; routable?: boolean } = {},
 ): CMSDocument {
   const config = collectionConfig(collection);
   const record = asRecord(item);
@@ -76,20 +99,32 @@ export function normalizeStrapiItem(
     "Strapi item is missing id",
   );
 
-  return {
+  const document: CMSDocument = {
     id,
     type: config.type,
-    uid: optionalString(
-      mappedValue(data, config.uidField) ??
-        data.uid ??
-        data.slug ??
-        record.documentId ??
-        record.id,
-    ),
-    url: optionalString(mappedValue(data, config.urlField)),
     status: normalizeStatus(data),
     data,
   };
+  const uid = optionalString(
+    mappedValue(data, config.uidField) ??
+      data.uid ??
+      data.slug ??
+      (options.fallbackUid === false ? undefined : record.documentId) ??
+      (options.fallbackUid === false ? undefined : record.id),
+  );
+  const url = optionalString(mappedValue(data, config.urlField));
+
+  if (uid) {
+    document.uid = uid;
+  }
+  if (url) {
+    document.url = url;
+  }
+  if (options.routable !== undefined) {
+    document.routable = options.routable;
+  }
+
+  return document;
 }
 
 async function fetchJson<T>(
@@ -137,6 +172,10 @@ function trimSlashes(value: string): string {
   return value.slice(start, end);
 }
 
+function strapiEndpointUrl(baseUrl: string, endpoint: string): URL {
+  return new URL(`/api/${trimSlashes(endpoint)}`, baseUrl);
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object"
     ? (value as Record<string, unknown>)
@@ -174,8 +213,8 @@ function optionalString(value: unknown): string | undefined {
 }
 
 function collectionConfig(
-  collection: string | StrapiCollectionConfig,
-): StrapiCollectionConfig {
+  collection: string | StrapiCollectionConfig | StrapiSingleTypeConfig,
+): StrapiCollectionConfig | StrapiSingleTypeConfig {
   return typeof collection === "string"
     ? { type: collection, endpoint: collection }
     : collection;

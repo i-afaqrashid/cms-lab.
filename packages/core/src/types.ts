@@ -5,6 +5,7 @@ export type CMSDocument = {
   type: string;
   uid?: string;
   url?: string;
+  routable?: boolean;
   status: CMSDocumentStatus;
   data: unknown;
 };
@@ -64,11 +65,17 @@ export type StrapiCollectionConfig = {
   endpoint: string;
 } & CmsFieldMappingConfig;
 
+export type StrapiSingleTypeConfig = {
+  type: string;
+  endpoint: string;
+} & CmsFieldMappingConfig;
+
 export type StrapiCmsProviderConfig = {
   provider: "strapi";
   url: string;
   token?: string;
-  collections: StrapiCollectionConfig[];
+  collections?: StrapiCollectionConfig[];
+  singleTypes?: StrapiSingleTypeConfig[];
 };
 
 export type DirectusCollectionConfig = {

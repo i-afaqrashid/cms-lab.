@@ -258,7 +258,8 @@ function cmsDetails(config: CmsProviderConfig): string {
   if (config.provider === "strapi") {
     return `## CMS details
 
-- Collections: ${config.collections.map((collection) => `${collection.type} (${collection.endpoint})`).join(", ")}`;
+- Collections: ${(config.collections ?? []).map((collection) => `${collection.type} (${collection.endpoint})`).join(", ") || "none"}
+- Single types: ${(config.singleTypes ?? []).map((singleType) => `${singleType.type} (${singleType.endpoint})`).join(", ") || "none"}`;
   }
 
   if (config.provider === "directus") {

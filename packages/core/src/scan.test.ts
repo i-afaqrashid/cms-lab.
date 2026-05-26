@@ -757,6 +757,32 @@ test("scanDocuments reports unrouted CMS document types as info", async () => {
   ]);
 });
 
+test("scanDocuments does not report unmapped routes for non-routable CMS documents", async () => {
+  const result = await scanDocuments({
+    config: baseConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "navbar-1",
+        type: "navbar",
+        status: "published",
+        routable: false,
+        data: { meta_title: "Navbar", meta_description: "Global navigation" },
+      },
+    ],
+    filters: { only: ["routes"] },
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(result.summary).toEqual({ errors: 0, warnings: 0, info: 0 });
+  expect(result.diagnostics).toEqual([]);
+});
+
 test("scanDocuments reports configured required field diagnostics", async () => {
   const result = await scanDocuments({
     config: {

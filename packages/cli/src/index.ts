@@ -970,7 +970,9 @@ function describeCms(config: CmsProviderConfig): string {
 
   if (config.provider === "strapi") {
     return `strapi url=${safeUrl(config.url)} collections=${formatList(
-      config.collections.map((collection) => collection.endpoint),
+      (config.collections ?? []).map((collection) => collection.endpoint),
+    )} singleTypes=${formatList(
+      (config.singleTypes ?? []).map((singleType) => singleType.endpoint),
     )}`;
   }
 

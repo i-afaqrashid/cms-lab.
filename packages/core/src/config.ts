@@ -32,23 +32,31 @@ const cmsFieldMappingShape = {
   urlField: z.string().min(1).optional(),
 };
 
+const strapiContentShape = z
+  .object({
+    type: z.string().min(1),
+    endpoint: z.string().min(1),
+    ...cmsFieldMappingShape,
+  })
+  .strict();
+
 const strapiConfigSchema = z
   .object({
     provider: z.literal("strapi"),
     url: z.string().url(),
     token: z.string().optional(),
-    collections: z
-      .array(
-        z
-          .object({
-            type: z.string().min(1),
-            endpoint: z.string().min(1),
-            ...cmsFieldMappingShape,
-          })
-          .strict(),
-      )
-      .min(1),
+    collections: z.array(strapiContentShape).min(1).optional(),
+    singleTypes: z.array(strapiContentShape).min(1).optional(),
   })
+  .refine(
+    (config) =>
+      (config.collections?.length ?? 0) > 0 ||
+      (config.singleTypes?.length ?? 0) > 0,
+    {
+      message: "Strapi config must include collections or singleTypes",
+      path: ["collections"],
+    },
+  )
   .strict();
 
 const directusConfigSchema = z
