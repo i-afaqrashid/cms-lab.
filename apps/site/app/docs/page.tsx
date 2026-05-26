@@ -14,6 +14,7 @@ export default function DocsPage() {
     <DocsShell
       active="/docs"
       toc={[
+        { href: "#paths", label: "Choose a path" },
         { href: "#how-it-works", label: "How it works" },
         { href: "#install", label: "Install" },
         { href: "#first-scan", label: "First scan" },
@@ -32,6 +33,58 @@ export default function DocsPage() {
         documents, probes expected routes, and produces terminal, JSON, or a
         local HTML report.
       </p>
+
+      <h2 id="paths">Choose a path</h2>
+      <div className="pathList">
+        <div className="pathItem">
+          <strong>I have a Next.js frontend and want to scan routes</strong>
+          <p>
+            Start your app, write the config, run <code>doctor</code>, then run
+            the scan command.
+          </p>
+          <Link href="/docs/scan">Scan command</Link>
+        </div>
+        <div className="pathItem">
+          <strong>I only have a CMS/backend right now</strong>
+          <p>
+            Generate agent context and document route assumptions before the
+            frontend exists.
+          </p>
+          <Link href="/docs/backend-only">Backend-only workflow</Link>
+        </div>
+        <div className="pathItem">
+          <strong>I use Directus, Strapi, or another relational CMS</strong>
+          <p>
+            Check adapter maturity first, then model route mappings and required
+            fields explicitly.
+          </p>
+          <Link href="/docs/tested-with">Adapter maturity matrix</Link>
+        </div>
+        <div className="pathItem">
+          <strong>I want CI output</strong>
+          <p>
+            Run cms-lab after the app is serving and upload the local report as
+            a private artifact.
+          </p>
+          <Link href="/docs/ci">CI setup</Link>
+        </div>
+        <div className="pathItem">
+          <strong>I want AI/coding-agent context</strong>
+          <p>
+            Generate safe project context files for tools that need CMS and
+            route information.
+          </p>
+          <Link href="/docs/agent-context">Agent context</Link>
+        </div>
+        <div className="pathItem">
+          <strong>I need to understand a first scan</strong>
+          <p>
+            Read the diagnostic codes and compare the output with common CMS
+            failure examples.
+          </p>
+          <Link href="/docs/diagnostics">Diagnostics</Link>
+        </div>
+      </div>
 
       <h2 id="how-it-works">How it works</h2>
       <p>
