@@ -93,6 +93,10 @@ export default function DirectusRestaurantExamplePage() {
         menu route needs a branch slug, make that slug available in the fetched
         item data or use a denormalized route field.
       </p>
+      <p>
+        A starter version of this shape is available from{" "}
+        <code>cms-lab init --cms directus --router pages</code>.
+      </p>
       <CodeBlock>{`import { defineConfig, readCmsDataPath } from "@cms-lab/core";
 
 export default defineConfig({
@@ -106,8 +110,8 @@ export default defineConfig({
       { type: "branch", collection: "branches", uidField: "slug" },
       { type: "category", collection: "menu_categories", uidField: "slug" },
       { type: "menu_item", collection: "menu_items", uidField: "slug", urlField: "routing.url" },
-      { type: "pricing", collection: "item_branch_pricing" },
-      { type: "inventory", collection: "inventory" },
+      { type: "pricing", collection: "item_branch_pricing", uidField: "id", routable: false },
+      { type: "inventory", collection: "inventory", uidField: "id", routable: false },
     ],
   },
   routes: [

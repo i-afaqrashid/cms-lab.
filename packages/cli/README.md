@@ -11,6 +11,7 @@ npx @cms-lab/cli scan
 ```sh
 cms-lab init
 cms-lab init --cms strapi --router pages
+cms-lab init --cms directus --router pages
 cms-lab doctor
 cms-lab doctor --debug --verbose 2
 cms-lab scan --report
@@ -42,6 +43,8 @@ project-specific required fields.
 
 `cms-lab init --cms strapi --router pages` writes a Strapi starter config with
 collections, single types, route examples, and the Strapi relation route helper.
+`cms-lab init --cms directus --router pages` writes a Directus starter config
+with branch, menu item, category, and non-routable pricing collection examples.
 Use `site.healthPath` or `site.healthUrl` in config when the app root is not the
 right page for the initial health probe.
 

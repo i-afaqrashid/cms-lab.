@@ -179,6 +179,12 @@ cms: {
       collection: "pages",
       uidField: "routing.slug",
     },
+    {
+      type: "pricing",
+      collection: "item_branch_pricing",
+      uidField: "id",
+      routable: false,
+    },
   ],
 }
 

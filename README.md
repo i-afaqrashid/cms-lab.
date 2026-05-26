@@ -233,6 +233,7 @@ dotted paths from `document.data`.
 ```sh
 cms-lab init
 cms-lab init --cms strapi --router pages
+cms-lab init --cms directus --router pages
 cms-lab doctor
 cms-lab scan
 cms-lab agent-context

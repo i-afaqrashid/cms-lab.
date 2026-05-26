@@ -26,6 +26,21 @@ statuses such as archived content as `draft`.
 Use `uidField` or `urlField` when your project stores route values in custom
 fields. Both options read dotted paths from `document.data`.
 
+Use `routable: false` for relation-heavy collections that should be checked for
+fields but should not create route-unmapped diagnostics:
+
+```ts
+collections: [
+  { type: "menu_item", collection: "menu_items", uidField: "slug" },
+  {
+    type: "pricing",
+    collection: "item_branch_pricing",
+    uidField: "id",
+    routable: false,
+  },
+];
+```
+
 See the public [adapter maturity matrix](https://cmslab.afaqrashid.com/docs/tested-with)
 for current test coverage and known limits.
 
