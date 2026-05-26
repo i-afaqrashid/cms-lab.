@@ -106,7 +106,7 @@ export async function runCli(
   const program = new Command()
     .name("cms-lab")
     .description("Catch CMS bugs before deploy.")
-    .version("1.0.9")
+    .version("1.0.10")
     .exitOverride()
     .configureOutput({
       writeOut: (text) => writeStdout(dependencies, text),

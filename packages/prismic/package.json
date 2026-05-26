@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/prismic",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "type": "module",
   "description": "Prismic document adapter for cms-lab.",
   "license": "MIT",
