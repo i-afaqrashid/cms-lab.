@@ -19,6 +19,7 @@ export default function DocsPage() {
         { href: "#first-scan", label: "First scan" },
         { href: "#backend-only", label: "Backend-only" },
         { href: "#examples", label: "Examples" },
+        { href: "#stability", label: "Stability" },
         { href: "#next", label: "Next" },
       ]}
     >
@@ -88,6 +89,16 @@ export default function DocsPage() {
         <a href={stackBlitzStarterUrl}>Run in StackBlitz</a>
       </p>
 
+      <h2 id="stability">Project stability</h2>
+      <p>
+        cms-lab is early, so the docs separate stable CLI behavior from adapter
+        maturity and planned checks. Review the versioning policy before using a
+        scan as a deploy gate.
+      </p>
+      <p>
+        <Link href="/docs/versioning">Read the versioning policy</Link>
+      </p>
+
       <h2 id="next">Where to next</h2>
       <ul>
         <li>
@@ -112,6 +123,9 @@ export default function DocsPage() {
         </li>
         <li>
           <Link href="/docs/agent-context">Generate agent context files</Link>
+        </li>
+        <li>
+          <Link href="/docs/versioning">Review stability and versioning</Link>
         </li>
         <li>
           <Link href="/docs/ci">Wire it into CI</Link>
