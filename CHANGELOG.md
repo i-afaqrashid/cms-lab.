@@ -4,6 +4,26 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.2.6 - 2026-05-26
+
+### Added
+
+- Added `diagnosticGroups` to scan results so repeated findings are grouped by
+  diagnostic code, severity, content type, and route pattern where available.
+- Added repeated-finding summaries to terminal, Markdown, and HTML report
+  output while keeping full row-level diagnostics visible.
+
+### Documentation
+
+- Documented grouped output in the README, scan docs, and bug examples.
+
+### Verification
+
+- Added core scan, terminal output, Markdown exporter, and HTML reporter tests
+  for grouped diagnostics.
+- Verified with `pnpm test`, `pnpm typecheck`, `pnpm build`,
+  `pnpm site:build`, `pnpm lint`, and `pnpm format:check`.
+
 ## 1.2.5 - 2026-05-26
 
 ### Added
