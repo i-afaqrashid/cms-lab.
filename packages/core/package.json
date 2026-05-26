@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/core",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "type": "module",
   "description": "Core config, scan, diagnostics, and checks for cms-lab.",
   "license": "MIT",
