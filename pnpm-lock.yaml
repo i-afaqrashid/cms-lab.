@@ -94,10 +94,10 @@ importers:
         version: 19.2.6(react@19.2.6)
     devDependencies:
       "@cms-lab/cli":
-        specifier: ^1.2.1
+        specifier: latest
         version: 1.2.1
       "@cms-lab/core":
-        specifier: ^1.2.1
+        specifier: latest
         version: 1.2.1
 
   examples/next-prismic:
@@ -113,10 +113,10 @@ importers:
         version: 19.2.6(react@19.2.6)
     devDependencies:
       "@cms-lab/cli":
-        specifier: ^1.2.1
+        specifier: latest
         version: 1.2.1
       "@cms-lab/core":
-        specifier: ^1.2.1
+        specifier: latest
         version: 1.2.1
 
   packages/cli:

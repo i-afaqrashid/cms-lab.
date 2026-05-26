@@ -4,6 +4,30 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.2.2 - 2026-05-26
+
+### Added
+
+- Added CMS-only `agent-context` support so backend/CMS repositories with a
+  valid cms-lab config can generate `AGENTS.md`, `.cms-lab/agent-context.md`,
+  `.cms-lab/agent-prompt.md`, and tool-specific files before a Next.js
+  frontend exists.
+- Added `cms-lab agent-context --mode auto|next|cms-only`. The default
+  `auto` mode falls back to CMS-only context when no Next.js app is detected;
+  `--mode next` preserves strict frontend detection.
+
+### Fixed
+
+- Kept runnable example package manifests installable on prerelease branches by
+  using published npm `latest` packages instead of unpublished future workspace
+  versions.
+
+### Verification
+
+- Added CLI tests for CMS-only agent-context generation, strict Next.js mode,
+  and generated all-preset agent files.
+- Verified with `pnpm verify` and `pnpm audit --audit-level moderate`.
+
 ## 1.2.1 - 2026-05-26
 
 ### Fixed
