@@ -17,6 +17,7 @@ export default function ExamplesPage() {
       toc={[
         { href: "#browser", label: "Browser examples" },
         { href: "#local", label: "Local run" },
+        { href: "#config-examples", label: "Config examples" },
         { href: "#github-actions", label: "GitHub Actions" },
       ]}
     >
@@ -67,6 +68,19 @@ export default function ExamplesPage() {
       <CodeBlock>{`cd examples/broken-prismic-demo
 npx @cms-lab/cli doctor
 npx @cms-lab/cli scan --ci --report --markdown --junit --fail-on never`}</CodeBlock>
+
+      <h2 id="config-examples">Config examples</h2>
+      <p>
+        Some examples are documentation-first because they need a real CMS and a
+        real frontend before they can be runnable in a browser workspace.
+      </p>
+      <ul>
+        <li>
+          <Link href="/docs/examples/directus-restaurant">
+            Directus restaurant catalog
+          </Link>
+        </li>
+      </ul>
 
       <h2 id="github-actions">Use it in GitHub Actions</h2>
       <p>

@@ -312,6 +312,10 @@ See [`/docs/providers`](https://cmslab.afaqrashid.com/docs/providers) for
 provider-specific setup notes for Prismic, Strapi, Directus, WordPress,
 Contentful, and Sanity.
 
+See
+[`/docs/examples/directus-restaurant`](https://cmslab.afaqrashid.com/docs/examples/directus-restaurant)
+for a generic Directus restaurant/catalog configuration.
+
 ## Checks
 
 cms-lab currently checks:

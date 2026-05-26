@@ -83,6 +83,15 @@ npx @cms-lab/cli scan --ci --report --fail-on error`}</CodeBlock>
         Check the <Link href="/docs/tested-with">adapter maturity matrix</Link>{" "}
         before using this provider as a strict deploy gate.
       </p>
+      {provider.slug === "directus" ? (
+        <p>
+          For a larger relational setup, read the{" "}
+          <Link href="/docs/examples/directus-restaurant">
+            Directus restaurant catalog example
+          </Link>
+          .
+        </p>
+      ) : null}
     </DocsShell>
   );
 }
