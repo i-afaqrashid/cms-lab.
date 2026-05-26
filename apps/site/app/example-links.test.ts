@@ -39,12 +39,15 @@ describe("public runnable examples", () => {
       "apps/site/app/docs/examples/page.tsx",
       "utf8",
     );
-    const newRoute = readFileSync("apps/site/app/new/route.ts", "utf8");
+    const newPage = readFileSync("apps/site/app/new/page.tsx", "utf8");
 
     expect(docsExamples).toContain('active="/docs/examples"');
     expect(docsExamples).toContain("exampleProjects.map");
     expect(docsExamples).toContain("href={example.url}");
     expect(docsExamples).toContain("Run in StackBlitz");
+    expect(newPage).toContain("stackBlitzStarterUrl");
+    expect(newPage).toContain('httpEquiv="refresh"');
+    expect(newPage).toContain("window.location.replace");
 
     for (const example of exampleProjects) {
       const directory = example.path;
@@ -68,7 +71,6 @@ describe("public runnable examples", () => {
 
       expect(rootReadme).toContain(example.url);
       expect(examplesReadme).toContain(example.url);
-      expect(newRoute).toContain(stackBlitzStarterUrl);
 
       const readme = readFileSync(join(directory, "README.md"), "utf8");
       expect(readme).toContain("Run in StackBlitz");
