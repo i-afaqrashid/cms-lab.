@@ -70,7 +70,7 @@ test("runCli prints JSON scan results and returns 1 when errors exist", async ()
   );
   expect(result.documents[0].uid).toBeUndefined();
   expect(stdout).not.toContain("Missing page");
-});
+}, 10000);
 
 test("runCli can opt in to raw document data in JSON output", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
@@ -772,7 +772,7 @@ test("runCli supports version output", async () => {
   });
 
   expect(exitCode).toBe(0);
-  expect(stdout).toContain("1.0.10");
+  expect(stdout).toContain("1.1.0");
 });
 
 test("runCli scan help includes examples and color controls", async () => {

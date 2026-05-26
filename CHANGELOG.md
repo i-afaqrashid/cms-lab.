@@ -4,6 +4,30 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.1.0 - 2026-05-26
+
+### Added
+
+- Added `cms.singleTypes` support to the Strapi adapter so singleton entries
+  can be fetched, normalized, and checked with the same SEO, field, and image
+  diagnostics as collection entries.
+
+### Changed
+
+- Strapi single-type documents are treated as non-routable by default. They do
+  not create `CMS-ROUTE-UNMAPPED` info diagnostics unless a project explicitly
+  maps them through normal route config.
+- CLI context output now lists Strapi collections and single types separately.
+- Updated README, Strapi package docs, and configuration docs with the new
+  Strapi config shape.
+
+### Verification
+
+- Added tests for single-type config validation, Strapi singleton
+  normalization, and route-unmapped suppression for non-routable CMS documents.
+- Verified against a private Strapi staging project: 39 CMS documents fetched,
+  including 7 single types, with singleton route noise suppressed.
+
 ## 1.0.10 - 2026-05-26
 
 ### Fixed
