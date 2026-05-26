@@ -6,6 +6,7 @@ export type CMSDocument = {
   uid?: string;
   url?: string;
   routable?: boolean;
+  entryKind?: "collection" | "single";
   status: CMSDocumentStatus;
   data: unknown;
 };
@@ -60,20 +61,27 @@ export type CmsFieldMappingConfig = {
   urlField?: string;
 };
 
+export type StrapiLocaleConfig = {
+  locale?: string;
+};
+
 export type StrapiCollectionConfig = {
   type: string;
   endpoint: string;
-} & CmsFieldMappingConfig;
+} & CmsFieldMappingConfig &
+  StrapiLocaleConfig;
 
 export type StrapiSingleTypeConfig = {
   type: string;
   endpoint: string;
-} & CmsFieldMappingConfig;
+} & CmsFieldMappingConfig &
+  StrapiLocaleConfig;
 
 export type StrapiCmsProviderConfig = {
   provider: "strapi";
   url: string;
   token?: string;
+  locale?: string;
   collections?: StrapiCollectionConfig[];
   singleTypes?: StrapiSingleTypeConfig[];
 };
@@ -142,6 +150,8 @@ export type CmsProviderConfig =
 export type CmsLabConfig = {
   site: {
     url: string;
+    healthPath?: string;
+    healthUrl?: string;
   };
   framework: {
     type: "next";

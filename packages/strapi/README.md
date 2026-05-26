@@ -7,6 +7,7 @@ cms: {
   provider: "strapi",
   url: "http://localhost:1337",
   token: process.env.STRAPI_TOKEN,
+  locale: "en",
   collections: [
     {
       type: "page",
@@ -36,6 +37,19 @@ for layout or site-wide content such as navbars, footers, and homepage sections.
 
 Use `uidField` or `urlField` when your project stores route values in custom
 fields. Both options read dotted paths from `document.data`.
+
+Set `cms.locale` to fetch all configured collections and single types for a
+locale. Individual collection or single-type entries can override it with their
+own `locale` value.
+
+For Next.js Pages Router projects, start with:
+
+```sh
+cms-lab init --cms strapi --router pages
+```
+
+The generated config includes collection routes, single types, and
+`strapiRelationSlug` for relation-based URL segments.
 
 ## Release History
 

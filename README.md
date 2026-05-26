@@ -52,6 +52,16 @@ export default defineConfig({
 });
 ```
 
+For localized apps where `/` is not the page you want to probe first, keep
+routes relative to `site.url` and set a health route separately:
+
+```ts
+site: {
+  url: "http://localhost:3000",
+  healthPath: "/en",
+}
+```
+
 Run your Next.js app, then scan it:
 
 ```sh
@@ -89,10 +99,13 @@ cms: {
 Strapi:
 
 ```ts
+import { strapiRelationSlug } from "@cms-lab/core";
+
 cms: {
   provider: "strapi",
   url: "http://localhost:1337",
   token: process.env.STRAPI_TOKEN,
+  locale: "en",
   collections: [
     {
       type: "page",
@@ -107,7 +120,19 @@ cms: {
       endpoint: "navbar",
     },
   ],
-}
+},
+
+routes: [
+  { type: "page", pattern: "/:slug", getPath: (doc) => `/${doc.uid}` },
+  {
+    type: "article",
+    pattern: "/blog/:topic/:slug",
+    getPath: (doc) => {
+      const topic = strapiRelationSlug(doc.data, "topic") ?? "uncategorized";
+      return `/blog/${topic}/${doc.uid}`;
+    },
+  },
+]
 ```
 
 Directus:
@@ -195,6 +220,7 @@ dotted paths from `document.data`.
 
 ```sh
 cms-lab init
+cms-lab init --cms strapi --router pages
 cms-lab doctor
 cms-lab scan
 cms-lab agent-context
@@ -246,6 +272,21 @@ The generated files point agents to the cms-lab GitHub repository, npm package,
 docs, local command examples, configured route patterns, and safe project facts
 without including tokens, raw CMS payloads, private URLs, webhook URLs, or local
 absolute paths.
+
+## Tested With
+
+The public test matrix lives at
+[`/docs/tested-with`](https://cmslab.afaqrashid.com/docs/tested-with). It lists
+only paths covered by a fixture, adapter test, public demo, or repeatable smoke
+test.
+
+Current coverage includes Prismic with Next.js App Router, Strapi v4 with
+Next.js Pages Router, Strapi single types, and adapter fixture checks for
+Directus, WordPress, Contentful, and Sanity.
+
+See
+[`/docs/bug-examples`](https://cmslab.afaqrashid.com/docs/bug-examples) for the
+ordinary CMS failures cms-lab is built to catch.
 
 ## Checks
 

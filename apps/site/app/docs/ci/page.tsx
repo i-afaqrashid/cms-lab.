@@ -12,6 +12,7 @@ export default function CiPage() {
       active="/docs/ci"
       toc={[
         { href: "#github-actions", label: "GitHub Actions" },
+        { href: "#copy-paste", label: "Copy-paste workflow" },
         { href: "#thresholds", label: "Thresholds" },
         { href: "#artifacts", label: "Artifacts" },
       ]}
@@ -32,6 +33,11 @@ export default function CiPage() {
     fail-on: error`}</CodeBlock>
 
       <p>For teams that prefer explicit shell steps:</p>
+      <h2 id="copy-paste">Copy-paste workflow</h2>
+      <p>
+        This workflow builds the app, starts it, waits for the local URL, runs
+        cms-lab, and uploads the HTML report even when the scan fails.
+      </p>
       <CodeBlock>{`name: cms-lab
 on: [pull_request]
 

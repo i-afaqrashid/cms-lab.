@@ -27,7 +27,11 @@ test("defineConfig preserves config shape for typed user configs", () => {
 
 test("validateConfig accepts local CMS provider configs", () => {
   const base = {
-    site: { url: "http://localhost:3000" },
+    site: {
+      url: "http://localhost:3000",
+      healthPath: "/en",
+      healthUrl: "http://localhost:3000/en/health",
+    },
     framework: { type: "next", router: "app" },
     routes: [{ type: "page", pattern: "/:uid", getPath: () => "/about" }],
   };
@@ -38,12 +42,14 @@ test("validateConfig accepts local CMS provider configs", () => {
       cms: {
         provider: "strapi",
         url: "http://localhost:1337",
+        locale: "en",
         collections: [
           {
             type: "page",
             endpoint: "pages",
             uidField: "metadata.handle",
             urlField: "metadata.path",
+            locale: "all",
           },
         ],
       },
@@ -60,6 +66,7 @@ test("validateConfig accepts local CMS provider configs", () => {
           {
             type: "navbar",
             endpoint: "navbar",
+            locale: "en",
           },
         ],
       },
@@ -139,6 +146,17 @@ test("validateConfig accepts local CMS provider configs", () => {
       },
     }).cms.provider,
   ).toBe("sanity");
+});
+
+test("validateConfig rejects unsafe site health paths", () => {
+  expect(() =>
+    validateConfig({
+      site: { url: "http://localhost:3000", healthPath: "//example.com" },
+      framework: { type: "next", router: "app" },
+      cms: { provider: "prismic", repositoryName: "demo" },
+      routes: [{ type: "page", pattern: "/:uid", getPath: () => "/about" }],
+    }),
+  ).toThrow(/healthPath/);
 });
 
 test("validateConfig accepts required field check rules", () => {

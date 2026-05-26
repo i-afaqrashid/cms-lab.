@@ -23,6 +23,10 @@ Try it:
 
 npx @cms-lab/cli scan --ci --report
 
+If your app uses a localized route like /en as the real healthy entrypoint,
+cms-lab now supports that with site.healthPath while keeping page route checks
+explicit.
+
 The thing I want most is real setup feedback: CMS provider, Next.js router type, config shape, and the first diagnostic that helped or confused you.
 ```
 
@@ -48,6 +52,8 @@ I built cms-lab for teams shipping Next.js sites backed by headless CMS content.
 The CLI runs locally in your project. It does not require a hosted cms-lab account. It fetches content from the CMS you configure, checks mapped routes and fields, then writes terminal, JSON, Markdown, JUnit, Slack, and HTML report output.
 
 I am looking for feedback from people using Prismic, Strapi, Directus, WordPress, Contentful, or Sanity with Next.js.
+
+The tested-with matrix is public in the docs so people can see which adapter paths have fixture or smoke-test coverage.
 ```
 
 ## Prismic Community
@@ -81,6 +87,10 @@ Try:
 npx @cms-lab/cli scan --ci --report
 
 I am especially looking for feedback from Strapi projects with nested slug fields, dynamic zones, or custom SEO objects.
+
+There is now a Strapi Pages Router starter config:
+
+cms-lab init --cms strapi --router pages
 ```
 
 ## Directus Community

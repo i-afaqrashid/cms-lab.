@@ -821,6 +821,16 @@ code {
   color: var(--muted);
 }
 
+.docsImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
 .metricGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

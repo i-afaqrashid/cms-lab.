@@ -9,6 +9,7 @@ import {
   SiteUnreachableError,
   explainDiagnostic,
   loadCmsLabConfig,
+  resolveSiteHealthUrl,
   scanDocuments,
   type CMSDocument,
   type CmsProviderConfig,
@@ -86,8 +87,12 @@ type DoctorCommandOptions = {
 type InitCommandOptions = {
   config?: string;
   force?: boolean;
+  cms?: string;
+  router?: string;
   repository?: string;
   url?: string;
+  strapiUrl?: string;
+  strapiLocale?: string;
 };
 
 type AgentContextCommandOptions = {
@@ -259,14 +264,27 @@ Examples:
     .description("Create a starter cms-lab.config.ts file.")
     .option("--config <path>", "Config file path", "cms-lab.config.ts")
     .option("--force", "Overwrite an existing config file")
+    .option(
+      "--cms <provider>",
+      "Starter CMS provider: prismic or strapi",
+      "prismic",
+    )
+    .option("--router <router>", "Next.js router: app or pages", "app")
     .option("--repository <name>", "Prismic repository name", "my-repo")
     .option("--url <url>", "Site URL", "http://localhost:3000")
+    .option(
+      "--strapi-url <url>",
+      "Strapi REST API URL",
+      "http://localhost:1337",
+    )
+    .option("--strapi-locale <locale>", "Strapi locale query param")
     .addHelpText(
       "after",
       `
 Examples:
   cms-lab init
   cms-lab init --repository my-prismic-repo --url http://localhost:3000
+  cms-lab init --cms strapi --router pages --strapi-url http://localhost:1337
   cms-lab init --config cms-lab.config.ts --force
 `,
     )
@@ -570,9 +588,10 @@ async function runDoctor(
     );
 
     const endSite = debug.time("site probe", 2);
-    await fetchSite(config.site.url, dependencies.fetch, timeoutMs, retries);
+    const healthUrl = resolveSiteHealthUrl(config.site).toString();
+    await fetchSite(healthUrl, dependencies.fetch, timeoutMs, retries);
     endSite();
-    writeStdout(dependencies, `site ok - ${config.site.url}\n`);
+    writeStdout(dependencies, `site ok - ${siteUrlForOutput(healthUrl)}\n`);
 
     const endCms = debug.time("cms fetch", 2);
     const documents = await fetchCmsDocuments(config.cms, dependencies);
@@ -657,13 +676,7 @@ async function runInit(
     }
 
     await mkdir(dirname(target), { recursive: true });
-    await writeFile(
-      target,
-      starterConfig({
-        repository: options.repository ?? "my-repo",
-        url: options.url ?? "http://localhost:3000",
-      }),
-    );
+    await writeFile(target, starterConfig(parseInitOptions(options)));
     writeStdout(dependencies, `created ${target}\n`);
     return 0;
   } catch (error) {
@@ -1026,6 +1039,17 @@ function safeUrl(value: string): string {
     return url.toString().replace(/\/$/, "");
   } catch {
     return "<invalid-url>";
+  }
+}
+
+function siteUrlForOutput(value: string): string {
+  try {
+    const url = new URL(value);
+    const auth = url.username || url.password ? "[redacted]@" : "";
+    const hash = url.hash ? "#[redacted]" : "";
+    return `${url.protocol}//${auth}${url.host}${url.pathname}${url.search ? "?[redacted]" : ""}${hash}`;
+  } catch {
+    return redactSensitive(value);
   }
 }
 
@@ -1443,12 +1467,46 @@ function plural(value: number, singular: string): string {
   return value === 1 ? singular : `${singular}s`;
 }
 
-function starterConfig(options: { repository: string; url: string }): string {
+type ParsedInitOptions = {
+  cms: "prismic" | "strapi";
+  router: ProjectInfo["router"];
+  repository: string;
+  url: string;
+  strapiUrl: string;
+  strapiLocale?: string;
+};
+
+function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
+  const cms = options.cms ?? "prismic";
+  if (cms !== "prismic" && cms !== "strapi") {
+    throw new ConfigLoadError("--cms must be one of: prismic, strapi");
+  }
+
+  const router = options.router ?? "app";
+  if (router !== "app" && router !== "pages") {
+    throw new ConfigLoadError("--router must be one of: app, pages");
+  }
+
+  return {
+    cms,
+    router,
+    repository: options.repository ?? "my-repo",
+    url: options.url ?? "http://localhost:3000",
+    strapiUrl: options.strapiUrl ?? "http://localhost:1337",
+    strapiLocale: options.strapiLocale,
+  };
+}
+
+function starterConfig(options: ParsedInitOptions): string {
+  if (options.cms === "strapi") {
+    return strapiStarterConfig(options);
+  }
+
   return `import { defineConfig } from "@cms-lab/core";
 
 export default defineConfig({
   site: { url: ${JSON.stringify(options.url)} },
-  framework: { type: "next", router: "app" },
+  framework: { type: "next", router: ${JSON.stringify(options.router)} },
   cms: {
     provider: "prismic",
     repositoryName: ${JSON.stringify(options.repository)},
@@ -1460,6 +1518,48 @@ export default defineConfig({
       type: "blog_post",
       pattern: "/blog/:uid",
       getPath: (doc) => \`/blog/\${doc.uid}\`,
+    },
+  ],
+});
+`;
+}
+
+function strapiStarterConfig(options: ParsedInitOptions): string {
+  const localeLine = options.strapiLocale
+    ? `\n    locale: ${JSON.stringify(options.strapiLocale)},`
+    : "";
+
+  return `import { defineConfig, strapiRelationSlug } from "@cms-lab/core";
+
+export default defineConfig({
+  site: {
+    url: ${JSON.stringify(options.url)},
+    // Use healthPath when your app's root redirects or errors but a locale route is healthy.
+    // healthPath: "/en",
+  },
+  framework: { type: "next", router: ${JSON.stringify(options.router)} },
+  cms: {
+    provider: "strapi",
+    url: ${JSON.stringify(options.strapiUrl)},
+    token: process.env.STRAPI_TOKEN,${localeLine}
+    collections: [
+      { type: "page", endpoint: "pages", uidField: "slug" },
+      { type: "article", endpoint: "articles", uidField: "slug" },
+    ],
+    singleTypes: [
+      { type: "navbar", endpoint: "navbar" },
+      { type: "footer", endpoint: "footer" },
+    ],
+  },
+  routes: [
+    { type: "page", pattern: "/:slug", getPath: (doc) => \`/\${doc.uid}\` },
+    {
+      type: "article",
+      pattern: "/blog/:topic/:slug",
+      getPath: (doc) => {
+        const topic = strapiRelationSlug(doc.data, "topic") ?? "uncategorized";
+        return \`/blog/\${topic}/\${doc.uid}\`;
+      },
     },
   ],
 });

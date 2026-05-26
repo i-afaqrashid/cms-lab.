@@ -184,6 +184,41 @@ test("renderHtmlReport emits real filter chips for severity and diagnostic group
   expect(html).toContain('data-diagnostic data-group="seo"');
 });
 
+test("renderHtmlReport summarizes collection and single-type documents when metadata is available", () => {
+  const html = renderHtmlReport({
+    project: {
+      framework: "next",
+      router: "pages",
+      rootDir: "/site",
+      pagesDir: "/site/pages",
+    },
+    documents: [
+      {
+        id: "page-1",
+        type: "page",
+        uid: "about",
+        status: "published",
+        entryKind: "collection",
+        data: {},
+      },
+      {
+        id: "navbar-1",
+        type: "navbar",
+        status: "published",
+        routable: false,
+        entryKind: "single",
+        data: {},
+      },
+    ],
+    diagnostics: [],
+    summary: { errors: 0, warnings: 0, info: 0 },
+  });
+
+  expect(html).toContain("Collections");
+  expect(html).toContain("Single types");
+  expect(html).toContain("1 single type");
+});
+
 test("renderHtmlReport filter script hides non-matching diagnostics", () => {
   const html = renderHtmlReport({
     project: {

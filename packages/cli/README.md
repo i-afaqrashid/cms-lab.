@@ -10,6 +10,7 @@ npx @cms-lab/cli scan
 
 ```sh
 cms-lab init
+cms-lab init --cms strapi --router pages
 cms-lab doctor
 cms-lab doctor --debug --verbose 2
 cms-lab scan --report
@@ -36,6 +37,11 @@ cms-lab supports Next.js App Router and Pages Router projects using Prismic,
 Strapi, Directus, WordPress, Contentful, and Sanity. It validates configured CMS
 route mappings, route reachability, UID gaps, SEO metadata, image alt text, and
 project-specific required fields.
+
+`cms-lab init --cms strapi --router pages` writes a Strapi starter config with
+collections, single types, route examples, and the Strapi relation route helper.
+Use `site.healthPath` or `site.healthUrl` in config when the app root is not the
+right page for the initial health probe.
 
 Debug logs use stderr and support `--debug` plus `--verbose <0|1|2|3>`, so JSON
 scan output remains clean on stdout. Raw CMS document `data` is redacted from

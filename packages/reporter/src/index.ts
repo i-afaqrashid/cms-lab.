@@ -37,6 +37,7 @@ export function renderHtmlReport(result: ScanResult): string {
         ? "warn"
         : "ok";
   const grouped = groupDiagnostics(diagnostics);
+  const documentStats = summarizeDocuments(result);
 
   return `<!doctype html>
 <html lang="en">
@@ -217,6 +218,12 @@ export function renderHtmlReport(result: ScanResult): string {
       font-size: 22px;
       color: var(--ink);
       margin-top: 4px;
+    }
+    .stat .sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
     }
     .stat.err .v { color: var(--error); }
     .report-toolbar {
@@ -431,6 +438,12 @@ export function renderHtmlReport(result: ScanResult): string {
           <div class="stat warn"><div class="k">Warnings</div><div class="v">${result.summary.warnings}</div></div>
           <div class="stat info"><div class="k">Info</div><div class="v">${result.summary.info}</div></div>
           <div class="stat"><div class="k">Documents</div><div class="v">${result.documents.length}</div></div>
+          ${
+            documentStats.hasEntryKinds
+              ? `<div class="stat"><div class="k">Collections</div><div class="v">${documentStats.collections}</div><div class="sub">${documentStats.collections} ${escapeHtml(plural(documentStats.collections, "collection"))}</div></div>
+          <div class="stat"><div class="k">Single types</div><div class="v">${documentStats.singleTypes}</div><div class="sub">${documentStats.singleTypes} ${escapeHtml(plural(documentStats.singleTypes, "single type"))}</div></div>`
+              : ""
+          }
         </div>
 
         <div class="report-toolbar" aria-label="Diagnostic filters">
@@ -503,6 +516,27 @@ type DiagnosticGroup = {
   label: string;
   diagnostics: Diagnostic[];
 };
+
+type DocumentStats = {
+  collections: number;
+  singleTypes: number;
+  hasEntryKinds: boolean;
+};
+
+function summarizeDocuments(result: ScanResult): DocumentStats {
+  const collections = result.documents.filter(
+    (document) => document.entryKind === "collection",
+  ).length;
+  const singleTypes = result.documents.filter(
+    (document) => document.entryKind === "single",
+  ).length;
+
+  return {
+    collections,
+    singleTypes,
+    hasEntryKinds: collections > 0 || singleTypes > 0,
+  };
+}
 
 function statusLabel(result: ScanResult): string {
   if (result.summary.errors > 0) {
