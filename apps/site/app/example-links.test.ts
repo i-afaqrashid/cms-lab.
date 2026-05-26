@@ -7,8 +7,6 @@ import { exampleProjects, stackBlitzStarterUrl } from "./example-links";
 
 const stackBlitzBase =
   "https://stackblitz.com/fork/github/i-afaqrashid/cms-lab/tree/main/examples";
-const packageVersion = JSON.parse(readFileSync("package.json", "utf8"))
-  .version as string;
 
 describe("public runnable examples", () => {
   test("defines StackBlitz links for repo-backed examples", () => {
@@ -57,12 +55,8 @@ describe("public runnable examples", () => {
         readFileSync(join(directory, "package.json"), "utf8"),
       );
       expect(manifest.private).toBe(true);
-      expect(manifest.devDependencies["@cms-lab/cli"]).toBe(
-        `^${packageVersion}`,
-      );
-      expect(manifest.devDependencies["@cms-lab/core"]).toBe(
-        `^${packageVersion}`,
-      );
+      expect(manifest.devDependencies["@cms-lab/cli"]).toBe("latest");
+      expect(manifest.devDependencies["@cms-lab/core"]).toBe("latest");
       expect(JSON.stringify(manifest)).not.toMatch(
         /workspace:|file:|link:|portal:/,
       );

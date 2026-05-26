@@ -13,7 +13,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@cms-lab/cli": "^1.2.1",
-    "@cms-lab/core": "^1.2.1"
+    "@cms-lab/cli": "latest",
+    "@cms-lab/core": "latest"
   }
 }
