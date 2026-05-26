@@ -19,6 +19,7 @@ export default function DocsPage() {
         { href: "#first-scan", label: "First scan" },
         { href: "#backend-only", label: "Backend-only" },
         { href: "#examples", label: "Examples" },
+        { href: "#comparison", label: "Comparison" },
         { href: "#stability", label: "Stability" },
         { href: "#next", label: "Next" },
       ]}
@@ -89,6 +90,16 @@ export default function DocsPage() {
         <a href={stackBlitzStarterUrl}>Run in StackBlitz</a>
       </p>
 
+      <h2 id="comparison">How it fits with other tools</h2>
+      <p>
+        cms-lab does not replace Playwright, Lighthouse CI, accessibility tools,
+        or link checkers. It covers the CMS-aware layer between content records
+        and routes.
+      </p>
+      <p>
+        <Link href="/docs/comparison">Read the comparison guide</Link>
+      </p>
+
       <h2 id="stability">Project stability</h2>
       <p>
         cms-lab is early, so the docs separate stable CLI behavior from adapter
@@ -117,6 +128,9 @@ export default function DocsPage() {
         </li>
         <li>
           <Link href="/docs/tested-with">Check the tested-with matrix</Link>
+        </li>
+        <li>
+          <Link href="/docs/comparison">Compare cms-lab with other tools</Link>
         </li>
         <li>
           <Link href="/docs/bug-examples">Review real bug examples</Link>

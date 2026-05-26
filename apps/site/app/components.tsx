@@ -16,6 +16,7 @@ export const docsNav: Array<{ title: string; links: DocLink[] }> = [
       { href: "/docs/scan", label: "Scan command" },
       { href: "/docs/examples", label: "Examples" },
       { href: "/docs/tested-with", label: "Tested with" },
+      { href: "/docs/comparison", label: "Comparison" },
       { href: "/docs/agent-context", label: "Agent context" },
       { href: "/docs/versioning", label: "Versioning" },
     ],
