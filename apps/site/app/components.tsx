@@ -26,6 +26,7 @@ export const docsNav: Array<{ title: string; links: DocLink[] }> = [
     links: [
       { href: "/docs/ci", label: "CI" },
       { href: "/docs/diagnostics", label: "Diagnostics" },
+      { href: "/docs/troubleshooting", label: "Troubleshooting" },
       { href: "/docs/bug-examples", label: "Bug examples" },
     ],
   },

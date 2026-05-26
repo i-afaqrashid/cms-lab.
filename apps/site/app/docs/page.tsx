@@ -84,6 +84,14 @@ export default function DocsPage() {
           </p>
           <Link href="/docs/diagnostics">Diagnostics</Link>
         </div>
+        <div className="pathItem">
+          <strong>Something failed before the scan ran</strong>
+          <p>
+            Check common setup errors such as missing config, unreachable CMS,
+            or a site health route that points at the wrong page.
+          </p>
+          <Link href="/docs/troubleshooting">Troubleshooting</Link>
+        </div>
       </div>
 
       <h2 id="how-it-works">How it works</h2>
@@ -199,6 +207,9 @@ export default function DocsPage() {
         </li>
         <li>
           <Link href="/docs/diagnostics">Check diagnostic codes</Link>
+        </li>
+        <li>
+          <Link href="/docs/troubleshooting">Fix common setup failures</Link>
         </li>
       </ul>
     </DocsShell>
