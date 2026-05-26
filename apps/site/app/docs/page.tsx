@@ -17,6 +17,7 @@ export default function DocsPage() {
         { href: "#how-it-works", label: "How it works" },
         { href: "#install", label: "Install" },
         { href: "#first-scan", label: "First scan" },
+        { href: "#backend-only", label: "Backend-only" },
         { href: "#examples", label: "Examples" },
         { href: "#next", label: "Next" },
       ]}
@@ -67,6 +68,16 @@ export default function DocsPage() {
         <span className="tMuted">$</span> npx @cms-lab/cli scan --report
       </Terminal>
 
+      <h2 id="backend-only">If you only have a CMS/backend</h2>
+      <p>
+        Start with config and agent context. Route scans wait until a frontend
+        is running, but backend-only projects can still document collection
+        shapes, route plans, and field assumptions for coding agents.
+      </p>
+      <p>
+        <Link href="/docs/backend-only">Read the backend-only workflow</Link>
+      </p>
+
       <h2 id="examples">Try a runnable example</h2>
       <p>
         If you want to see cms-lab before wiring it into your own CMS, open the
@@ -81,6 +92,11 @@ export default function DocsPage() {
       <ul>
         <li>
           <Link href="/docs/configuration">Write the config</Link>
+        </li>
+        <li>
+          <Link href="/docs/backend-only">
+            Plan a backend-only CMS workflow
+          </Link>
         </li>
         <li>
           <Link href="/docs/examples">Run an example project</Link>
