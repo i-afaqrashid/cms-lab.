@@ -4,6 +4,22 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.0.10 - 2026-05-26
+
+### Fixed
+
+- Reduced Strapi image-alt noise by skipping generated media variants under
+  `formats`. cms-lab now checks the editable parent media field instead of
+  reporting `formats.thumbnail`, `formats.small`, `formats.medium`, or
+  `formats.large` as separate CMS images.
+
+### Verification
+
+- Added a regression test for Strapi media with useful parent alt text and
+  generated responsive variants.
+- Verified against the public Strapi LaunchPad demo with Next.js: 11 documents,
+  0 errors, 80 warnings, and no generated `formats.*` image-alt diagnostics.
+
 ## 1.0.9 - 2026-05-25
 
 ### Documentation

@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@cms-lab/site",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "type": "module",
   "scripts": {
     "dev": "next dev -p 2677",
