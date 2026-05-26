@@ -13,6 +13,7 @@ export const docsNav: Array<{ title: string; links: DocLink[] }> = [
       { href: "/docs", label: "Overview" },
       { href: "/docs/configuration", label: "Configuration" },
       { href: "/docs/scan", label: "Scan command" },
+      { href: "/docs/tested-with", label: "Tested with" },
       { href: "/docs/agent-context", label: "Agent context" },
     ],
   },
@@ -21,6 +22,7 @@ export const docsNav: Array<{ title: string; links: DocLink[] }> = [
     links: [
       { href: "/docs/ci", label: "CI" },
       { href: "/docs/diagnostics", label: "Diagnostics" },
+      { href: "/docs/bug-examples", label: "Bug examples" },
     ],
   },
 ];

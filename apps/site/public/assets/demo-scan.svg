@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="720" viewBox="0 0 1180 720" role="img" aria-labelledby="title desc">
+  <title id="title">cms-lab terminal scan output</title>
+  <desc id="desc">A terminal screenshot showing cms-lab route, field, SEO, and image diagnostics.</desc>
+  <rect width="1180" height="720" rx="18" fill="#111214"/>
+  <rect x="0" y="0" width="1180" height="46" rx="18" fill="#17191c"/>
+  <circle cx="30" cy="23" r="7" fill="#e57373"/>
+  <circle cx="52" cy="23" r="7" fill="#e9c46a"/>
+  <circle cx="74" cy="23" r="7" fill="#b6e26b"/>
+  <text x="102" y="29" fill="#8a8f84" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14">cms-lab scan --ci --report</text>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24">
+    <text x="42" y="96" fill="#8a8f84">$</text>
+    <text x="72" y="96" fill="#eceee5">npx @cms-lab/cli scan --ci --report</text>
+    <text x="42" y="154" fill="#eceee5" font-weight="700">cms-lab</text>
+    <text x="42" y="194" fill="#8a8f84">project</text>
+    <text x="174" y="194" fill="#eceee5">next pages</text>
+    <text x="42" y="234" fill="#8a8f84">documents</text>
+    <text x="174" y="234" fill="#eceee5">39</text>
+    <text x="42" y="304" fill="#e57373">errors</text>
+    <text x="76" y="348" fill="#eceee5">CMS-ROUTE-404</text>
+    <text x="292" y="348" fill="#8a8f84">Route /blog/missing returned 404</text>
+    <text x="42" y="418" fill="#e9c46a">warnings</text>
+    <text x="76" y="462" fill="#eceee5">CMS-FIELD-MISSING</text>
+    <text x="340" y="462" fill="#8a8f84">Document article-12 is missing data.author.name</text>
+    <text x="76" y="504" fill="#eceee5">SEO-META-MISSING</text>
+    <text x="316" y="504" fill="#8a8f84">Document page-7 is missing meta_description</text>
+    <text x="76" y="546" fill="#eceee5">A11Y-IMG-ALT</text>
+    <text x="268" y="546" fill="#8a8f84">Image field data.hero is missing useful alt text</text>
+    <text x="42" y="616" fill="#8a8f84">summary</text>
+    <text x="174" y="616" fill="#e57373">1 error</text>
+    <text x="308" y="616" fill="#e9c46a">3 warnings</text>
+    <text x="42" y="660" fill="#e57373">scan failed - 1 error</text>
+    <text x="340" y="660" fill="#8a8f84">report .cms-lab/report.html</text>
+  </g>
+</svg>

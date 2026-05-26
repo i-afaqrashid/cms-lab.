@@ -14,6 +14,7 @@ export default function ConfigurationPage() {
         { href: "#example", label: "Example" },
         { href: "#keys", label: "Keys" },
         { href: "#adapter-examples", label: "Adapter examples" },
+        { href: "#strapi-pages", label: "Strapi Pages Router" },
         { href: "#route-fields", label: "Route fields" },
         { href: "#required-fields", label: "Required fields" },
       ]}
@@ -73,6 +74,28 @@ export default defineConfig({
           </tr>
           <tr>
             <td>
+              <code>site.healthPath</code>
+            </td>
+            <td>no</td>
+            <td>
+              Same-origin path used only by <code>doctor</code> and the initial
+              scan health probe. Use it for localized apps where <code>/</code>{" "}
+              redirects or returns a non-OK response but <code>/en</code> is
+              healthy.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>site.healthUrl</code>
+            </td>
+            <td>no</td>
+            <td>
+              Absolute URL for a dedicated health check endpoint. Route probes
+              still use <code>site.url</code>.
+            </td>
+          </tr>
+          <tr>
+            <td>
               <code>framework</code>
             </td>
             <td>yes</td>
@@ -124,6 +147,7 @@ export default defineConfig({
   provider: "strapi",
   url: "http://localhost:1337",
   token: process.env.STRAPI_TOKEN,
+  locale: "en",
   collections: [
     {
       type: "page",
@@ -189,6 +213,48 @@ cms: {
     },
   ],
 }`}</CodeBlock>
+
+      <h2 id="strapi-pages">Strapi with Next.js Pages Router</h2>
+      <p>
+        Pages Router projects usually have explicit dynamic routes, so keep the
+        Strapi mapping equally explicit. Single types are scanned for fields,
+        SEO, and images, but they are not treated as missing page routes by
+        default.
+      </p>
+      <CodeBlock>{`import { defineConfig, strapiRelationSlug } from "@cms-lab/core";
+
+export default defineConfig({
+  site: {
+    url: "http://localhost:3000",
+    healthPath: "/en",
+  },
+  framework: { type: "next", router: "pages" },
+  cms: {
+    provider: "strapi",
+    url: "http://localhost:1337",
+    token: process.env.STRAPI_TOKEN,
+    locale: "en",
+    collections: [
+      { type: "page", endpoint: "pages", uidField: "slug" },
+      { type: "article", endpoint: "articles", uidField: "slug" },
+    ],
+    singleTypes: [
+      { type: "navbar", endpoint: "navbar" },
+      { type: "footer", endpoint: "footer" },
+    ],
+  },
+  routes: [
+    { type: "page", pattern: "/:slug", getPath: (doc) => "/" + doc.uid },
+    {
+      type: "article",
+      pattern: "/blog/:topic/:slug",
+      getPath: (doc) => {
+        const topic = strapiRelationSlug(doc.data, "topic") ?? "uncategorized";
+        return "/blog/" + topic + "/" + doc.uid;
+      },
+    },
+  ],
+});`}</CodeBlock>
 
       <h2 id="route-fields">Route fields</h2>
       <p>

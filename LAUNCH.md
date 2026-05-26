@@ -105,6 +105,33 @@ Expected behavior:
 - `--fail-on never` exits `0` while still writing diagnostics
 - HTML, Markdown, JUnit, and JSON artifacts are created
 
+## Tested-With Matrix
+
+Keep the public matrix at `https://cmslab.afaqrashid.com/docs/tested-with`
+aligned with real coverage only.
+
+Current rows:
+
+- Prismic + Next.js App Router: public fixture and packaged CLI smoke.
+- Strapi v4 + Next.js Pages Router: repeatable smoke plus adapter tests.
+- Strapi single types: adapter tests and smoke coverage.
+- Contentful, Sanity, WordPress, and Directus: adapter fixture tests.
+
+Do not add a provider, framework, or project type to the matrix until there is a
+fixture, adapter test, public demo, or repeatable smoke test behind it.
+
+## Current Product Focus
+
+The next focused release should stay on adoption friction:
+
+- localized app health checks through `site.healthPath` or `site.healthUrl`
+- Strapi locale support
+- Strapi relation helpers for route mappings
+- clearer report counts for collections versus single types
+- better `cms-lab init` output for Strapi Pages Router projects
+
+After that, use real project feedback before widening the scanner again.
+
 ## Launch Step 4
 
 After GitHub, npm, CI, docs, and the outside-app smoke test are green, announce it quietly and ask for real usage:

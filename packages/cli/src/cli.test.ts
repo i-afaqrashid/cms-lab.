@@ -1426,6 +1426,76 @@ test("runCli init writes a starter config and refuses to overwrite by default", 
   );
 });
 
+test("runCli init can write a Strapi Pages Router starter config", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+
+  const exitCode = await runCli(
+    [
+      "init",
+      "--cms",
+      "strapi",
+      "--router",
+      "pages",
+      "--url",
+      "http://localhost:3000",
+      "--strapi-url",
+      "http://localhost:1337",
+    ],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: () => {},
+    },
+  );
+
+  const config = await readFile(join(cwd, "cms-lab.config.ts"), "utf8");
+
+  expect(exitCode).toBe(0);
+  expect(config).toContain('framework: { type: "next", router: "pages" }');
+  expect(config).toContain('provider: "strapi"');
+  expect(config).toContain("collections:");
+  expect(config).toContain("singleTypes:");
+  expect(config).toContain("strapiRelationSlug");
+});
+
+test("runCli doctor uses site.healthPath for localized apps", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "pages"), { recursive: true });
+  await writeFile(join(cwd, "next.config.mjs"), "export default {}");
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000?preview=true', healthPath: '/en' },
+        framework: { type: 'next', router: 'pages' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  const requestedUrls: string[] = [];
+  let stdout = "";
+  const exitCode = await runCli(["doctor", "--config", configPath], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+    fetchPrismicDocuments: async () => [],
+    fetch: async (url) => {
+      requestedUrls.push(String(url));
+      return new Response("ok");
+    },
+  });
+
+  expect(exitCode).toBe(0);
+  expect(requestedUrls).toEqual(["http://localhost:3000/en?preview=true"]);
+  expect(stdout).toContain("site ok - http://localhost:3000/en?[redacted]");
+});
+
 test("runCli rejects check groups that are not implemented", async () => {
   let stderr = "";
   const exitCode = await runCli(["scan", "--only", "links"], {

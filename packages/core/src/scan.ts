@@ -41,7 +41,7 @@ export async function scanDocuments(
   const diagnostics: Diagnostic[] = [];
 
   await assertSiteReachable(
-    options.config.site.url,
+    resolveSiteHealthUrl(options.config.site).toString(),
     fetchImpl,
     timeoutMs,
     retries,
@@ -249,6 +249,19 @@ async function checkRouteReachability(
   });
 
   return results.flat();
+}
+
+export function resolveSiteHealthUrl(site: CmsLabConfig["site"]): URL {
+  if (site.healthUrl) {
+    return new URL(site.healthUrl);
+  }
+
+  const siteUrl = new URL(site.url);
+  if (site.healthPath) {
+    return resolveSiteRouteUrl(siteUrl, site.healthPath);
+  }
+
+  return siteUrl;
 }
 
 function resolveSiteRouteUrl(siteUrl: URL, path: string): URL {

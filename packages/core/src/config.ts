@@ -32,11 +32,16 @@ const cmsFieldMappingShape = {
   urlField: z.string().min(1).optional(),
 };
 
+const strapiLocaleShape = {
+  locale: z.string().min(1).optional(),
+};
+
 const strapiContentShape = z
   .object({
     type: z.string().min(1),
     endpoint: z.string().min(1),
     ...cmsFieldMappingShape,
+    ...strapiLocaleShape,
   })
   .strict();
 
@@ -45,6 +50,7 @@ const strapiConfigSchema = z
     provider: z.literal("strapi"),
     url: z.string().url(),
     token: z.string().optional(),
+    ...strapiLocaleShape,
     collections: z.array(strapiContentShape).min(1).optional(),
     singleTypes: z.array(strapiContentShape).min(1).optional(),
   })
@@ -193,6 +199,15 @@ const configSchema = z
     site: z
       .object({
         url: z.string().url(),
+        healthPath: z
+          .string()
+          .min(1)
+          .refine(
+            (path) => path.startsWith("/") && !path.startsWith("//"),
+            "healthPath must be a same-origin path starting with a single /",
+          )
+          .optional(),
+        healthUrl: z.string().url().optional(),
       })
       .strict(),
     framework: z

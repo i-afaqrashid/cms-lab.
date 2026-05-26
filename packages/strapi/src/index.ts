@@ -41,6 +41,7 @@ export async function fetchStrapiDocuments(
       url.searchParams.set("pagination[pageSize]", "100");
       url.searchParams.set("pagination[page]", String(page));
       url.searchParams.set("populate", "*");
+      applyLocale(url, collection.locale ?? config.locale);
 
       const response = await fetchJson<StrapiResponse>(
         fetchImpl,
@@ -49,7 +50,7 @@ export async function fetchStrapiDocuments(
       );
       documents.push(
         ...(response.data ?? []).map((item) =>
-          normalizeStrapiItem(collection, item),
+          normalizeStrapiItem(collection, item, { entryKind: "collection" }),
         ),
       );
       const pageCount = response.meta?.pagination?.pageCount ?? page;
@@ -65,6 +66,7 @@ export async function fetchStrapiDocuments(
   for (const singleType of config.singleTypes ?? []) {
     const url = strapiEndpointUrl(config.url, singleType.endpoint);
     url.searchParams.set("populate", "*");
+    applyLocale(url, singleType.locale ?? config.locale);
 
     const response = await fetchJson<StrapiSingleTypeResponse>(
       fetchImpl,
@@ -77,6 +79,7 @@ export async function fetchStrapiDocuments(
         normalizeStrapiItem(singleType, response.data, {
           fallbackUid: false,
           routable: false,
+          entryKind: "single",
         }),
       );
     }
@@ -88,7 +91,11 @@ export async function fetchStrapiDocuments(
 export function normalizeStrapiItem(
   collection: string | StrapiCollectionConfig | StrapiSingleTypeConfig,
   item: unknown,
-  options: { fallbackUid?: boolean; routable?: boolean } = {},
+  options: {
+    fallbackUid?: boolean;
+    routable?: boolean;
+    entryKind?: CMSDocument["entryKind"];
+  } = {},
 ): CMSDocument {
   const config = collectionConfig(collection);
   const record = asRecord(item);
@@ -122,6 +129,9 @@ export function normalizeStrapiItem(
   }
   if (options.routable !== undefined) {
     document.routable = options.routable;
+  }
+  if (options.entryKind) {
+    document.entryKind = options.entryKind;
   }
 
   return document;
@@ -174,6 +184,12 @@ function trimSlashes(value: string): string {
 
 function strapiEndpointUrl(baseUrl: string, endpoint: string): URL {
   return new URL(`/api/${trimSlashes(endpoint)}`, baseUrl);
+}
+
+function applyLocale(url: URL, locale: string | undefined): void {
+  if (locale) {
+    url.searchParams.set("locale", locale);
+  }
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

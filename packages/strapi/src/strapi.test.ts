@@ -38,6 +38,7 @@ test("fetchStrapiDocuments normalizes Strapi REST documents", async () => {
       id: "strapi-page-1",
       type: "page",
       uid: "about",
+      entryKind: "collection",
       status: "draft",
       data: {
         id: 1,
@@ -84,6 +85,7 @@ test("fetchStrapiDocuments supports Strapi v4 attributes payloads", async () => 
       id: "42",
       type: "article",
       uid: "v4-article",
+      entryKind: "collection",
       status: "published",
       data: {
         id: 42,
@@ -130,6 +132,7 @@ test("fetchStrapiDocuments fetches and normalizes Strapi single types as non-rou
     {
       id: "3",
       type: "navbar",
+      entryKind: "single",
       status: "published",
       routable: false,
       data: {
@@ -140,6 +143,43 @@ test("fetchStrapiDocuments fetches and normalizes Strapi single types as non-rou
         publishedAt: "2026-05-26T00:00:00.000Z",
       },
     },
+  ]);
+});
+
+test("fetchStrapiDocuments adds Strapi locale query params for collections and single types", async () => {
+  const calls: string[] = [];
+
+  await fetchStrapiDocuments(
+    {
+      provider: "strapi",
+      url: "http://localhost:1337",
+      locale: "en",
+      collections: [
+        { type: "page", endpoint: "pages" },
+        { type: "article", endpoint: "articles", locale: "all" },
+      ],
+      singleTypes: [{ type: "navbar", endpoint: "navbar" }],
+    },
+    {
+      fetch: async (url) => {
+        calls.push(String(url));
+
+        if (String(url).includes("/api/navbar")) {
+          return Response.json({ data: { id: 1, publishedAt: null } });
+        }
+
+        return Response.json({
+          data: [],
+          meta: { pagination: { page: 1, pageCount: 1 } },
+        });
+      },
+    },
+  );
+
+  expect(calls).toEqual([
+    "http://localhost:1337/api/pages?pagination%5BpageSize%5D=100&pagination%5Bpage%5D=1&populate=*&locale=en",
+    "http://localhost:1337/api/articles?pagination%5BpageSize%5D=100&pagination%5Bpage%5D=1&populate=*&locale=all",
+    "http://localhost:1337/api/navbar?populate=*&locale=en",
   ]);
 });
 
@@ -240,6 +280,7 @@ test("fetchStrapiDocuments uses numeric ids and slugs when documentId is absent"
       id: "25",
       type: "page",
       uid: "numeric-id-page",
+      entryKind: "collection",
       status: "published",
       data: {
         id: 25,

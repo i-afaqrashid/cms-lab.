@@ -74,6 +74,12 @@ export default function DocsPage() {
           <Link href="/docs/scan">Read the scan command reference</Link>
         </li>
         <li>
+          <Link href="/docs/tested-with">Check the tested-with matrix</Link>
+        </li>
+        <li>
+          <Link href="/docs/bug-examples">Review real bug examples</Link>
+        </li>
+        <li>
           <Link href="/docs/agent-context">Generate agent context files</Link>
         </li>
         <li>

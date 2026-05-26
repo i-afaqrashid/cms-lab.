@@ -4,6 +4,30 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## Unreleased
+
+### Added
+
+- Added `site.healthPath` and `site.healthUrl` so localized apps or dedicated
+  health endpoints can be used for `doctor` and the initial scan health probe
+  without changing normal route checks.
+- Added Strapi locale config at the provider, collection, and single-type level.
+- Added Strapi relation route helpers for common nested relation slug patterns.
+- Added Strapi Pages Router output to `cms-lab init`.
+- Added docs for the public tested-with matrix, copy-paste CI setup, real CMS
+  bug examples, and Strapi Pages Router setup.
+
+### Changed
+
+- HTML reports now show collection and single-type document counts when adapter
+  metadata is available.
+
+### Verification
+
+- Added unit coverage for localized health probes, Strapi locale requests,
+  relation route helpers, Strapi init output, doctor URL redaction, and report
+  document-kind summaries.
+
 ## 1.1.0 - 2026-05-26
 
 ### Added
@@ -25,8 +49,8 @@ history stays consistent across GitHub and npm.
 
 - Added tests for single-type config validation, Strapi singleton
   normalization, and route-unmapped suppression for non-routable CMS documents.
-- Verified against a private Strapi staging project: 39 CMS documents fetched,
-  including 7 single types, with singleton route noise suppressed.
+- Verified with a Strapi smoke project: 39 CMS documents fetched, including 7
+  single types, with singleton route noise suppressed.
 
 ## 1.0.10 - 2026-05-26
 
