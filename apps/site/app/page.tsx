@@ -56,6 +56,24 @@ const adapters = [
   { logo: "sanity" as const, name: "Sanity" },
 ];
 
+const proofExamples = [
+  {
+    title: "A published article changed slug, but the old route still ships",
+    reports: "Route returns 404 for the CMS document path.",
+    fix: "Update the CMS slug, route mapping, redirect, or dynamic route fetch.",
+  },
+  {
+    title: "A Directus catalog item misses route metadata",
+    reports: "Missing UID, required field, SEO, or image-alt diagnostics.",
+    fix: "Fill the configured fields or make the frontend handle the missing value.",
+  },
+  {
+    title: "A Strapi single type is missing layout content",
+    reports: "Content diagnostics without route-unmapped noise.",
+    fix: "Fix the singleton content before it breaks shared UI.",
+  },
+];
+
 export default function HomePage() {
   return (
     <>
@@ -109,6 +127,51 @@ export default function HomePage() {
             <span className="tOk">scan completed</span>
             {"\n"}report written to .cms-lab/report.html
           </Terminal>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap proofWrap">
+          <div>
+            <div className="sectionHead">
+              <span className="sectionTag">Proof</span>
+              <h2 className="sectionTitle">
+                Examples that map to real CMS problems.
+              </h2>
+            </div>
+            <div className="proofList">
+              {proofExamples.map((example) => (
+                <article className="proofItem" key={example.title}>
+                  <h3>{example.title}</h3>
+                  <p>
+                    <strong>Reports:</strong> {example.reports}
+                  </p>
+                  <p>
+                    <strong>Typical fix:</strong> {example.fix}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+          <aside className="proofAside" aria-label="Current scope">
+            <h3>Works today</h3>
+            <ul>
+              <li>Route probing for configured CMS document paths.</li>
+              <li>Required field, SEO, UID, and image-alt checks.</li>
+              <li>Local HTML, JSON, Markdown, JUnit, and Slack output.</li>
+            </ul>
+            <h3>Still planned</h3>
+            <ul>
+              <li>Deep cross-document relationship rules.</li>
+              <li>Schema-to-code drift detection.</li>
+              <li>Provider-specific draft preview checks.</li>
+            </ul>
+            <p>
+              <Link href="/docs/bug-examples">Read bug examples</Link>
+              {" · "}
+              <Link href="/docs/tested-with">Check adapter maturity</Link>
+            </p>
+          </aside>
         </div>
       </section>
 
@@ -183,6 +246,12 @@ export default defineConfig({
                   </div>
                 ))}
               </div>
+              <p className="muted adapterFootnote">
+                Directus, Strapi, and the other adapters do not have identical
+                coverage. Check the{" "}
+                <Link href="/docs/tested-with">adapter maturity matrix</Link>{" "}
+                before turning a scan into a deploy gate.
+              </p>
             </div>
             <div className="panel">
               <h3>Private by default</h3>
