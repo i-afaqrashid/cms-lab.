@@ -136,10 +136,12 @@ npx @cms-lab/cli scan --fail-on never --report`}</CodeBlock>
       <h2 id="privacy">Privacy while debugging</h2>
       <p>
         Do not paste tokens, private URLs, raw CMS payloads, webhook URLs, or
-        generated reports into public issues. Redacted JSON output is the right
-        default for sharing.
+        full generated reports into public issues. Redacted JSON output is the
+        right default for scripts. Share-safe HTML is better when someone needs
+        to inspect report grouping and filters.
       </p>
-      <CodeBlock>{`npx @cms-lab/cli scan --json > cms-lab-redacted.json`}</CodeBlock>
+      <CodeBlock>{`npx @cms-lab/cli scan --json > cms-lab-redacted.json
+npx @cms-lab/cli scan --report --share-report`}</CodeBlock>
     </DocsShell>
   );
 }

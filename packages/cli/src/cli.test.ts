@@ -1343,6 +1343,64 @@ test("runCli can write an HTML report without breaking JSON stdout", async () =>
   expect(await readFile(reportPath, "utf8")).toContain("cms-lab report");
 });
 
+test("runCli can write a share-safe HTML report", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  const configPath = join(cwd, "cms-lab.config.ts");
+  const reportPath = join(cwd, ".cms-lab", "share.html");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: () => '/missing' }],
+      })
+    `,
+  );
+
+  const exitCode = await runCli(
+    ["scan", "--config", configPath, "--report", reportPath, "--share-report"],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: () => {},
+      fetchPrismicDocuments: async () => [
+        {
+          id: "secret-doc-id",
+          type: "page",
+          uid: "about",
+          status: "published",
+          data: { meta_title: "About", meta_description: "About page" },
+        },
+      ],
+      fetch: async (url) => {
+        if (String(url).endsWith("/missing")) {
+          return new Response("missing", { status: 404 });
+        }
+
+        return new Response("ok");
+      },
+    },
+  );
+
+  const report = await readFile(reportPath, "utf8");
+
+  expect(exitCode).toBe(1);
+  expect(report).toContain("Share-safe report");
+  expect(report).toContain("CMS-ROUTE-404");
+  expect(report).toContain("/missing");
+  expect(report).toContain("[redacted CMS source]");
+  expect(report).not.toContain("secret-doc-id");
+  expect(report).not.toContain(cwd);
+});
+
 test("runCli can write Markdown and JUnit exports without breaking JSON stdout", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "app"), { recursive: true });

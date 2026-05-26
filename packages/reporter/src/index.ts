@@ -26,9 +26,19 @@ export function getReporterStatus(): ReporterStatus {
   };
 }
 
-export function renderHtmlReport(result: ScanResult): string {
+export type HtmlReportPrivacy = "full" | "share";
+
+export type HtmlReportOptions = {
+  privacy?: HtmlReportPrivacy;
+};
+
+export function renderHtmlReport(
+  result: ScanResult,
+  options: HtmlReportOptions = {},
+): string {
   const generatedAt = new Date().toISOString();
   const diagnostics = result.diagnostics;
+  const privacy = options.privacy ?? "full";
   const status = result.summary.errors > 0 ? "failed" : "passed";
   const statusClass =
     result.summary.errors > 0
@@ -425,6 +435,7 @@ export function renderHtmlReport(result: ScanResult): string {
                 <span class="badge ${statusClass}">${escapeHtml(statusLabel(result))}</span>
                 ${result.summary.warnings > 0 ? `<span class="badge warn">${result.summary.warnings} ${escapeHtml(plural(result.summary.warnings, "warning"))}</span>` : ""}
                 ${result.summary.info > 0 ? `<span class="badge info">${result.summary.info} ${escapeHtml(plural(result.summary.info, "info item"))}</span>` : ""}
+                ${privacy === "share" ? `<span class="badge">Share-safe report</span>` : ""}
               </div>
               <div class="subtitle">
                 ${escapeHtml(projectLabel(result))} · ${result.documents.length} ${escapeHtml(plural(result.documents.length, "document"))}
@@ -454,7 +465,7 @@ export function renderHtmlReport(result: ScanResult): string {
           ${grouped.map((group) => `<button class="chip" type="button" data-filter-kind="group" data-filter-value="${escapeHtml(group.label)}">${escapeHtml(group.label)} <span class="n">${group.diagnostics.length}</span></button>`).join("")}
         </div>
 
-        ${diagnostics.length === 0 ? `<div class="empty-state">No diagnostics found.</div>` : grouped.map((group) => diagnosticsGroup(group)).join("")}
+        ${diagnostics.length === 0 ? `<div class="empty-state">No diagnostics found.</div>` : grouped.map((group) => diagnosticsGroup(group, result, privacy)).join("")}
 
         <div class="report-foot">
           <span>project: <span class="path-code">${escapeHtml(result.project.framework)} ${escapeHtml(result.project.router)}</span></span>
@@ -591,12 +602,16 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
   return "other";
 }
 
-function diagnosticsGroup(group: DiagnosticGroup): string {
+function diagnosticsGroup(
+  group: DiagnosticGroup,
+  result: ScanResult,
+  privacy: HtmlReportPrivacy,
+): string {
   return `<section class="diagnostic-group" data-diagnostic-group="${escapeHtml(group.label)}">
   <div class="group-header">
     <span>${escapeHtml(group.label)}</span> · <span class="count" data-visible-count>${group.diagnostics.length} ${escapeHtml(plural(group.diagnostics.length, "diagnostic"))}</span>
   </div>
-  ${group.diagnostics.map((diagnostic, index) => diagnosticRow(diagnostic, group.label, index + 1)).join("")}
+  ${group.diagnostics.map((diagnostic, index) => diagnosticRow(diagnostic, group.label, index + 1, result, privacy)).join("")}
   </section>`;
 }
 
@@ -604,15 +619,58 @@ function diagnosticRow(
   diagnostic: Diagnostic,
   group: string,
   index: number,
+  result: ScanResult,
+  privacy: HtmlReportPrivacy,
 ): string {
+  const path = diagnostic.path
+    ? redactReportValue(diagnostic.path, result, privacy)
+    : undefined;
+  const message = redactReportValue(diagnostic.message, result, privacy);
+  const source =
+    privacy === "share"
+      ? diagnostic.source
+        ? "[redacted CMS source]"
+        : undefined
+      : diagnostic.source;
+
   return `<div class="diag ${escapeHtml(diagnostic.severity)}" data-diagnostic data-group="${escapeHtml(group)}" data-severity="${escapeHtml(diagnostic.severity)}">
     <div class="col-num">${index}</div>
     <div class="sev"><span class="marker"></span>${escapeHtml(diagnostic.severity)}</div>
     <div class="msg">
-      ${diagnostic.path ? `<strong>${escapeHtml(diagnostic.path)}</strong> ` : ""}${escapeHtml(diagnostic.message)}
-      <span class="ctx"><span class="diag-code">${escapeHtml(diagnostic.code)}</span>${diagnostic.source ? ` <span aria-hidden="true">·</span> <span>${escapeHtml(diagnostic.source)}</span>` : ""}</span>
+      ${path ? `<strong>${escapeHtml(path)}</strong> ` : ""}${escapeHtml(message)}
+      <span class="ctx"><span class="diag-code">${escapeHtml(diagnostic.code)}</span>${source ? ` <span aria-hidden="true">·</span> <span>${escapeHtml(source)}</span>` : ""}</span>
     </div>
   </div>`;
+}
+
+function redactReportValue(
+  value: string,
+  result: ScanResult,
+  privacy: HtmlReportPrivacy,
+): string {
+  if (privacy !== "share") {
+    return value;
+  }
+
+  let redacted = value;
+  const projectPaths = [
+    result.project.appDir,
+    result.project.pagesDir,
+    result.project.rootDir,
+  ]
+    .filter((path): path is string => Boolean(path))
+    .sort((a, b) => b.length - a.length);
+
+  for (const projectPath of projectPaths) {
+    redacted = redacted.replaceAll(projectPath, "[redacted project path]");
+  }
+
+  return redacted
+    .replaceAll(
+      /(?:\/Users|\/private\/var|\/var\/folders)\/[^\s<>"')]+/g,
+      "[redacted project path]",
+    )
+    .replaceAll(/[A-Z]:\\Users\\[^\s<>"')]+/gi, "[redacted project path]");
 }
 
 function capitalize(value: string): string {

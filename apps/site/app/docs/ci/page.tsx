@@ -79,11 +79,13 @@ npx @cms-lab/cli scan --ci --fail-on never`}</CodeBlock>
         The report is a self-contained HTML file. It can be opened locally,
         uploaded as a CI artifact, or attached to release notes.
       </p>
+      <CodeBlock>{`npx @cms-lab/cli scan --ci --report --share-report`}</CodeBlock>
       <div className="callout">
         <strong>Keep reports private</strong>
         Reports stay in your workspace unless your CI uploads them. Treat report
-        artifacts as project data when they include route paths, CMS type names,
-        or document sources.
+        artifacts as project data when they include route paths or CMS type
+        names. Use <code>--share-report</code> for public issue attachments; it
+        removes CMS source IDs and local project paths from the HTML report.
       </div>
     </DocsShell>
   );
