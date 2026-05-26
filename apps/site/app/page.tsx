@@ -80,6 +80,9 @@ export default function HomePage() {
               <Link className="btn btnPrimary" href="/docs">
                 Read docs
               </Link>
+              <Link className="btn" href="/new">
+                Try example
+              </Link>
             </div>
           </div>
         </div>

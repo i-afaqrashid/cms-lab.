@@ -86,8 +86,38 @@ importers:
       next:
         specifier: ^15.0.0
         version: 15.5.18(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
+    devDependencies:
+      "@cms-lab/cli":
+        specifier: ^1.2.1
+        version: 1.2.1
+      "@cms-lab/core":
+        specifier: ^1.2.1
+        version: 1.2.1
 
-  examples/next-prismic: {}
+  examples/next-prismic:
+    dependencies:
+      next:
+        specifier: ^15.0.0
+        version: 15.5.18(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.6
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
+    devDependencies:
+      "@cms-lab/cli":
+        specifier: ^1.2.1
+        version: 1.2.1
+      "@cms-lab/core":
+        specifier: ^1.2.1
+        version: 1.2.1
 
   packages/cli:
     dependencies:
@@ -183,6 +213,77 @@ importers:
         version: link:../core
 
 packages:
+  "@cms-lab/cli@1.2.1":
+    resolution:
+      {
+        integrity: sha512-S33jhV9xLbGaE+brMohsbej7DZuJkGeOqBYLIyiAMoytWZkxAstLr5xP4JKEBw4Eu7FpscOWvGr8NAyqSV2y5w==,
+      }
+    engines: { node: ">=20.10" }
+    hasBin: true
+
+  "@cms-lab/contentful@1.2.1":
+    resolution:
+      {
+        integrity: sha512-y80/fonoD0UVinf4zjjzuCZM5iWxfpQ4KHJF7VofjGsH9R9ZknAcyldue/Q7+l1E2d7NtXRK3ytutZvyjALBQw==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/core@1.2.1":
+    resolution:
+      {
+        integrity: sha512-BafNnY88WsQ/zJesiJbd87Ss7VTiJWcTXijEsxycy7IgbNY6s7W0osImdwFXvks2/bsLNWkocGC4mD4Jvvz5NA==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/directus@1.2.1":
+    resolution:
+      {
+        integrity: sha512-ectraI66/sxZlYqeBpZ+SCbW087aJVZ0KfUAg61dxvyEhBDqwf/EUnv13r2xO6GLiN00yO4pYUpRGiwVDKp+Zw==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/next@1.2.1":
+    resolution:
+      {
+        integrity: sha512-egK7YLhbr7ysFkGE7X7XiuBUlegfRWAAfDsvlppL900d1QUP57kT1K/uIkrRForFC64ZVoKT/WYQ5wy2v5m9CQ==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/prismic@1.2.1":
+    resolution:
+      {
+        integrity: sha512-4pi2adYTMdw1uaif7HhQBxXOzS+A0Ebh8yxZTZ7ixnNPqtXveyJ/YJ7vm2Yo/d+AMuWYSpsiCW7y2OAs21hrSg==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/reporter@1.2.1":
+    resolution:
+      {
+        integrity: sha512-e3f2VMVVXewy1xfCSXJx3WTKFH4ClR0G/wG7en7G2hN0p/GRs+c3w3wZAP0SdvAO2FXeOCNmf6rkHtIU79swKQ==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/sanity@1.2.1":
+    resolution:
+      {
+        integrity: sha512-lSq1p2fX+ia9THQbsUTR4ieHKQn6VnIYqvVvbiwQyPgJE3bOCI7p01c/0uU72l8F9nCD5ZdID9H5QL0Wfe8+pQ==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/strapi@1.2.1":
+    resolution:
+      {
+        integrity: sha512-ohQ+nfFaSmlSg0gWlvGVra4q2xZE1maPhjeYIfi2zoSUZf1O+NedHhYoH+AYyAK45XimceK/H8Sxt2wciG3DGA==,
+      }
+    engines: { node: ">=20.10" }
+
+  "@cms-lab/wordpress@1.2.1":
+    resolution:
+      {
+        integrity: sha512-nDD0BK0ONwmzQRxgz4l7yimnVlgae6QBvzoovIbd3jHbaPDwzDaQf7bJsuZ7O7urNwsOMxccLRoVkck7duPhFA==,
+      }
+    engines: { node: ">=20.10" }
+
   "@emnapi/core@1.10.0":
     resolution:
       {
@@ -2954,6 +3055,77 @@ packages:
       }
 
 snapshots:
+  "@cms-lab/cli@1.2.1":
+    dependencies:
+      "@cms-lab/contentful": 1.2.1
+      "@cms-lab/core": 1.2.1
+      "@cms-lab/directus": 1.2.1
+      "@cms-lab/next": 1.2.1
+      "@cms-lab/prismic": 1.2.1
+      "@cms-lab/reporter": 1.2.1
+      "@cms-lab/sanity": 1.2.1
+      "@cms-lab/strapi": 1.2.1
+      "@cms-lab/wordpress": 1.2.1
+      commander: 14.0.3
+      picocolors: 1.1.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/contentful@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/core@1.2.1":
+    dependencies:
+      c12: 3.3.4
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/directus@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/next@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/prismic@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/reporter@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/sanity@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/strapi@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
+  "@cms-lab/wordpress@1.2.1":
+    dependencies:
+      "@cms-lab/core": 1.2.1
+    transitivePeerDependencies:
+      - magicast
+
   "@emnapi/core@1.10.0":
     dependencies:
       "@emnapi/wasi-threads": 1.2.1

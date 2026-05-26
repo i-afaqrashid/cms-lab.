@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CodeBlock, DocsShell, Terminal } from "../components";
+import { stackBlitzStarterUrl } from "../example-links";
 
 export const metadata: Metadata = {
   title: "Docs",
@@ -16,6 +17,7 @@ export default function DocsPage() {
         { href: "#how-it-works", label: "How it works" },
         { href: "#install", label: "Install" },
         { href: "#first-scan", label: "First scan" },
+        { href: "#examples", label: "Examples" },
         { href: "#next", label: "Next" },
       ]}
     >
@@ -65,10 +67,23 @@ export default function DocsPage() {
         <span className="tMuted">$</span> npx @cms-lab/cli scan --report
       </Terminal>
 
+      <h2 id="examples">Try a runnable example</h2>
+      <p>
+        If you want to see cms-lab before wiring it into your own CMS, open the
+        broken Prismic demo in a browser workspace. It intentionally produces a
+        report with real route, field, SEO, and image diagnostics.
+      </p>
+      <p>
+        <a href={stackBlitzStarterUrl}>Run in StackBlitz</a>
+      </p>
+
       <h2 id="next">Where to next</h2>
       <ul>
         <li>
           <Link href="/docs/configuration">Write the config</Link>
+        </li>
+        <li>
+          <Link href="/docs/examples">Run an example project</Link>
         </li>
         <li>
           <Link href="/docs/scan">Read the scan command reference</Link>
