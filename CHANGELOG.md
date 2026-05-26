@@ -4,6 +4,29 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.2.4 - 2026-05-26
+
+### Added
+
+- Added `cms-lab init --cms directus` for Directus projects. The starter config
+  includes branch, menu item, category, and relation-heavy pricing collection
+  examples.
+- Added `routable: false` support to Directus collection config so junction or
+  relation-heavy collections can be checked for fields without producing
+  route-unmapped diagnostics.
+
+### Documentation
+
+- Documented Directus init usage, non-routable collection examples, and updated
+  the Directus restaurant/catalog docs.
+
+### Verification
+
+- Added CLI, config-schema, and Directus adapter coverage for the new starter
+  and non-routable Directus collections.
+- Verified with `pnpm test`, `pnpm typecheck`, `pnpm format:check`,
+  `pnpm lint`, `pnpm build`, and `pnpm site:build`.
+
 ## 1.2.3 - 2026-05-26
 
 ### Added

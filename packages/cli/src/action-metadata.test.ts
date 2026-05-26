@@ -53,7 +53,7 @@ test("GitHub Action runner builds a cms-lab scan command", async () => {
     PATH: `${tmp}:${process.env.PATH ?? ""}`,
     GITHUB_OUTPUT: outputFile,
     CMS_LAB_NPX_ARGS_FILE: argsFile,
-    CMS_LAB_VERSION: "1.2.3",
+    CMS_LAB_VERSION: "1.2.4",
     CMS_LAB_CONFIG: "cms-lab.config.ts",
     CMS_LAB_URL: "http://localhost:3000",
     CMS_LAB_REPORT: "true",
@@ -79,7 +79,7 @@ test("GitHub Action runner builds a cms-lab scan command", async () => {
 
   expect(args).toEqual([
     "-y",
-    "@cms-lab/cli@1.2.3",
+    "@cms-lab/cli@1.2.4",
     "scan",
     "--ci",
     "--config",
