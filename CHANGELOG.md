@@ -4,6 +4,26 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.2.3 - 2026-05-26
+
+### Added
+
+- Added `cms-lab scan --report --share-report` for share-safe HTML reports.
+  Share-safe reports redact CMS source IDs and local project paths while keeping
+  diagnostic codes, severity, route paths, and field paths visible.
+- Added reporter API support for `renderHtmlReport(result, { privacy: "share" })`.
+
+### Documentation
+
+- Documented share-safe report behavior in the README, CLI package README,
+  reporter package README, scan docs, CI docs, and troubleshooting docs.
+
+### Verification
+
+- Added reporter and CLI coverage for share-safe report redaction.
+- Verified with `pnpm test`, `pnpm typecheck`, `pnpm format:check`,
+  `pnpm lint`, `pnpm build`, and `pnpm site:build`.
+
 ## 1.2.2 - 2026-05-26
 
 ### Added
