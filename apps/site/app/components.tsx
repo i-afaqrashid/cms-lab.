@@ -22,6 +22,18 @@ export const docsNav: Array<{ title: string; links: DocLink[] }> = [
     ],
   },
   {
+    title: "Providers",
+    links: [
+      { href: "/docs/providers", label: "All providers" },
+      { href: "/docs/providers/prismic", label: "Prismic" },
+      { href: "/docs/providers/strapi", label: "Strapi" },
+      { href: "/docs/providers/directus", label: "Directus" },
+      { href: "/docs/providers/wordpress", label: "WordPress" },
+      { href: "/docs/providers/contentful", label: "Contentful" },
+      { href: "/docs/providers/sanity", label: "Sanity" },
+    ],
+  },
+  {
     title: "Run",
     links: [
       { href: "/docs/ci", label: "CI" },

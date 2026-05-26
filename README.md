@@ -308,6 +308,10 @@ for common first-run failures and fixes.
 See [`/docs/large-catalogs`](https://cmslab.afaqrashid.com/docs/large-catalogs)
 for baseline, filtering, and concurrency guidance on larger CMS inventories.
 
+See [`/docs/providers`](https://cmslab.afaqrashid.com/docs/providers) for
+provider-specific setup notes for Prismic, Strapi, Directus, WordPress,
+Contentful, and Sanity.
+
 ## Checks
 
 cms-lab currently checks:
