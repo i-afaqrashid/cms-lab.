@@ -4,6 +4,19 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.2.1 - 2026-05-26
+
+### Fixed
+
+- Updated the GitHub Action Marketplace name to `cms-lab CMS Scan` so the
+  action can be published without conflicting with the repository or
+  organization name.
+
+### Verification
+
+- Bumped all workspace packages and CLI version output to `1.2.1` for the
+  Marketplace metadata patch release.
+
 ## 1.2.0 - 2026-05-26
 
 ### Added
