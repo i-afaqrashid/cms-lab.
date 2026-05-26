@@ -6,6 +6,7 @@ import type {
   CheckGroup,
   CmsLabConfig,
   Diagnostic,
+  DiagnosticGroupSummary,
   FetchLike,
   ProjectInfo,
   RelationshipRule,
@@ -91,6 +92,11 @@ export async function scanDocuments(
     project: options.project,
     documents,
     diagnostics,
+    diagnosticGroups: summarizeDiagnosticGroups(
+      diagnostics,
+      options.config,
+      routeCandidates,
+    ),
     summary: summarizeDiagnostics(diagnostics),
   };
 }
@@ -518,6 +524,118 @@ function checkRelationships(
 
 function relationshipRules(config: CmsLabConfig): RelationshipRule[] {
   return config.checks?.relationships ?? [];
+}
+
+function summarizeDiagnosticGroups(
+  diagnostics: Diagnostic[],
+  config: CmsLabConfig,
+  routeCandidates: RouteCandidate[],
+): DiagnosticGroupSummary[] {
+  const routePatternBySource = new Map(
+    routeCandidates.map((candidate) => [
+      sourceFor(config, candidate.document),
+      candidate.route.pattern,
+    ]),
+  );
+  const groups = new Map<string, DiagnosticGroupSummary>();
+
+  for (const diagnostic of diagnostics) {
+    const type = typeFromSource(diagnostic.source);
+    const routePattern = routePatternForDiagnostic(
+      diagnostic,
+      type,
+      config,
+      routePatternBySource,
+    );
+    const key = diagnosticGroupKey(diagnostic, type, routePattern);
+    const existing = groups.get(key);
+    const example = diagnosticExample(diagnostic);
+
+    if (existing) {
+      existing.count += 1;
+      if (example && !existing.examples.includes(example)) {
+        existing.examples.push(example);
+      }
+      existing.examples = existing.examples.slice(0, 3);
+      continue;
+    }
+
+    groups.set(key, {
+      key,
+      severity: diagnostic.severity,
+      code: diagnostic.code,
+      count: 1,
+      ...(type ? { type } : {}),
+      ...(routePattern ? { routePattern } : {}),
+      label: diagnosticGroupLabel(type, routePattern),
+      examples: example ? [example] : [],
+    });
+  }
+
+  return [...groups.values()];
+}
+
+function routePatternForDiagnostic(
+  diagnostic: Diagnostic,
+  type: string | undefined,
+  config: CmsLabConfig,
+  routePatternBySource: Map<string, string>,
+): string | undefined {
+  if (
+    !isRouteDiagnostic(diagnostic.code) &&
+    diagnostic.code !== "CMS-UID-MISSING"
+  ) {
+    return undefined;
+  }
+
+  if (diagnostic.source) {
+    const routePattern = routePatternBySource.get(diagnostic.source);
+    if (routePattern) {
+      return routePattern;
+    }
+  }
+
+  return type
+    ? config.routes.find((route) => route.type === type)?.pattern
+    : undefined;
+}
+
+function isRouteDiagnostic(code: string): boolean {
+  return code.startsWith("CMS-ROUTE");
+}
+
+function diagnosticGroupKey(
+  diagnostic: Diagnostic,
+  type: string | undefined,
+  routePattern: string | undefined,
+): string {
+  return [diagnostic.severity, diagnostic.code, type, routePattern]
+    .filter(Boolean)
+    .join(":");
+}
+
+function diagnosticGroupLabel(
+  type: string | undefined,
+  routePattern: string | undefined,
+): string {
+  if (type && routePattern) {
+    return `${type} ${routePattern}`;
+  }
+
+  return type ?? "project";
+}
+
+function diagnosticExample(diagnostic: Diagnostic): string | undefined {
+  return diagnostic.path ?? diagnostic.source ?? diagnostic.message;
+}
+
+function typeFromSource(source: string | undefined): string | undefined {
+  if (!source) {
+    return undefined;
+  }
+
+  const match = /^[^:]+:([^#]+)#/.exec(source);
+  return match?.[1];
 }
 
 function hasRelationshipMatch(

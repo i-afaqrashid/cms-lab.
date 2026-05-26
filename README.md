@@ -357,6 +357,10 @@ Report outputs:
 - `--junit` writes `.cms-lab/junit.xml`
 - `--slack-webhook` sends a compact redacted Slack summary
 
+Terminal, JSON, Markdown, and HTML reports include repeated-finding summaries
+when the same content type/template produces the same diagnostic many times.
+Raw row-level diagnostics stay available for debugging.
+
 Slack summaries include counts and diagnostic codes. They do not include CMS tokens, webhook URLs, raw CMS payloads, local project paths, or full JSON output.
 
 ## Exit Behavior

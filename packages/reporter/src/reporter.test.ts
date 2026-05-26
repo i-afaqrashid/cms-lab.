@@ -246,6 +246,54 @@ test("renderHtmlReport emits real filter chips for severity and diagnostic group
   expect(html).toContain('data-diagnostic data-group="seo"');
 });
 
+test("renderHtmlReport shows repeated diagnostics by content type and template", () => {
+  const result: ScanResult = {
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [],
+    diagnostics: [
+      {
+        severity: "error",
+        code: "CMS-ROUTE-404",
+        message: "Route /about returned 404",
+        path: "/about",
+        source: "prismic:page#1",
+      },
+      {
+        severity: "error",
+        code: "CMS-ROUTE-404",
+        message: "Route /contact returned 404",
+        path: "/contact",
+        source: "prismic:page#2",
+      },
+    ],
+    diagnosticGroups: [
+      {
+        key: "error:CMS-ROUTE-404:page:/:uid",
+        severity: "error",
+        code: "CMS-ROUTE-404",
+        count: 2,
+        type: "page",
+        routePattern: "/:uid",
+        label: "page /:uid",
+        examples: ["/about", "/contact"],
+      },
+    ],
+    summary: { errors: 2, warnings: 0, info: 0 },
+  };
+
+  const html = renderHtmlReport(result);
+
+  expect(html).toContain("Repeated findings");
+  expect(html).toContain("page /:uid");
+  expect(html).toContain("CMS-ROUTE-404");
+  expect(html).toContain("/about, /contact");
+});
+
 test("renderHtmlReport summarizes collection and single-type documents when metadata is available", () => {
   const html = renderHtmlReport({
     project: {

@@ -20,6 +20,21 @@ export function renderMarkdownSummary(
     return lines.join("\n");
   }
 
+  const repeatedGroups = (result.diagnosticGroups ?? []).filter(
+    (group) => group.count > 1,
+  );
+  if (repeatedGroups.length > 0) {
+    lines.push("## Repeated Findings", "");
+    lines.push("| Group | Code | Count | Examples |");
+    lines.push("| --- | --- | ---: | --- |");
+    for (const group of repeatedGroups) {
+      lines.push(
+        `| ${escapeMarkdown(group.label)} | ${escapeMarkdown(group.code)} | ${group.count} | ${escapeMarkdown(group.examples.join(", "))} |`,
+      );
+    }
+    lines.push("");
+  }
+
   lines.push("## Diagnostics", "");
   lines.push("| Severity | Code | Message | Source |");
   lines.push("| --- | --- | --- | --- |");
