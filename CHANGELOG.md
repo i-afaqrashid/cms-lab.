@@ -4,7 +4,7 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
-## Unreleased
+## 1.2.0 - 2026-05-26
 
 ### Added
 
