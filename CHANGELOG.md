@@ -4,6 +4,23 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## 1.2.5 - 2026-05-26
+
+### Added
+
+- Added `checks.relationships` for simple equality joins across normalized CMS
+  documents, starting with rules such as `menu_item.id -> pricing.menu_item_id`.
+- Added `CMS-RELATIONSHIP-MISSING` diagnostics and relationship grouping in
+  HTML and JUnit-style outputs.
+- Added relationship examples to the Directus starter config, Directus docs,
+  configuration docs, diagnostics docs, and the tested-with matrix.
+
+### Verification
+
+- Added config-schema, scan, reporter, and CLI coverage for relationship rules.
+- Verified with `pnpm test`, `pnpm typecheck`, `pnpm build`,
+  `pnpm site:build`, `pnpm lint`, and `pnpm format:check`.
+
 ## 1.2.4 - 2026-05-26
 
 ### Added
