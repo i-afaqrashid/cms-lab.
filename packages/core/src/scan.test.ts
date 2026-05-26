@@ -676,6 +676,54 @@ test("scanDocuments reports provider-specific image alt gaps with provider sourc
   }
 });
 
+test("scanDocuments ignores Strapi derived image formats when the parent media has alt text", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      cms: {
+        provider: "strapi" as const,
+        url: "http://localhost:1337",
+        collections: [{ type: "page", endpoint: "pages" }],
+      },
+      checks: { routes: false, seo: false, fields: false },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "page-1",
+        type: "page",
+        uid: "about",
+        status: "published",
+        data: {
+          cover: {
+            url: "/uploads/cover.jpg",
+            alternativeText: "Rocket launch cover",
+            mime: "image/jpeg",
+            formats: {
+              thumbnail: {
+                url: "/uploads/thumbnail_cover.jpg",
+                mime: "image/jpeg",
+              },
+              small: {
+                url: "/uploads/small_cover.jpg",
+                mime: "image/jpeg",
+              },
+            },
+          },
+        },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(result.diagnostics).toEqual([]);
+});
+
 test("scanDocuments reports unrouted CMS document types as info", async () => {
   const result = await scanDocuments({
     config: baseConfig,

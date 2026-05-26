@@ -544,7 +544,7 @@ function imageAltCandidate(
   if (
     provider === "strapi" &&
     typeof record.url === "string" &&
-    ("alternativeText" in record || "mime" in record || "formats" in record)
+    ("alternativeText" in record || "formats" in record)
   ) {
     return { isImage: true, value: record.alternativeText };
   }
