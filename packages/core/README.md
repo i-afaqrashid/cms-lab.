@@ -40,6 +40,10 @@ routes: [
 probe hit a known-good page or endpoint while normal route probes still use
 `site.url`.
 
+`checks.relationships` supports narrow equality joins across normalized
+documents, for example requiring each `menu_item` to have at least one matching
+`pricing` row by `id -> menu_item_id`.
+
 ## Release History
 
 See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)

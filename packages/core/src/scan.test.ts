@@ -903,6 +903,85 @@ test("scanDocuments reports configured required field diagnostics", async () => 
   ]);
 });
 
+test("scanDocuments reports configured relationship diagnostics", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      cms: {
+        provider: "directus",
+        url: "http://localhost:8055",
+        collections: [
+          { type: "menu_item", collection: "menu_items" },
+          {
+            type: "pricing",
+            collection: "item_branch_pricing",
+            routable: false,
+          },
+        ],
+      },
+      checks: {
+        routes: false,
+        seo: false,
+        a11y: false,
+        images: false,
+        fields: false,
+        relationships: [
+          {
+            from: "menu_item",
+            to: "pricing",
+            where: { fromField: "id", toField: "menu_item_id" },
+            min: 1,
+            severity: "warning",
+          },
+        ],
+      },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "item-1",
+        type: "menu_item",
+        uid: "burger",
+        status: "published",
+        data: { id: 10, name: "Burger" },
+      },
+      {
+        id: "item-2",
+        type: "menu_item",
+        uid: "fries",
+        status: "published",
+        data: { id: 20, name: "Fries" },
+      },
+      {
+        id: "pricing-1",
+        type: "pricing",
+        status: "published",
+        routable: false,
+        data: { id: 1, menu_item_id: 20, price: 12 },
+      },
+    ],
+    filters: { only: ["relationships"] },
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(result.summary).toEqual({ errors: 0, warnings: 1, info: 0 });
+  expect(result.diagnostics).toEqual([
+    {
+      severity: "warning",
+      code: "CMS-RELATIONSHIP-MISSING",
+      message:
+        "Document item-1 of type menu_item has 0 pricing records matching id -> menu_item_id; expected at least 1",
+      path: "relationships.menu_item.pricing",
+      source: "directus:menu_item#item-1",
+    },
+  ]);
+});
+
 test("scanDocuments limits concurrent route probes", async () => {
   let activeRequests = 0;
   let maxActiveRequests = 0;

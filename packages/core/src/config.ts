@@ -162,6 +162,21 @@ const requiredFieldRuleSchema = z.object({
   severity: z.enum(["error", "warning"]).optional(),
 });
 
+const relationshipRuleSchema = z
+  .object({
+    from: z.string().min(1),
+    to: z.string().min(1),
+    where: z
+      .object({
+        fromField: z.string().min(1),
+        toField: z.string().min(1),
+      })
+      .strict(),
+    min: z.number().int().min(0).optional(),
+    severity: z.enum(["error", "warning", "info"]).optional(),
+  })
+  .strict();
+
 const checksSchema = z
   .object({
     routes: z.boolean().optional(),
@@ -191,6 +206,7 @@ const checksSchema = z
         }),
       ])
       .optional(),
+    relationships: z.array(relationshipRuleSchema).optional(),
   })
   .strict()
   .optional();

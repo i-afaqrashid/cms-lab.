@@ -208,12 +208,18 @@ test("renderHtmlReport emits real filter chips for severity and diagnostic group
         path: "data.title",
       },
       {
+        severity: "warning",
+        code: "CMS-RELATIONSHIP-MISSING",
+        message: "Relationship missing",
+        path: "relationships.menu_item.pricing",
+      },
+      {
         severity: "info",
         code: "CMS-ROUTE-UNMAPPED",
         message: "Settings has no route",
       },
     ],
-    summary: { errors: 1, warnings: 2, info: 1 },
+    summary: { errors: 1, warnings: 3, info: 1 },
   };
 
   const html = renderHtmlReport(result);
@@ -230,9 +236,13 @@ test("renderHtmlReport emits real filter chips for severity and diagnostic group
   );
   expect(html).toContain('data-filter-kind="group" data-filter-value="routes"');
   expect(html).toContain('data-filter-kind="group" data-filter-value="fields"');
+  expect(html).toContain(
+    'data-filter-kind="group" data-filter-value="relationships"',
+  );
   expect(html).toContain('data-filter-kind="group" data-filter-value="seo"');
   expect(html).toContain('data-diagnostic data-group="routes"');
   expect(html).toContain('data-diagnostic data-group="fields"');
+  expect(html).toContain('data-diagnostic data-group="relationships"');
   expect(html).toContain('data-diagnostic data-group="seo"');
 });
 

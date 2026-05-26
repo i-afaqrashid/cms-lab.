@@ -184,7 +184,8 @@ export default function ScanPage() {
             <td>all</td>
             <td>
               Run only selected groups: <code>routes</code>, <code>seo</code>,{" "}
-              <code>a11y</code>, <code>images</code>, <code>fields</code>.
+              <code>a11y</code>, <code>images</code>, <code>fields</code>,{" "}
+              <code>relationships</code>.
             </td>
           </tr>
           <tr>

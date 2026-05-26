@@ -36,9 +36,9 @@ const rows = [
     tests: "adapter fixtures",
     publicExample: "not yet",
     singletons: "not yet",
-    relations: "not yet",
+    relations: "equality joins",
     limits:
-      "Basic collection fetching and normalization are covered. CMS-only workflows and relation checks need more work.",
+      "Basic collection fetching, CMS-only workflow, and relationship minimum checks are covered. Conditional business rules still need project code.",
   },
   {
     adapter: "WordPress",

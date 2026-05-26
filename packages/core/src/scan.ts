@@ -3,10 +3,12 @@ import { readCmsDataPath } from "./data-path.js";
 import { SiteUnreachableError } from "./errors.js";
 import type {
   CMSDocument,
+  CheckGroup,
   CmsLabConfig,
   Diagnostic,
   FetchLike,
   ProjectInfo,
+  RelationshipRule,
   RequiredFieldRule,
   RouteDefinition,
   ScanFilters,
@@ -79,6 +81,10 @@ export async function scanDocuments(
 
   if (shouldRunCheck("fields", options.config, options.filters)) {
     diagnostics.push(...checkRequiredFields(options.config, documents));
+  }
+
+  if (shouldRunCheck("relationships", options.config, options.filters)) {
+    diagnostics.push(...checkRelationships(options.config, documents));
   }
 
   return {
@@ -459,6 +465,113 @@ function requiredFieldRules(config: CmsLabConfig): RequiredFieldRule[] {
   return fields.required ?? [];
 }
 
+function checkRelationships(
+  config: CmsLabConfig,
+  documents: CMSDocument[],
+): Diagnostic[] {
+  const rules = relationshipRules(config);
+  if (rules.length === 0) {
+    return [];
+  }
+
+  const documentsByType = new Map<string, CMSDocument[]>();
+  for (const document of documents) {
+    documentsByType.set(document.type, [
+      ...(documentsByType.get(document.type) ?? []),
+      document,
+    ]);
+  }
+
+  const diagnostics: Diagnostic[] = [];
+
+  for (const rule of rules) {
+    const min = rule.min ?? 1;
+    const targets = documentsByType.get(rule.to) ?? [];
+
+    for (const document of documentsByType.get(rule.from) ?? []) {
+      const fromValues = relationshipValues(document, rule.where.fromField);
+      const matchCount = targets.filter((target) =>
+        hasRelationshipMatch(
+          fromValues,
+          relationshipValues(target, rule.where.toField),
+        ),
+      ).length;
+
+      if (matchCount >= min) {
+        continue;
+      }
+
+      diagnostics.push(
+        createDiagnostic({
+          severity: rule.severity ?? "warning",
+          code: "CMS-RELATIONSHIP-MISSING",
+          message: `Document ${document.id} of type ${document.type} has ${matchCount} ${rule.to} records matching ${rule.where.fromField} -> ${rule.where.toField}; expected at least ${min}`,
+          path: `relationships.${rule.from}.${rule.to}`,
+          source: sourceFor(config, document),
+        }),
+      );
+    }
+  }
+
+  return diagnostics;
+}
+
+function relationshipRules(config: CmsLabConfig): RelationshipRule[] {
+  return config.checks?.relationships ?? [];
+}
+
+function hasRelationshipMatch(
+  fromValues: string[],
+  toValues: string[],
+): boolean {
+  if (fromValues.length === 0 || toValues.length === 0) {
+    return false;
+  }
+
+  const targetValues = new Set(toValues);
+  return fromValues.some((value) => targetValues.has(value));
+}
+
+function relationshipValues(document: CMSDocument, path: string): string[] {
+  const dataValue = readCmsDataPath(document.data, path);
+  if (dataValue !== undefined) {
+    return normalizeRelationshipValues(dataValue);
+  }
+
+  return normalizeRelationshipValues(
+    (document as unknown as Record<string, unknown>)[path],
+  );
+}
+
+function normalizeRelationshipValues(value: unknown): string[] {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => normalizeRelationshipValues(item));
+  }
+
+  if (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
+  ) {
+    return [String(value)];
+  }
+
+  const record = asRecord(value);
+  if (!record) {
+    return [];
+  }
+
+  return [
+    ...normalizeRelationshipValues(record.id),
+    ...normalizeRelationshipValues(record.uid),
+    ...normalizeRelationshipValues(record.slug),
+  ];
+}
+
 function hasSeoValue(
   config: CmsLabConfig,
   data: Record<string, unknown>,
@@ -637,7 +750,7 @@ function isCheckEnabled(value: unknown, defaultValue: boolean): boolean {
 }
 
 function shouldRunCheck(
-  group: "routes" | "seo" | "a11y" | "images" | "fields",
+  group: CheckGroup,
   config: CmsLabConfig,
   filters?: ScanFilters,
 ): boolean {
@@ -666,6 +779,10 @@ function shouldRunCheck(
 
   if (group === "images") {
     return isCheckEnabled(config.checks?.images, true);
+  }
+
+  if (group === "relationships") {
+    return true;
   }
 
   return isCheckEnabled(config.checks?.fields, true);

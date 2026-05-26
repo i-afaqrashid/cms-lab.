@@ -60,6 +60,15 @@ export default defineConfig({
         { type: "blog_post", path: "author.name", severity: "warning" },
       ],
     },
+    relationships: [
+      {
+        from: "blog_post",
+        to: "author",
+        where: { fromField: "author.id", toField: "id" },
+        min: 1,
+        severity: "warning",
+      },
+    ],
   },
 });
 ```
@@ -254,6 +263,7 @@ cms-lab scan --junit
 cms-lab scan --slack-webhook "$CMS_LAB_SLACK_WEBHOOK"
 cms-lab scan --type page
 cms-lab scan --only routes
+cms-lab scan --only relationships
 cms-lab scan --skip seo --skip a11y
 cms-lab scan --fail-on warning
 cms-lab scan --max-warnings 0
@@ -331,6 +341,7 @@ cms-lab currently checks:
 - Missing SEO titles and descriptions
 - Missing or placeholder image alt text
 - Custom required fields declared in `checks.fields.required`
+- Cross-document relationship minimums declared in `checks.relationships`
 
 The scanner keeps the original CMS payload in `document.data`, preserves public permalinks when a CMS exposes them, uses slug-like fields as `uid` where available, and treats non-public entries such as drafts, archived content, and scheduled WordPress posts as `draft`.
 

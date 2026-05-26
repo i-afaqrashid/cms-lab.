@@ -150,7 +150,7 @@ export function DiagnosticCode({
   children: ReactNode;
 }) {
   const severityClass = severity === "mixed" ? "warning" : severity;
-  const severityLabel = severity === "mixed" ? "error or warning" : severity;
+  const severityLabel = severity === "mixed" ? "configured" : severity;
 
   return (
     <tr>

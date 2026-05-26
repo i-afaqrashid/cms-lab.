@@ -115,6 +115,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
     return "fields";
   }
 
+  if (diagnostic.code.startsWith("CMS-RELATIONSHIP")) {
+    return "relationships";
+  }
+
   if (diagnostic.code.startsWith("SEO-")) {
     return "seo";
   }

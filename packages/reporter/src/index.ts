@@ -566,7 +566,14 @@ function plural(value: number, singular: string): string {
 }
 
 function groupDiagnostics(diagnostics: Diagnostic[]): DiagnosticGroup[] {
-  const groupOrder = ["routes", "fields", "seo", "a11y", "other"];
+  const groupOrder = [
+    "routes",
+    "fields",
+    "relationships",
+    "seo",
+    "a11y",
+    "other",
+  ];
   const groups = new Map<string, Diagnostic[]>();
 
   for (const diagnostic of diagnostics) {
@@ -589,6 +596,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
 
   if (diagnostic.code.startsWith("CMS-FIELD")) {
     return "fields";
+  }
+
+  if (diagnostic.code.startsWith("CMS-RELATIONSHIP")) {
+    return "relationships";
   }
 
   if (diagnostic.code.startsWith("SEO-")) {

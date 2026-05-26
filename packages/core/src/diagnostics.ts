@@ -105,6 +105,14 @@ const explanations: DiagnosticExplanation[] = [
       "A document is missing a required field declared in cms-lab config.",
     fix: "Fill the required field in the CMS, or update checks.fields.required if the field is no longer required.",
   },
+  {
+    code: "CMS-RELATIONSHIP-MISSING",
+    severity: "warning",
+    title: "CMS relationship rule did not match enough records",
+    meaning:
+      "A relationship rule expected a document to have one or more matching related records, but cms-lab found fewer than the configured minimum.",
+    fix: "Check the related CMS collection, the join fields in checks.relationships, and whether the related content should be published or active.",
+  },
 ];
 
 export function explainDiagnostic(

@@ -39,7 +39,7 @@ cms-lab explain CMS-ROUTE-404
 cms-lab supports Next.js App Router and Pages Router projects using Prismic,
 Strapi, Directus, WordPress, Contentful, and Sanity. It validates configured CMS
 route mappings, route reachability, UID gaps, SEO metadata, image alt text, and
-project-specific required fields.
+project-specific required fields and relationship minimums.
 
 `cms-lab init --cms strapi --router pages` writes a Strapi starter config with
 collections, single types, route examples, and the Strapi relation route helper.

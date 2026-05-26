@@ -136,8 +136,9 @@ export default defineConfig({
       <h2 id="fields">Required fields</h2>
       <p>
         Required field checks are useful today for high-volume collections and
-        junction collections. They do not prove the full relational invariant,
-        but they catch missing values before templates or scripts assume them.
+        junction collections. Relationship checks cover the first useful
+        cross-document invariant: whether one collection has matching related
+        rows in another collection.
       </p>
       <CodeBlock>{`checks: {
   fields: {
@@ -155,6 +156,22 @@ export default defineConfig({
       { type: "inventory", path: "current_stock", severity: "warning" },
     ],
   },
+  relationships: [
+    {
+      from: "menu_item",
+      to: "pricing",
+      where: { fromField: "id", toField: "menu_item_id" },
+      min: 1,
+      severity: "warning",
+    },
+    {
+      from: "branch",
+      to: "pricing",
+      where: { fromField: "id", toField: "branch_id" },
+      min: 1,
+      severity: "warning",
+    },
+  ],
 }`}</CodeBlock>
 
       <h2 id="images">Images and alt text</h2>
@@ -178,12 +195,13 @@ export default defineConfig({
         <li>Menu item route builders that cannot produce a valid path.</li>
         <li>Missing slugs, required fields, SEO fields, and image alt text.</li>
         <li>Junction rows missing required IDs or price fields.</li>
+        <li>Items or branches without any matching pricing rows.</li>
       </ul>
       <p>
-        What is not built in yet: cross-document rules such as "every active
-        menu item must have at least one available pricing row per branch" or
-        "every branch must have one available menu item." Track those with the
-        relationship-check feature work.
+        What is not built in yet: richer conditional rules such as "every active
+        menu item must have an available pricing row per active branch" or
+        "ignore archived branches when checking availability." Keep those in
+        project-specific checks until adapter-specific rules exist.
       </p>
       <p>
         Next steps:{" "}
