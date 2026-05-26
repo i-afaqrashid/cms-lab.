@@ -1,6 +1,6 @@
 {
   "name": "@cms-lab/contentful",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "description": "Contentful document adapter for cms-lab.",
   "license": "MIT",

@@ -1,4 +1,4 @@
-name: cms-lab
+name: cms-lab CMS Scan
 description: Scan CMS content against configured site routes before deploy.
 author: Afaq Rashid
 

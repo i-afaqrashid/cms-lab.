@@ -7,7 +7,7 @@ test("GitHub Action metadata exposes the cms-lab scan wrapper", async () => {
   const action = await readFile(resolve("action.yml"), "utf8");
   const runner = await readFile(resolve("scripts/github-action.sh"), "utf8");
 
-  expect(action).toContain("name: cms-lab");
+  expect(action).toContain("name: cms-lab CMS Scan");
   expect(action).toContain("using: composite");
   expect(action).toContain("node-version: 24");
   expect(action).toContain("scripts/github-action.sh");
@@ -53,7 +53,7 @@ test("GitHub Action runner builds a cms-lab scan command", async () => {
     PATH: `${tmp}:${process.env.PATH ?? ""}`,
     GITHUB_OUTPUT: outputFile,
     CMS_LAB_NPX_ARGS_FILE: argsFile,
-    CMS_LAB_VERSION: "1.2.0",
+    CMS_LAB_VERSION: "1.2.1",
     CMS_LAB_CONFIG: "cms-lab.config.ts",
     CMS_LAB_URL: "http://localhost:3000",
     CMS_LAB_REPORT: "true",
@@ -79,7 +79,7 @@ test("GitHub Action runner builds a cms-lab scan command", async () => {
 
   expect(args).toEqual([
     "-y",
-    "@cms-lab/cli@1.2.0",
+    "@cms-lab/cli@1.2.1",
     "scan",
     "--ci",
     "--config",
