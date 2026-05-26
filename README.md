@@ -18,6 +18,16 @@ You can also run it without adding it to the project:
 npx @cms-lab/cli scan
 ```
 
+## Try It In StackBlitz
+
+Open a public example before wiring cms-lab into your own CMS:
+
+- [Run the broken Prismic demo in StackBlitz](https://stackblitz.com/fork/github/i-afaqrashid/cms-lab/tree/main/examples/broken-prismic-demo?title=cms-lab%20Broken%20Prismic%20demo)
+- [Run the Next Prismic config reference in StackBlitz](https://stackblitz.com/fork/github/i-afaqrashid/cms-lab/tree/main/examples/next-prismic?title=cms-lab%20Next%20Prismic%20config)
+
+The default browser starter is also available at
+https://cmslab.afaqrashid.com/new.
+
 ## Quick Start
 
 Create `cms-lab.config.ts` in a Next.js project:

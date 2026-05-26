@@ -2,6 +2,15 @@
 
 This is a no-secret demo for launch posts and local smoke testing. It uses the public Prismic starter repository and intentionally includes bad route and field expectations so `cms-lab` produces visible diagnostics.
 
+## Run in StackBlitz
+
+[Run in StackBlitz](https://stackblitz.com/fork/github/i-afaqrashid/cms-lab/tree/main/examples/broken-prismic-demo?title=cms-lab%20Broken%20Prismic%20demo)
+
+StackBlitz opens this folder from GitHub. Use the commands below in the browser
+terminal or run them locally from this directory.
+
+## Run locally
+
 Run from this folder after building the workspace, or use the published package after the next release:
 
 ```sh
