@@ -59,6 +59,8 @@ CI strictness can be raised with `--fail-on warning`, `--max-warnings <count>`,
 Exports include local HTML (`--report`), share-safe local HTML
 (`--report --share-report`), Markdown (`--markdown`), JUnit XML (`--junit`),
 and redacted Slack incoming webhook summaries (`--slack-webhook <url>`).
+Terminal, JSON, Markdown, and HTML outputs include repeated-finding summaries
+when many documents hit the same content type/template issue.
 Share-safe HTML redacts CMS source IDs and local project paths while keeping
 diagnostic codes, severity, route paths, and field paths visible. Slack
 notifications send counts and diagnostic codes only, never raw CMS payloads,

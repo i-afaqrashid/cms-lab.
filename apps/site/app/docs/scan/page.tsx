@@ -312,6 +312,11 @@ export default function ScanPage() {
         report to a public issue. It keeps the useful diagnostic details but
         hides CMS source IDs and local project paths.
       </p>
+      <p>
+        Scan output also includes repeated-finding groups. Those groups show
+        when one content type or route template is causing the same issue across
+        many documents, while the full diagnostics array still keeps each row.
+      </p>
       <CodeBlock>{`{
   "project": {
     "framework": "next",
@@ -333,6 +338,17 @@ export default function ScanPage() {
       "message": "Route /about returned 404",
       "path": "/about",
       "source": "prismic:page#Yabc"
+    }
+  ],
+  "diagnosticGroups": [
+    {
+      "code": "CMS-ROUTE-404",
+      "severity": "error",
+      "count": 12,
+      "type": "page",
+      "routePattern": "/:uid",
+      "label": "page /:uid",
+      "examples": ["/about", "/contact"]
     }
   ],
   "summary": { "errors": 1, "warnings": 0, "info": 0 }

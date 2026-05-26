@@ -1,5 +1,9 @@
 import pc from "picocolors";
-import type { Diagnostic, ScanResult } from "@cms-lab/core";
+import type {
+  Diagnostic,
+  DiagnosticGroupSummary,
+  ScanResult,
+} from "@cms-lab/core";
 
 export type FormatOutputOptions = {
   color?: boolean;
@@ -44,6 +48,8 @@ export function formatPrettyResult(
     result.diagnostics.filter((diagnostic) => diagnostic.severity === "info"),
     paint.cyan,
   );
+
+  appendRepeatedGroups(lines, result.diagnosticGroups ?? [], paint.bold);
 
   lines.push("");
   lines.push("summary");
@@ -120,6 +126,25 @@ function appendGroup(
     lines.push(
       `  ${color(diagnostic.code)}${location} - ${diagnostic.message}${source}`,
     );
+  }
+  lines.push("");
+}
+
+function appendRepeatedGroups(
+  lines: string[],
+  groups: DiagnosticGroupSummary[],
+  formatTitle: (value: string) => string,
+): void {
+  const repeated = groups.filter((group) => group.count > 1);
+  if (repeated.length === 0) {
+    return;
+  }
+
+  lines.push(formatTitle("repeated"));
+  for (const group of repeated) {
+    const examples =
+      group.examples.length > 0 ? ` (${group.examples.join(", ")})` : "";
+    lines.push(`  ${group.label} - ${group.code} x${group.count}${examples}`);
   }
   lines.push("");
 }

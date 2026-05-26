@@ -62,6 +62,73 @@ test("scanDocuments reports route failures and content diagnostics", async () =>
   ]);
 });
 
+test("scanDocuments summarizes repeated diagnostics by content type and route pattern", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: {
+        seo: false,
+        a11y: false,
+        images: false,
+        fields: {
+          required: [{ type: "page", path: "headline", severity: "warning" }],
+        },
+      },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "page-1",
+        type: "page",
+        uid: "about",
+        status: "published",
+        data: { headline: "" },
+      },
+      {
+        id: "page-2",
+        type: "page",
+        uid: "contact",
+        status: "published",
+        data: { headline: "" },
+      },
+    ],
+    fetch: async (url) => {
+      if (String(url).endsWith("/about") || String(url).endsWith("/contact")) {
+        return new Response("missing", { status: 404 });
+      }
+
+      return new Response("ok");
+    },
+  });
+
+  expect(result.diagnosticGroups).toEqual([
+    {
+      key: "error:CMS-ROUTE-404:page:/:uid",
+      severity: "error",
+      code: "CMS-ROUTE-404",
+      count: 2,
+      type: "page",
+      routePattern: "/:uid",
+      label: "page /:uid",
+      examples: ["/about", "/contact"],
+    },
+    {
+      key: "warning:CMS-FIELD-MISSING:page",
+      severity: "warning",
+      code: "CMS-FIELD-MISSING",
+      count: 2,
+      type: "page",
+      label: "page",
+      examples: ["data.headline"],
+    },
+  ]);
+});
+
 test("scanDocuments treats 5xx route responses as errors", async () => {
   const result = await scanDocuments({
     config: baseConfig,

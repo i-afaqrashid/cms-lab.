@@ -266,6 +266,48 @@ export function renderHtmlReport(
     .chip .n { color: var(--muted); }
     .chip.active { background: var(--ink); color: #f6f5ef; border-color: var(--ink); }
     .chip.active .n { color: #b8b7ad; }
+    .repeated {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .repeated h2 {
+      font-size: 13px;
+      margin-bottom: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0;
+    }
+    .repeated-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .repeated-list li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      font-size: 13px;
+    }
+    .repeated-main { min-width: 0; }
+    .repeated-title {
+      font-family: var(--mono);
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+    .repeated-examples {
+      color: var(--muted);
+      margin-top: 2px;
+      overflow-wrap: anywhere;
+    }
+    .repeated-count {
+      font-family: var(--mono);
+      color: var(--muted);
+      white-space: nowrap;
+    }
     .group-header {
       padding: 10px 20px;
       background: var(--surface-2);
@@ -457,6 +499,8 @@ export function renderHtmlReport(
           }
         </div>
 
+        ${repeatedDiagnosticGroups(result)}
+
         <div class="report-toolbar" aria-label="Diagnostic filters">
           <button class="chip active" type="button" data-filter-kind="all" data-filter-value="all">All <span class="n">${diagnostics.length}</span></button>
           <button class="chip" type="button" data-filter-kind="severity" data-filter-value="error">Errors <span class="n">${result.summary.errors}</span></button>
@@ -559,6 +603,36 @@ function statusLabel(result: ScanResult): string {
   }
 
   return "no errors";
+}
+
+function repeatedDiagnosticGroups(result: ScanResult): string {
+  const groups = (result.diagnosticGroups ?? []).filter(
+    (group) => group.count > 1,
+  );
+  if (groups.length === 0) {
+    return "";
+  }
+
+  return `<section class="repeated" aria-label="Repeated findings">
+  <h2>Repeated findings</h2>
+  <ul class="repeated-list">
+    ${groups
+      .map(
+        (group) => `<li>
+      <div class="repeated-main">
+        <div class="repeated-title">${escapeHtml(group.label)} · ${escapeHtml(group.code)}</div>
+        ${
+          group.examples.length > 0
+            ? `<div class="repeated-examples">${escapeHtml(group.examples.join(", "))}</div>`
+            : ""
+        }
+      </div>
+      <div class="repeated-count">x${group.count}</div>
+    </li>`,
+      )
+      .join("")}
+  </ul>
+</section>`;
 }
 
 function plural(value: number, singular: string): string {

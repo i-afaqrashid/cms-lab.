@@ -187,10 +187,22 @@ export type ScanSummary = {
   info: number;
 };
 
+export type DiagnosticGroupSummary = {
+  key: string;
+  severity: DiagnosticSeverity;
+  code: string;
+  count: number;
+  label: string;
+  type?: string;
+  routePattern?: string;
+  examples: string[];
+};
+
 export type ScanResult = {
   project: ProjectInfo;
   documents: CMSDocument[];
   diagnostics: Diagnostic[];
+  diagnosticGroups?: DiagnosticGroupSummary[];
   summary: ScanSummary;
 };
 

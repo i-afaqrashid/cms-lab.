@@ -73,6 +73,19 @@ export default function BugExamplesPage() {
               Write specific alt text or mark decorative images in the app.
             </td>
           </tr>
+          <tr>
+            <td>
+              One template repeats the same issue across many CMS documents.
+            </td>
+            <td>
+              A repeated-finding group such as <code>page /:uid</code> plus the
+              full row-level diagnostics.
+            </td>
+            <td>
+              Fix the shared route/template code or bulk-edit the affected CMS
+              records.
+            </td>
+          </tr>
         </tbody>
       </table>
 
