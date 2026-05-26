@@ -51,6 +51,9 @@ cms-lab init --cms strapi --router pages
 The generated config includes collection routes, single types, and
 `strapiRelationSlug` for relation-based URL segments.
 
+See the public [adapter maturity matrix](https://cmslab.afaqrashid.com/docs/tested-with)
+for current test coverage and known limits.
+
 ## Release History
 
 See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)

@@ -787,7 +787,7 @@ code {
 .table tbody {
   display: table;
   width: 100%;
-  min-width: 640px;
+  min-width: 860px;
 }
 
 .table th,
