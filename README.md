@@ -305,6 +305,9 @@ crawls.
 See [`/docs/troubleshooting`](https://cmslab.afaqrashid.com/docs/troubleshooting)
 for common first-run failures and fixes.
 
+See [`/docs/large-catalogs`](https://cmslab.afaqrashid.com/docs/large-catalogs)
+for baseline, filtering, and concurrency guidance on larger CMS inventories.
+
 ## Checks
 
 cms-lab currently checks:

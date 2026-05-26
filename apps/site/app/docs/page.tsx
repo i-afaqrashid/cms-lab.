@@ -61,6 +61,14 @@ export default function DocsPage() {
           <Link href="/docs/tested-with">Adapter maturity matrix</Link>
         </div>
         <div className="pathItem">
+          <strong>I have thousands of CMS entries</strong>
+          <p>
+            Start with a baseline, narrow by content type, and tune route probe
+            concurrency before making CI strict.
+          </p>
+          <Link href="/docs/large-catalogs">Large catalog scanning</Link>
+        </div>
+        <div className="pathItem">
           <strong>I want CI output</strong>
           <p>
             Run cms-lab after the app is serving and upload the local report as
@@ -210,6 +218,9 @@ export default function DocsPage() {
         </li>
         <li>
           <Link href="/docs/troubleshooting">Fix common setup failures</Link>
+        </li>
+        <li>
+          <Link href="/docs/large-catalogs">Scan larger catalogs safely</Link>
         </li>
       </ul>
     </DocsShell>
