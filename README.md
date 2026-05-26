@@ -101,6 +101,12 @@ cms: {
       urlField: "routing.url",
     },
   ],
+  singleTypes: [
+    {
+      type: "navbar",
+      endpoint: "navbar",
+    },
+  ],
 }
 ```
 

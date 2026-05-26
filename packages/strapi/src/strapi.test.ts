@@ -97,6 +97,52 @@ test("fetchStrapiDocuments supports Strapi v4 attributes payloads", async () => 
   ]);
 });
 
+test("fetchStrapiDocuments fetches and normalizes Strapi single types as non-routable documents", async () => {
+  const calls: string[] = [];
+
+  const documents = await fetchStrapiDocuments(
+    {
+      provider: "strapi",
+      url: "http://localhost:1337",
+      singleTypes: [{ type: "navbar", endpoint: "navbar" }],
+    },
+    {
+      fetch: async (url) => {
+        calls.push(String(url));
+
+        return Response.json({
+          data: {
+            id: 3,
+            attributes: {
+              title: "Main navigation",
+              meta_title: "Navigation",
+              meta_description: "Global site navigation",
+              publishedAt: "2026-05-26T00:00:00.000Z",
+            },
+          },
+        });
+      },
+    },
+  );
+
+  expect(calls).toEqual(["http://localhost:1337/api/navbar?populate=*"]);
+  expect(documents).toEqual([
+    {
+      id: "3",
+      type: "navbar",
+      status: "published",
+      routable: false,
+      data: {
+        id: 3,
+        title: "Main navigation",
+        meta_title: "Navigation",
+        meta_description: "Global site navigation",
+        publishedAt: "2026-05-26T00:00:00.000Z",
+      },
+    },
+  ]);
+});
+
 test("normalizeStrapiItem keeps rich SEO and media fields while treating non-published status as draft", () => {
   expect(
     normalizeStrapiItem("article", {

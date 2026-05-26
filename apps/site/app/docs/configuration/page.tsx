@@ -113,11 +113,12 @@ export default defineConfig({
 
       <h2 id="adapter-examples">Adapter examples</h2>
       <p>
-        Adapter configs use the same route and check model. Strapi and Directus
-        declare collections; WordPress, Contentful, and Sanity declare content
-        or document types. The adapters preserve native CMS fields in{" "}
-        <code>document.data</code>, so route mappings and required-field checks
-        can use provider-specific values when your app needs them.
+        Adapter configs use the same route and check model. Strapi declares
+        collections and single types; Directus declares collections; WordPress,
+        Contentful, and Sanity declare content or document types. The adapters
+        preserve native CMS fields in <code>document.data</code>, so route
+        mappings and required-field checks can use provider-specific values when
+        your app needs them.
       </p>
       <CodeBlock>{`cms: {
   provider: "strapi",
@@ -128,6 +129,12 @@ export default defineConfig({
       type: "page",
       endpoint: "pages",
       uidField: "routing.slug",
+    },
+  ],
+  singleTypes: [
+    {
+      type: "navbar",
+      endpoint: "navbar",
     },
   ],
 }
