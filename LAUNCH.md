@@ -105,6 +105,17 @@ Expected behavior:
 - `--fail-on never` exits `0` while still writing diagnostics
 - HTML, Markdown, JUnit, and JSON artifacts are created
 
+## Launch Assets
+
+Use the generated assets when a launch post or repository page needs a real
+product visual. They are captured from the broken Prismic demo and do not
+include private project paths, customer URLs, tokens, or raw CMS payloads.
+
+- [Terminal screenshot](./assets/launch/terminal-screenshot.png)
+- [HTML report screenshot](./assets/launch/report-screenshot.png)
+- [CI failure screenshot](./assets/launch/ci-failure-screenshot.png)
+- [Short demo GIF](./assets/launch/demo.gif)
+
 ## Tested-With Matrix
 
 Keep the public matrix at `https://cmslab.afaqrashid.com/docs/tested-with`

@@ -6,6 +6,8 @@ Catch CMS bugs before deploy.
 
 There is no hosted cms-lab service. The CLI runs inside your project and talks directly to the CMS endpoints you configure.
 
+![cms-lab HTML report showing route errors, field warnings, SEO warnings, and image alt text warnings from the broken Prismic demo](./assets/launch/report-screenshot.png)
+
 ## Install
 
 ```sh
