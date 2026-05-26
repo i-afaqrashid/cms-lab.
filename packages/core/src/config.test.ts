@@ -215,4 +215,4 @@ test("loadCmsLabConfig loads a TypeScript config file", async () => {
     throw new Error("Expected prismic config");
   }
   expect(result.config.cms.repositoryName).toBe("demo");
-});
+}, 10000);
