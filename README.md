@@ -302,6 +302,9 @@ See [`/docs/comparison`](https://cmslab.afaqrashid.com/docs/comparison) for how
 cms-lab fits with link checkers, Playwright, Lighthouse CI, and custom route
 crawls.
 
+See [`/docs/troubleshooting`](https://cmslab.afaqrashid.com/docs/troubleshooting)
+for common first-run failures and fixes.
+
 ## Checks
 
 cms-lab currently checks:
