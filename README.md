@@ -298,6 +298,10 @@ See
 [`/docs/bug-examples`](https://cmslab.afaqrashid.com/docs/bug-examples) for the
 ordinary CMS failures cms-lab is built to catch.
 
+See [`/docs/comparison`](https://cmslab.afaqrashid.com/docs/comparison) for how
+cms-lab fits with link checkers, Playwright, Lighthouse CI, and custom route
+crawls.
+
 ## Checks
 
 cms-lab currently checks:
