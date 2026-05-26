@@ -185,6 +185,9 @@ export default function DocsPage() {
           <Link href="/docs/configuration">Write the config</Link>
         </li>
         <li>
+          <Link href="/docs/providers">Pick provider-specific setup docs</Link>
+        </li>
+        <li>
           <Link href="/docs/backend-only">
             Plan a backend-only CMS workflow
           </Link>

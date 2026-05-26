@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+
 import { CodeBlock, DocsShell } from "../../components";
 
 export const metadata: Metadata = {
@@ -142,6 +144,10 @@ export default defineConfig({
         preserve native CMS fields in <code>document.data</code>, so route
         mappings and required-field checks can use provider-specific values when
         your app needs them.
+      </p>
+      <p>
+        For provider-specific setup notes and caveats, open{" "}
+        <Link href="/docs/providers">the provider docs</Link>.
       </p>
       <CodeBlock>{`cms: {
   provider: "strapi",
