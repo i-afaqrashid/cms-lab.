@@ -41,6 +41,22 @@ collections: [
 ];
 ```
 
+Use `checks.relationships` for simple cross-collection minimums:
+
+```ts
+checks: {
+  relationships: [
+    {
+      from: "menu_item",
+      to: "pricing",
+      where: { fromField: "id", toField: "menu_item_id" },
+      min: 1,
+      severity: "warning",
+    },
+  ],
+}
+```
+
 See the public [adapter maturity matrix](https://cmslab.afaqrashid.com/docs/tested-with)
 for current test coverage and known limits.
 

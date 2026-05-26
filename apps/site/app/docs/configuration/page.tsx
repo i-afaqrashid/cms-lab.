@@ -19,6 +19,7 @@ export default function ConfigurationPage() {
         { href: "#strapi-pages", label: "Strapi Pages Router" },
         { href: "#route-fields", label: "Route fields" },
         { href: "#required-fields", label: "Required fields" },
+        { href: "#relationships", label: "Relationships" },
       ]}
     >
       <div className="breadcrumb">Docs / Configuration</div>
@@ -54,6 +55,15 @@ export default defineConfig({
         { type: "article", path: "title", severity: "warning" },
       ],
     },
+    relationships: [
+      {
+        from: "article",
+        to: "author",
+        where: { fromField: "author.id", toField: "id" },
+        min: 1,
+        severity: "warning",
+      },
+    ],
   },
 });`}</CodeBlock>
 
@@ -320,6 +330,29 @@ export default defineConfig({
         <strong>Path format</strong>
         Required field paths are read from <code>document.data</code>. Use
         dotted paths for nested objects, for example <code>author.name</code>.
+      </div>
+      <h2 id="relationships">Relationships</h2>
+      <p>
+        Relationship checks compare one field on a source document with one
+        field on related documents. Use them for simple junction-table rules,
+        such as a catalog item needing at least one pricing row.
+      </p>
+      <CodeBlock>{`checks: {
+  relationships: [
+    {
+      from: "menu_item",
+      to: "pricing",
+      where: { fromField: "id", toField: "menu_item_id" },
+      min: 1,
+      severity: "warning",
+    },
+  ],
+}`}</CodeBlock>
+      <div className="callout">
+        <strong>First version</strong>
+        Relationship rules currently use equality joins against normalized CMS
+        documents. More specific active-status and price rules should stay in
+        required fields or project checks until adapter-specific rules exist.
       </div>
       <div className="callout">
         <strong>Provider fields</strong>

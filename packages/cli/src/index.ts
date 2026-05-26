@@ -1185,7 +1185,14 @@ function assertTypeFilterMatched(
 }
 
 function parseCheckGroups(values: string[] | undefined): CheckGroup[] {
-  const allowed = new Set(["routes", "seo", "a11y", "images", "fields"]);
+  const allowed = new Set([
+    "routes",
+    "seo",
+    "a11y",
+    "images",
+    "fields",
+    "relationships",
+  ]);
   const groups = splitList(values);
 
   for (const group of groups) {
@@ -1650,6 +1657,15 @@ export default defineConfig({
         { type: "pricing", path: "is_available", severity: "warning" },
       ],
     },
+    relationships: [
+      {
+        from: "menu_item",
+        to: "pricing",
+        where: { fromField: "id", toField: "menu_item_id" },
+        min: 1,
+        severity: "warning",
+      },
+    ],
   },
 });
 `;

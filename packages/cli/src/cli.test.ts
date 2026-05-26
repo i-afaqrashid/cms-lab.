@@ -1665,6 +1665,11 @@ test("runCli init can write a Directus starter config", async () => {
   expect(config).toContain('{ type: "category", collection: "menu_categories"');
   expect(config).toContain('collection: "item_branch_pricing"');
   expect(config).toContain("routable: false");
+  expect(config).toContain('from: "menu_item"');
+  expect(config).toContain('to: "pricing"');
+  expect(config).toContain(
+    'where: { fromField: "id", toField: "menu_item_id" }',
+  );
   expect(config).toContain('pattern: "/branches/:slug"');
   expect(config).toContain('pattern: "/menu/:branch/:slug"');
 });
@@ -1719,7 +1724,7 @@ test("runCli rejects check groups that are not implemented", async () => {
 
   expect(exitCode).toBe(2);
   expect(stderr).toContain("Unknown check group");
-  expect(stderr).toContain("routes, seo, a11y, images, fields");
+  expect(stderr).toContain("routes, seo, a11y, images, fields, relationships");
 });
 
 test("runCli doctor validates config, project, site, and CMS connectivity", async () => {

@@ -173,6 +173,15 @@ test("validateConfig accepts required field check rules", () => {
           { type: "page", path: "hero.cta_label", severity: "warning" },
         ],
       },
+      relationships: [
+        {
+          from: "menu_item",
+          to: "pricing",
+          where: { fromField: "id", toField: "menu_item_id" },
+          min: 1,
+          severity: "warning",
+        },
+      ],
     },
   });
 
@@ -182,6 +191,15 @@ test("validateConfig accepts required field check rules", () => {
       { type: "page", path: "hero.cta_label", severity: "warning" },
     ],
   });
+  expect(config.checks?.relationships).toEqual([
+    {
+      from: "menu_item",
+      to: "pricing",
+      where: { fromField: "id", toField: "menu_item_id" },
+      min: 1,
+      severity: "warning",
+    },
+  ]);
 });
 
 test("validateConfig rejects unsupported SEO check sub-options", () => {

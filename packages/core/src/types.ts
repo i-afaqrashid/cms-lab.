@@ -49,6 +49,17 @@ export type RequiredFieldRule = {
   severity?: "error" | "warning";
 };
 
+export type RelationshipRule = {
+  from: string;
+  to: string;
+  where: {
+    fromField: string;
+    toField: string;
+  };
+  min?: number;
+  severity?: DiagnosticSeverity;
+};
+
 export type PrismicCmsProviderConfig = {
   provider: "prismic";
   repositoryName: string;
@@ -166,6 +177,7 @@ export type CmsLabConfig = {
     images?: boolean;
     a11y?: boolean | { imgAlt?: boolean };
     fields?: boolean | { required?: RequiredFieldRule[] };
+    relationships?: RelationshipRule[];
   };
 };
 
@@ -184,7 +196,13 @@ export type ScanResult = {
 
 export type FetchLike = typeof fetch;
 
-export type CheckGroup = "routes" | "seo" | "a11y" | "images" | "fields";
+export type CheckGroup =
+  | "routes"
+  | "seo"
+  | "a11y"
+  | "images"
+  | "fields"
+  | "relationships";
 
 export type ScanFilters = {
   types?: string[];

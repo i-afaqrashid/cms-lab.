@@ -334,6 +334,7 @@ function checksSummary(config: CmsLabConfig): string {
     `- SEO: ${checkState(checks?.seo)}`,
     `- Image alt text: ${checkState(checks?.a11y ?? checks?.images)}`,
     `- Required fields: ${requiredFieldsSummary(config)}`,
+    `- Relationship rules: ${relationshipRulesSummary(config)}`,
   ];
 
   return lines.join("\n");
@@ -365,6 +366,20 @@ function requiredFieldsSummary(config: CmsLabConfig): string {
   return required
     .map(
       (field) => `${field.type}.${field.path} (${field.severity ?? "error"})`,
+    )
+    .join(", ");
+}
+
+function relationshipRulesSummary(config: CmsLabConfig): string {
+  const relationships = config.checks?.relationships ?? [];
+  if (relationships.length === 0) {
+    return "default";
+  }
+
+  return relationships
+    .map(
+      (rule) =>
+        `${rule.from} -> ${rule.to} (${rule.where.fromField} = ${rule.where.toField}, min ${rule.min ?? 1}, ${rule.severity ?? "warning"})`,
     )
     .join(", ");
 }

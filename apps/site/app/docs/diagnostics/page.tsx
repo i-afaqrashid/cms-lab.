@@ -85,6 +85,14 @@ export default function DiagnosticsPage() {
             follows that field rule.
           </DiagnosticCode>
           <DiagnosticCode
+            code="CMS-RELATIONSHIP-MISSING"
+            severity="mixed"
+            group="relationships"
+          >
+            A configured relationship rule found fewer matching related records
+            than expected. Severity follows that relationship rule.
+          </DiagnosticCode>
+          <DiagnosticCode
             code="SEO-META-MISSING"
             severity="warning"
             group="seo"
