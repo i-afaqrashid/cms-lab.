@@ -23,6 +23,7 @@ cms-lab scan --json --include-sensitive-output
 cms-lab scan --max-warnings 0
 cms-lab scan --strict
 cms-lab agent-context
+cms-lab agent-context --mode cms-only
 cms-lab agent-context --preset all
 cms-lab agent-context --preset claude
 cms-lab agent-context --preset gemini
@@ -61,7 +62,9 @@ cms-lab docs, package links, route mappings, and safe project facts before
 attempting fixes. The default preset writes `AGENTS.md` plus shared files in
 `.cms-lab/`. Tool-specific presets can write `CLAUDE.md`, `GEMINI.md`, Copilot
 instructions, and a reusable Copilot prompt. Existing files are not overwritten
-unless `--force` is passed.
+unless `--force` is passed. Use `--mode cms-only` in backend-only CMS projects;
+the generated context will state that no frontend was detected and that route
+scans need a running app.
 
 ## Config
 

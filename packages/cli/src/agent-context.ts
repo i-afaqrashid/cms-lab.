@@ -19,7 +19,7 @@ export type AgentContextPreset =
 
 export type AgentContextOptions = {
   config: CmsLabConfig;
-  project: ProjectInfo;
+  project?: ProjectInfo;
   configFile: string;
   outputDir: string;
   includeAgentsMd: boolean;
@@ -46,21 +46,21 @@ export function renderAgentContextFiles(
   if (includeAgentsMd) {
     files.push({
       path: "AGENTS.md",
-      content: renderAgentsMd(contextPath, promptPath),
+      content: renderAgentsMd(contextPath, promptPath, options.project),
     });
   }
 
   if (options.preset === "claude" || options.preset === "all") {
     files.push({
       path: "CLAUDE.md",
-      content: renderClaudeMd(contextPath, promptPath),
+      content: renderClaudeMd(contextPath, promptPath, options.project),
     });
   }
 
   if (options.preset === "gemini" || options.preset === "all") {
     files.push({
       path: "GEMINI.md",
-      content: renderGeminiMd(contextPath, promptPath),
+      content: renderGeminiMd(contextPath, promptPath, options.project),
     });
   }
 
@@ -68,11 +68,15 @@ export function renderAgentContextFiles(
     files.push(
       {
         path: ".github/copilot-instructions.md",
-        content: renderCopilotInstructions(contextPath, promptPath),
+        content: renderCopilotInstructions(
+          contextPath,
+          promptPath,
+          options.project,
+        ),
       },
       {
         path: ".github/prompts/cms-lab-fix.prompt.md",
-        content: renderCopilotPrompt(contextPath, promptPath),
+        content: renderCopilotPrompt(contextPath, promptPath, options.project),
       },
     );
   }
@@ -91,10 +95,14 @@ export function renderAgentContextFiles(
   return files;
 }
 
-function renderAgentsMd(contextPath: string, promptPath: string): string {
+function renderAgentsMd(
+  contextPath: string,
+  promptPath: string,
+  project: ProjectInfo | undefined,
+): string {
   return `# cms-lab agent handoff
 
-This project uses cms-lab to check CMS content against the routes and fields the Next.js app expects.
+${agentProjectSummary(project)}
 
 Before changing code for CMS-related failures:
 
@@ -105,32 +113,40 @@ Before changing code for CMS-related failures:
    - npm: ${NPM_URL}
    - Docs: ${DOCS_URL}
 4. Run \`npx @cms-lab/cli doctor\` before a first scan.
-5. Run \`npx @cms-lab/cli scan --ci --report\` to reproduce diagnostics.
+5. ${agentScanInstruction(project)}
 6. Use \`npx @cms-lab/cli explain <CODE>\` for diagnostic details.
 
 Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
 }
 
-function renderClaudeMd(contextPath: string, promptPath: string): string {
+function renderClaudeMd(
+  contextPath: string,
+  promptPath: string,
+  project: ProjectInfo | undefined,
+): string {
   return `# cms-lab Claude Code context
 
 @${contextPath}
 @${promptPath}
 
-Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx @cms-lab/cli doctor\` first when connecting a project, then run \`npx @cms-lab/cli scan --ci --report\` to reproduce the current diagnostics.
+Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. ${toolScanGuidance(project)}
 
 Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
 }
 
-function renderGeminiMd(contextPath: string, promptPath: string): string {
+function renderGeminiMd(
+  contextPath: string,
+  promptPath: string,
+  project: ProjectInfo | undefined,
+): string {
   return `# cms-lab Gemini CLI context
 
 @${contextPath}
 @${promptPath}
 
-Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. Run \`npx @cms-lab/cli doctor\` first when connecting a project, then run \`npx @cms-lab/cli scan --ci --report\` to reproduce the current diagnostics.
+Use these cms-lab files before changing code for CMS route, field, SEO, or report diagnostics. ${toolScanGuidance(project)}
 
 Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
@@ -139,20 +155,25 @@ Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payl
 function renderCopilotInstructions(
   contextPath: string,
   promptPath: string,
+  project: ProjectInfo | undefined,
 ): string {
   return `# cms-lab Copilot instructions
 
-This project uses cms-lab to check CMS content against the routes and fields the Next.js app expects.
+${agentProjectSummary(project)}
 
 - Read \`${contextPath}\` before changing code for CMS diagnostics.
 - Use \`${promptPath}\` when asked to investigate a cms-lab failure.
-- Prefer reproducing with \`npx @cms-lab/cli scan --ci --report\` before editing application code.
+- ${toolScanBullet(project)}
 - Use \`npx @cms-lab/cli explain <CODE>\` before deciding where a diagnostic should be fixed.
 - Do not print or commit CMS tokens, webhook URLs, private site URLs, raw CMS payloads, or local absolute paths.
 `;
 }
 
-function renderCopilotPrompt(contextPath: string, promptPath: string): string {
+function renderCopilotPrompt(
+  contextPath: string,
+  promptPath: string,
+  project: ProjectInfo | undefined,
+): string {
   return `# Fix cms-lab diagnostics
 
 Use this prompt when investigating cms-lab diagnostics in this repository.
@@ -160,7 +181,7 @@ Use this prompt when investigating cms-lab diagnostics in this repository.
 1. Read \`${contextPath}\`.
 2. Read \`${promptPath}\`.
 3. Run \`npx @cms-lab/cli doctor\`.
-4. Run \`npx @cms-lab/cli scan --ci --report\`.
+4. ${toolPromptScanStep(project)}
 5. For each diagnostic code, run \`npx @cms-lab/cli explain <CODE>\`.
 6. Decide whether the fix belongs in CMS content, cms-lab route mapping, or application code.
 7. Make the smallest verifiable change and rerun cms-lab.
@@ -183,7 +204,7 @@ Use this file to orient coding agents before they work on CMS route, field, SEO,
 ## Project scan model
 
 - Config file: ${options.configFile}
-- Framework: ${projectLabel(options.project)}
+${projectFact(options.project)}
 - CMS provider: ${options.config.cms.provider}
 - Site URL: configured in cms-lab config (redacted)
 
@@ -201,10 +222,12 @@ ${checksSummary(options.config)}
 
 \`\`\`sh
 npx @cms-lab/cli doctor
-npx @cms-lab/cli scan --ci --report
+${options.project ? "npx @cms-lab/cli scan --ci --report" : "# Add or start the frontend before running route scans"}
 npx @cms-lab/cli scan --json
 npx @cms-lab/cli explain CMS-ROUTE-404
 \`\`\`
+
+${options.project ? "" : "Route scans require a running frontend. Use this context to document the CMS shape now, then add route mappings and scan commands once the frontend exists.\n"}
 
 ## Agent workflow
 
@@ -219,7 +242,7 @@ npx @cms-lab/cli explain CMS-ROUTE-404
 function renderPromptFile(options: AgentContextOptions): string {
   return `# cms-lab agent prompt
 
-You are working in a Next.js project that uses cms-lab to catch CMS-driven failures before deploy.
+${promptProjectSummary(options.project)}
 
 This prompt is suitable for agents such as Claude Code, Codex, Gemini CLI, Antigravity, OpenCode, and similar coding agents.
 
@@ -238,9 +261,11 @@ npx @cms-lab/cli scan --ci --report
 
 Project facts:
 
-- Framework: ${projectLabel(options.project)}
+${projectFact(options.project)}
 - CMS provider: ${options.config.cms.provider}
 - Route mappings: ${options.config.routes.map((route) => `${route.type} -> ${route.pattern}`).join(", ")}
+
+${options.project ? "" : "Add frontend route config before running route scans. The frontend has not been detected yet, so use this context for CMS schema, collection, and route-planning work first.\n"}
 
 When diagnostics appear, use \`npx @cms-lab/cli explain <CODE>\` before deciding whether the fix belongs in CMS content, route mapping, or application code.
 
@@ -354,6 +379,62 @@ function projectLabel(project: ProjectInfo): string {
   }
 
   return `${project.framework} ${project.router}`;
+}
+
+function projectFact(project: ProjectInfo | undefined): string {
+  if (!project) {
+    return "- Frontend: not detected";
+  }
+
+  return `- Framework: ${projectLabel(project)}`;
+}
+
+function agentProjectSummary(project: ProjectInfo | undefined): string {
+  if (!project) {
+    return "This project uses cms-lab to describe CMS content expectations before a frontend has been detected.";
+  }
+
+  return "This project uses cms-lab to check CMS content against the routes and fields the Next.js app expects.";
+}
+
+function agentScanInstruction(project: ProjectInfo | undefined): string {
+  if (!project) {
+    return "Add or start the frontend before running route scans.";
+  }
+
+  return "Run `npx @cms-lab/cli scan --ci --report` to reproduce diagnostics.";
+}
+
+function promptProjectSummary(project: ProjectInfo | undefined): string {
+  if (!project) {
+    return "You are working in a CMS/backend project where the frontend has not been detected yet. Use cms-lab to document the CMS shape and prepare route checks before deploy.";
+  }
+
+  return "You are working in a Next.js project that uses cms-lab to catch CMS-driven failures before deploy.";
+}
+
+function toolScanGuidance(project: ProjectInfo | undefined): string {
+  if (!project) {
+    return "The frontend has not been detected yet; run `npx @cms-lab/cli doctor` for config checks and add or start the frontend before route scans.";
+  }
+
+  return "Run `npx @cms-lab/cli doctor` first when connecting a project, then run `npx @cms-lab/cli scan --ci --report` to reproduce the current diagnostics.";
+}
+
+function toolScanBullet(project: ProjectInfo | undefined): string {
+  if (!project) {
+    return "The frontend has not been detected yet; use the context for CMS setup work and add or start the frontend before route scans.";
+  }
+
+  return "Prefer reproducing with `npx @cms-lab/cli scan --ci --report` before editing application code.";
+}
+
+function toolPromptScanStep(project: ProjectInfo | undefined): string {
+  if (!project) {
+    return "The frontend has not been detected yet; add or start it before running `npx @cms-lab/cli scan --ci --report`.";
+  }
+
+  return "Run `npx @cms-lab/cli scan --ci --report`.";
 }
 
 function trimSlashes(value: string): string {

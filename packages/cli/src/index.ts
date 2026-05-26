@@ -97,6 +97,7 @@ type InitCommandOptions = {
 
 type AgentContextCommandOptions = {
   config?: string;
+  mode?: string;
   out?: string;
   preset?: string;
   force?: boolean;
@@ -296,6 +297,7 @@ Examples:
     .command("agent-context")
     .description("Generate AI-agent handoff files for cms-lab projects.")
     .option("--config <path>", "Path to cms-lab config file")
+    .option("--mode <mode>", "Project mode: auto, next, or cms-only", "auto")
     .option(
       "--out <dir>",
       "Directory for generated cms-lab agent files",
@@ -314,6 +316,7 @@ Examples:
 Examples:
   cms-lab agent-context
   cms-lab agent-context --config cms-lab.config.ts
+  cms-lab agent-context --mode cms-only
   cms-lab agent-context --preset all
   cms-lab agent-context --preset claude
   cms-lab agent-context --preset copilot
@@ -692,12 +695,25 @@ async function runAgentContext(
   const cwd = dependencies.cwd ?? process.cwd();
 
   try {
+    const mode = parseAgentContextMode(options.mode);
     const loaded = await loadCmsLabConfig({ cwd, configPath: options.config });
-    const project = await detectNextProject(cwd);
-    assertConfiguredRouterMatchesProject(
-      loaded.config.framework.router,
-      project,
-    );
+    const project =
+      mode === "cms-only"
+        ? undefined
+        : await detectOptionalNextProject(cwd, mode);
+
+    if (project) {
+      assertConfiguredRouterMatchesProject(
+        loaded.config.framework.router,
+        project,
+      );
+    } else {
+      writeStdout(
+        dependencies,
+        "No Next.js project detected; generating CMS-only agent context.\n",
+      );
+    }
+
     const files = renderAgentContextFiles({
       config: loaded.config,
       project,
@@ -748,6 +764,32 @@ async function runAgentContext(
 
     writeStderr(dependencies, `Config error: ${safeMessageFrom(error)}\n`);
     return 2;
+  }
+}
+
+type AgentContextMode = "auto" | "next" | "cms-only";
+
+function parseAgentContextMode(value: string | undefined): AgentContextMode {
+  const mode = value ?? "auto";
+  if (mode === "auto" || mode === "next" || mode === "cms-only") {
+    return mode;
+  }
+
+  throw new ConfigLoadError("--mode must be one of: auto, next, cms-only");
+}
+
+async function detectOptionalNextProject(
+  cwd: string,
+  mode: AgentContextMode,
+): Promise<ProjectInfo | undefined> {
+  try {
+    return await detectNextProject(cwd);
+  } catch (error) {
+    if (mode === "next" || !(error instanceof ConfigLoadError)) {
+      throw error;
+    }
+
+    return undefined;
   }
 }
 
