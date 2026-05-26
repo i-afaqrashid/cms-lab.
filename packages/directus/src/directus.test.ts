@@ -196,6 +196,32 @@ test("normalizeDirectusItem supports configured uid and url fields", () => {
   });
 });
 
+test("normalizeDirectusItem can mark relation-heavy Directus collections as non-routable", () => {
+  expect(
+    normalizeDirectusItem(
+      {
+        type: "pricing",
+        collection: "item_branch_pricing",
+        uidField: "id",
+        routable: false,
+      },
+      {
+        id: 4521,
+        menu_item_id: 873,
+        branch_id: 14,
+        price: 289,
+        is_available: true,
+      },
+    ),
+  ).toMatchObject({
+    id: "4521",
+    type: "pricing",
+    uid: "4521",
+    routable: false,
+    status: "published",
+  });
+});
+
 test("fetchDirectusDocuments sends bearer tokens and reports HTTP failures", async () => {
   let authorization: string | null = null;
 

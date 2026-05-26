@@ -89,6 +89,7 @@ export type StrapiCmsProviderConfig = {
 export type DirectusCollectionConfig = {
   type: string;
   collection: string;
+  routable?: boolean;
 } & CmsFieldMappingConfig;
 
 export type DirectusCmsProviderConfig = {

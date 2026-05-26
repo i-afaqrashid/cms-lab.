@@ -66,7 +66,7 @@ export function normalizeDirectusItem(
     "Directus item is missing id",
   );
 
-  return {
+  const document: CMSDocument = {
     id,
     type: config.type,
     uid: optionalString(
@@ -76,6 +76,12 @@ export function normalizeDirectusItem(
     status: normalizeStatus(data.status),
     data,
   };
+
+  if (config.routable !== undefined) {
+    document.routable = config.routable;
+  }
+
+  return document;
 }
 
 async function fetchJson<T>(

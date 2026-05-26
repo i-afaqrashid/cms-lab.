@@ -94,6 +94,7 @@ type InitCommandOptions = {
   url?: string;
   strapiUrl?: string;
   strapiLocale?: string;
+  directusUrl?: string;
 };
 
 type AgentContextCommandOptions = {
@@ -272,7 +273,7 @@ Examples:
     .option("--force", "Overwrite an existing config file")
     .option(
       "--cms <provider>",
-      "Starter CMS provider: prismic or strapi",
+      "Starter CMS provider: prismic, strapi, or directus",
       "prismic",
     )
     .option("--router <router>", "Next.js router: app or pages", "app")
@@ -284,6 +285,7 @@ Examples:
       "http://localhost:1337",
     )
     .option("--strapi-locale <locale>", "Strapi locale query param")
+    .option("--directus-url <url>", "Directus API URL", "http://localhost:8055")
     .addHelpText(
       "after",
       `
@@ -291,6 +293,7 @@ Examples:
   cms-lab init
   cms-lab init --repository my-prismic-repo --url http://localhost:3000
   cms-lab init --cms strapi --router pages --strapi-url http://localhost:1337
+  cms-lab init --cms directus --router pages --directus-url http://localhost:8055
   cms-lab init --config cms-lab.config.ts --force
 `,
     )
@@ -1522,18 +1525,21 @@ function plural(value: number, singular: string): string {
 }
 
 type ParsedInitOptions = {
-  cms: "prismic" | "strapi";
+  cms: "prismic" | "strapi" | "directus";
   router: ProjectInfo["router"];
   repository: string;
   url: string;
   strapiUrl: string;
   strapiLocale?: string;
+  directusUrl: string;
 };
 
 function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
   const cms = options.cms ?? "prismic";
-  if (cms !== "prismic" && cms !== "strapi") {
-    throw new ConfigLoadError("--cms must be one of: prismic, strapi");
+  if (cms !== "prismic" && cms !== "strapi" && cms !== "directus") {
+    throw new ConfigLoadError(
+      "--cms must be one of: prismic, strapi, directus",
+    );
   }
 
   const router = options.router ?? "app";
@@ -1548,12 +1554,17 @@ function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
     url: options.url ?? "http://localhost:3000",
     strapiUrl: options.strapiUrl ?? "http://localhost:1337",
     strapiLocale: options.strapiLocale,
+    directusUrl: options.directusUrl ?? "http://localhost:8055",
   };
 }
 
 function starterConfig(options: ParsedInitOptions): string {
   if (options.cms === "strapi") {
     return strapiStarterConfig(options);
+  }
+
+  if (options.cms === "directus") {
+    return directusStarterConfig(options);
   }
 
   return `import { defineConfig } from "@cms-lab/core";
@@ -1574,6 +1585,72 @@ export default defineConfig({
       getPath: (doc) => \`/blog/\${doc.uid}\`,
     },
   ],
+});
+`;
+}
+
+function directusStarterConfig(options: ParsedInitOptions): string {
+  return `import { defineConfig, readCmsDataPath } from "@cms-lab/core";
+
+export default defineConfig({
+  site: {
+    url: ${JSON.stringify(options.url)},
+    // Use healthPath when your app's root redirects or errors but a locale route is healthy.
+    // healthPath: "/en",
+  },
+  framework: { type: "next", router: ${JSON.stringify(options.router)} },
+  cms: {
+    provider: "directus",
+    url: ${JSON.stringify(options.directusUrl)},
+    token: process.env.DIRECTUS_TOKEN,
+    collections: [
+      { type: "branch", collection: "branches", uidField: "slug" },
+      { type: "menu_item", collection: "menu_items", uidField: "slug" },
+      { type: "category", collection: "menu_categories", uidField: "slug" },
+      {
+        type: "pricing",
+        collection: "item_branch_pricing",
+        uidField: "id",
+        routable: false,
+      },
+    ],
+  },
+  routes: [
+    {
+      type: "branch",
+      pattern: "/branches/:slug",
+      getPath: (doc) => \`/branches/\${doc.uid}\`,
+    },
+    {
+      type: "category",
+      pattern: "/categories/:slug",
+      getPath: (doc) => \`/categories/\${doc.uid}\`,
+    },
+    {
+      type: "menu_item",
+      pattern: "/menu/:branch/:slug",
+      getPath: (doc) => {
+        const branch =
+          readCmsDataPath(doc.data, "branch.slug") ??
+          readCmsDataPath(doc.data, "branch_id.slug") ??
+          "branch";
+
+        return \`/menu/\${branch}/\${doc.uid}\`;
+      },
+    },
+  ],
+  checks: {
+    fields: {
+      required: [
+        { type: "branch", path: "name" },
+        { type: "branch", path: "city" },
+        { type: "menu_item", path: "name" },
+        { type: "menu_item", path: "base_price", severity: "warning" },
+        { type: "pricing", path: "price", severity: "warning" },
+        { type: "pricing", path: "is_available", severity: "warning" },
+      ],
+    },
+  },
 });
 `;
 }

@@ -117,6 +117,7 @@ export default defineConfig({
       { type: "branch", collection: "branches", uidField: "slug" },
       { type: "menu_item", collection: "menu_items", uidField: "slug" },
       { type: "category", collection: "menu_categories", uidField: "slug" },
+      { type: "pricing", collection: "item_branch_pricing", uidField: "id", routable: false },
     ],
   },
   routes: [
@@ -137,8 +138,9 @@ export default defineConfig({
 }`,
     caveats: [
       "Collections are explicit; cms-lab does not discover every Directus collection automatically.",
+      "Run cms-lab init --cms directus --router pages for a starter config.",
       "Status handling uses common status values such as published, publish, and live.",
-      "Relationship invariants such as branch pricing coverage are not built in yet.",
+      "Use routable: false for relation-heavy collections that should be checked for fields without producing route-unmapped diagnostics.",
     ],
   },
   {

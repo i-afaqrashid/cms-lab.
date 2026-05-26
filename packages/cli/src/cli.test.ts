@@ -1632,6 +1632,43 @@ test("runCli init can write a Strapi Pages Router starter config", async () => {
   expect(config).toContain("strapiRelationSlug");
 });
 
+test("runCli init can write a Directus starter config", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+
+  const exitCode = await runCli(
+    [
+      "init",
+      "--cms",
+      "directus",
+      "--router",
+      "pages",
+      "--url",
+      "http://localhost:3000",
+      "--directus-url",
+      "http://localhost:8055",
+    ],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: () => {},
+    },
+  );
+
+  const config = await readFile(join(cwd, "cms-lab.config.ts"), "utf8");
+
+  expect(exitCode).toBe(0);
+  expect(config).toContain('framework: { type: "next", router: "pages" }');
+  expect(config).toContain('provider: "directus"');
+  expect(config).toContain("process.env.DIRECTUS_TOKEN");
+  expect(config).toContain('{ type: "branch", collection: "branches"');
+  expect(config).toContain('{ type: "menu_item", collection: "menu_items"');
+  expect(config).toContain('{ type: "category", collection: "menu_categories"');
+  expect(config).toContain('collection: "item_branch_pricing"');
+  expect(config).toContain("routable: false");
+  expect(config).toContain('pattern: "/branches/:slug"');
+  expect(config).toContain('pattern: "/menu/:branch/:slug"');
+});
+
 test("runCli doctor uses site.healthPath for localized apps", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "pages"), { recursive: true });

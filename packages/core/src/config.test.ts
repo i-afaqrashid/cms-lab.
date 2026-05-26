@@ -85,6 +85,7 @@ test("validateConfig accepts local CMS provider configs", () => {
             collection: "pages",
             uidField: "routing.slug",
             urlField: "routing.url",
+            routable: false,
           },
         ],
       },

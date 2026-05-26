@@ -76,6 +76,7 @@ const directusConfigSchema = z
           .object({
             type: z.string().min(1),
             collection: z.string().min(1),
+            routable: z.boolean().optional(),
             ...cmsFieldMappingShape,
           })
           .strict(),
