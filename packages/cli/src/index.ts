@@ -70,6 +70,7 @@ type ScanCommandOptions = {
   slackWebhook?: string;
   notifyOn?: string;
   includeSensitiveOutput?: boolean;
+  shareReport?: boolean;
   debug?: boolean;
   verbose?: string;
   color?: boolean;
@@ -159,6 +160,10 @@ Examples:
     .option(
       "--report [path]",
       "Write an HTML report. Defaults to .cms-lab/report.html",
+    )
+    .option(
+      "--share-report",
+      "Redact CMS source IDs and local project paths in the HTML report",
     )
     .option(
       "--markdown [path]",
@@ -439,7 +444,9 @@ async function runScan(
     const status = exitCode === 0 ? "passed" : "failed";
 
     const endReport = debug.time("exports", 2);
-    await maybeWriteReport(options.report, result, cwd);
+    await maybeWriteReport(options.report, result, cwd, {
+      share: Boolean(options.shareReport),
+    });
     await maybeWriteMarkdown(options.markdown, result, status, cwd);
     await maybeWriteJUnit(options.junit, result, cwd);
     const slackSent = await maybePostSlack({
@@ -1337,6 +1344,7 @@ async function maybeWriteReport(
   report: boolean | string | undefined,
   result: ScanResult,
   cwd: string,
+  options: { share?: boolean } = {},
 ): Promise<void> {
   if (!report) {
     return;
@@ -1344,7 +1352,11 @@ async function maybeWriteReport(
 
   const path = reportPathFromOption(report, cwd);
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, renderHtmlReport(result), "utf8");
+  await writeFile(
+    path,
+    renderHtmlReport(result, { privacy: options.share ? "share" : "full" }),
+    "utf8",
+  );
 }
 
 function reportPathFromOption(report: boolean | string, cwd: string): string {

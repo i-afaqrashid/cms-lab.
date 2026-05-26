@@ -9,6 +9,16 @@ import { renderHtmlReport } from "@cms-lab/reporter";
 The CLI uses this package for `cms-lab scan --report`. The generated report is a
 self-contained HTML file with grouped diagnostics and client-side filters.
 
+Use the share privacy mode when rendering a report that may be attached to a
+public issue:
+
+```ts
+renderHtmlReport(result, { privacy: "share" });
+```
+
+Share-safe reports keep diagnostic codes, severity, route paths, and field paths
+visible, but redact CMS source IDs and local project paths.
+
 ## Release History
 
 See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)

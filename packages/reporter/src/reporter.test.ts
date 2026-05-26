@@ -128,6 +128,58 @@ test("renderHtmlReport keeps long CMS source IDs inside the diagnostic body", ()
   expect(html).not.toContain('class="src"');
 });
 
+test("renderHtmlReport can redact report details for sharing", () => {
+  const result: ScanResult = {
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/Users/afaq/private-site",
+      appDir: "/Users/afaq/private-site/app",
+    },
+    documents: [
+      {
+        id: "secret-document-id",
+        type: "article",
+        uid: "public-slug",
+        status: "published",
+        data: {},
+      },
+    ],
+    diagnostics: [
+      {
+        severity: "error",
+        code: "CMS-ROUTE-404",
+        message:
+          "Route /articles/public-slug returned 404 from /Users/afaq/private-site/app/articles/[uid]/page.tsx",
+        path: "/articles/public-slug",
+        source: "directus:articles#secret-document-id",
+      },
+      {
+        severity: "warning",
+        code: "CMS-FIELD-MISSING",
+        message:
+          "Document /Users/afaq/private-site/content.json is missing required field data.author.name",
+        path: "data.author.name",
+        source: "directus:articles#secret-document-id",
+      },
+    ],
+    summary: { errors: 1, warnings: 1, info: 0 },
+  };
+
+  const html = renderHtmlReport(result, { privacy: "share" });
+
+  expect(html).toContain("Share-safe report");
+  expect(html).toContain("CMS-ROUTE-404");
+  expect(html).toContain("CMS-FIELD-MISSING");
+  expect(html).toContain("/articles/public-slug");
+  expect(html).toContain("data.author.name");
+  expect(html).toContain("[redacted project path]");
+  expect(html).toContain("[redacted CMS source]");
+  expect(html).not.toContain("/Users/afaq/private-site");
+  expect(html).not.toContain("secret-document-id");
+  expect(html).not.toContain("directus:articles#secret-document-id");
+});
+
 test("renderHtmlReport emits real filter chips for severity and diagnostic groups", () => {
   const result: ScanResult = {
     project: {

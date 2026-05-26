@@ -120,6 +120,17 @@ export default function ScanPage() {
           </tr>
           <tr>
             <td>
+              <code>--share-report</code>
+            </td>
+            <td>false</td>
+            <td>
+              Redact CMS source IDs and local project paths in the HTML report
+              while keeping diagnostic codes, severity, route paths, and field
+              paths visible.
+            </td>
+          </tr>
+          <tr>
+            <td>
               <code>--markdown [path]</code>
             </td>
             <td>false</td>
@@ -294,6 +305,11 @@ export default function ScanPage() {
         Slack webhook messages are intentionally smaller than local files: they
         include counts and diagnostic codes, not raw CMS payloads, local paths,
         webhook URLs, or full diagnostic JSON.
+      </p>
+      <p>
+        Use <code>--report --share-report</code> when you need to attach an HTML
+        report to a public issue. It keeps the useful diagnostic details but
+        hides CMS source IDs and local project paths.
       </p>
       <CodeBlock>{`{
   "project": {

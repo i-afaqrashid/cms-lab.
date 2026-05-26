@@ -247,6 +247,7 @@ cms-lab scan --config ./cms-lab.config.ts
 cms-lab scan --json
 cms-lab scan --ci
 cms-lab scan --report
+cms-lab scan --report --share-report
 cms-lab scan --markdown
 cms-lab scan --junit
 cms-lab scan --slack-webhook "$CMS_LAB_SLACK_WEBHOOK"
@@ -339,6 +340,7 @@ By default, `--json` redacts raw CMS document data, document URLs, document UIDs
 Report outputs:
 
 - `--report` writes `.cms-lab/report.html`
+- `--share-report` redacts CMS source IDs and local project paths from the HTML report, while keeping diagnostic codes, severity, route paths, and field paths visible
 - `--markdown` writes `.cms-lab/summary.md`
 - `--junit` writes `.cms-lab/junit.xml`
 - `--slack-webhook` sends a compact redacted Slack summary

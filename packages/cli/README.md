@@ -14,6 +14,7 @@ cms-lab init --cms strapi --router pages
 cms-lab doctor
 cms-lab doctor --debug --verbose 2
 cms-lab scan --report
+cms-lab scan --report --share-report
 cms-lab scan --markdown
 cms-lab scan --junit
 cms-lab scan --slack-webhook "$CMS_LAB_SLACK_WEBHOOK"
@@ -52,10 +53,13 @@ unless `--include-sensitive-output` is passed explicitly.
 CI strictness can be raised with `--fail-on warning`, `--max-warnings <count>`,
 `--max-info <count>`, or `--strict`.
 
-Exports include local HTML (`--report`), Markdown (`--markdown`), JUnit XML
-(`--junit`), and redacted Slack incoming webhook summaries
-(`--slack-webhook <url>`). Slack notifications send counts and diagnostic codes
-only, never raw CMS payloads, local paths, or webhook URLs.
+Exports include local HTML (`--report`), share-safe local HTML
+(`--report --share-report`), Markdown (`--markdown`), JUnit XML (`--junit`),
+and redacted Slack incoming webhook summaries (`--slack-webhook <url>`).
+Share-safe HTML redacts CMS source IDs and local project paths while keeping
+diagnostic codes, severity, route paths, and field paths visible. Slack
+notifications send counts and diagnostic codes only, never raw CMS payloads,
+local paths, or webhook URLs.
 
 `cms-lab agent-context` writes safe handoff files so coding agents can read the
 cms-lab docs, package links, route mappings, and safe project facts before
