@@ -888,7 +888,7 @@ test("runCli supports version output", async () => {
   });
 
   expect(exitCode).toBe(0);
-  expect(stdout).toContain("1.2.2");
+  expect(stdout).toContain("1.2.3");
 });
 
 test("runCli scan help includes examples and color controls", async () => {
