@@ -773,6 +773,37 @@ code {
   margin-top: 18px;
 }
 
+.pathList {
+  display: grid;
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.pathItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 18px;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+.pathItem strong {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.pathItem p {
+  grid-column: 1;
+  margin: 0;
+}
+
+.pathItem a {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  white-space: nowrap;
+}
+
 .table {
   display: block;
   overflow-x: auto;
@@ -1030,6 +1061,16 @@ code {
   .sideNav,
   .toc {
     display: none;
+  }
+
+  .pathItem {
+    grid-template-columns: 1fr;
+  }
+
+  .pathItem a {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
   }
 }
 
