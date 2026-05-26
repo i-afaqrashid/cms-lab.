@@ -26,6 +26,9 @@ statuses such as archived content as `draft`.
 Use `uidField` or `urlField` when your project stores route values in custom
 fields. Both options read dotted paths from `document.data`.
 
+See the public [adapter maturity matrix](https://cmslab.afaqrashid.com/docs/tested-with)
+for current test coverage and known limits.
+
 ## Release History
 
 See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)

@@ -13,6 +13,9 @@ records into cms-lab `CMSDocument` values. Private repositories can use
 Native Prismic fields stay in `document.data`; the core scanner recognizes
 common Prismic SEO fields and image `alt` values during content checks.
 
+See the public [adapter maturity matrix](https://cmslab.afaqrashid.com/docs/tested-with)
+for current test coverage and known limits.
+
 ## Release History
 
 See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)

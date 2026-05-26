@@ -27,6 +27,9 @@ route mappings can use common fields such as `doc.uid` or `doc.data.slug`.
 Use `uidField` or `urlField` when your project stores route values in custom
 fields. Both options read dotted paths from normalized `document.data`.
 
+See the public [adapter maturity matrix](https://cmslab.afaqrashid.com/docs/tested-with)
+for current test coverage and known limits.
+
 ## Release History
 
 See the repository [changelog](https://github.com/i-afaqrashid/cms-lab/blob/main/CHANGELOG.md)

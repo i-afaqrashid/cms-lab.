@@ -288,7 +288,7 @@ absolute paths.
 The public test matrix lives at
 [`/docs/tested-with`](https://cmslab.afaqrashid.com/docs/tested-with). It lists
 only paths covered by a fixture, adapter test, public demo, or repeatable smoke
-test.
+test, and it marks adapter maturity limits explicitly.
 
 Current coverage includes Prismic with Next.js App Router, Strapi v4 with
 Next.js Pages Router, Strapi single types, and adapter fixture checks for
