@@ -13,6 +13,7 @@ export default function AgentContextPage() {
       active="/docs/agent-context"
       toc={[
         { href: "#generate", label: "Generate" },
+        { href: "#cms-only", label: "CMS-only" },
         { href: "#presets", label: "Presets" },
         { href: "#files", label: "Files" },
         { href: "#agents", label: "Agents" },
@@ -36,6 +37,7 @@ export default function AgentContextPage() {
         Use flags when you need a custom config path or an intentional rewrite.
       </p>
       <CodeBlock>{`npx @cms-lab/cli agent-context --config ./cms-lab.config.ts
+npx @cms-lab/cli agent-context --mode cms-only
 npx @cms-lab/cli agent-context --preset all
 npx @cms-lab/cli agent-context --preset claude
 npx @cms-lab/cli agent-context --preset gemini
@@ -43,6 +45,21 @@ npx @cms-lab/cli agent-context --preset copilot
 npx @cms-lab/cli agent-context --force
 npx @cms-lab/cli agent-context --no-agents-md
 npx @cms-lab/cli agent-context --out .cms-lab`}</CodeBlock>
+
+      <h2 id="cms-only">CMS-only projects</h2>
+      <p>
+        <code>agent-context</code> can run before a frontend exists. If the
+        command does not detect a Next.js app, it still writes safe context from
+        the cms-lab config and marks the frontend as not detected.
+      </p>
+      <CodeBlock>{`npx @cms-lab/cli agent-context --mode cms-only --preset all`}</CodeBlock>
+      <p>
+        CMS-only context is useful for backend-heavy Directus, Strapi, or
+        catalog projects that need an agent handoff for collections, route
+        planning, and required fields. Route scans still require a running
+        frontend; add route mappings and run <code>scan</code> once the frontend
+        exists.
+      </p>
 
       <h2 id="presets">Presets</h2>
       <p>

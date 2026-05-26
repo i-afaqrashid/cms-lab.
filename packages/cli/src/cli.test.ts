@@ -247,6 +247,122 @@ test("runCli agent-context writes safe AI agent handoff files", async () => {
   expect(combined).not.toContain("top-secret-token");
 });
 
+test("runCli agent-context supports CMS-only projects without Next.js", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: {
+          provider: 'directus',
+          url: 'http://localhost:8055',
+          token: process.env.DIRECTUS_TOKEN,
+          collections: [
+            { type: 'branch', collection: 'branches', uidField: 'slug' },
+            { type: 'menu_item', collection: 'menu_items', uidField: 'slug' },
+            { type: 'pricing', collection: 'item_branch_pricing' },
+          ],
+        },
+        routes: [
+          { type: 'branch', pattern: '/branches/:uid', getPath: (doc) => '/branches/' + doc.uid },
+        ],
+        checks: {
+          fields: {
+            required: [
+              { type: 'branch', path: 'name' },
+              { type: 'menu_item', path: 'base_price', severity: 'warning' },
+            ],
+          },
+        },
+      })
+    `,
+  );
+
+  let stdout = "";
+  let stderr = "";
+  const exitCode = await runCli(
+    ["agent-context", "--config", configPath, "--preset", "all"],
+    {
+      cwd,
+      stdout: (text) => {
+        stdout += text;
+      },
+      stderr: (text) => {
+        stderr += text;
+      },
+    },
+  );
+
+  const context = await readFile(
+    join(cwd, ".cms-lab/agent-context.md"),
+    "utf8",
+  );
+  const prompt = await readFile(join(cwd, ".cms-lab/agent-prompt.md"), "utf8");
+  const claude = await readFile(join(cwd, "CLAUDE.md"), "utf8");
+  const gemini = await readFile(join(cwd, "GEMINI.md"), "utf8");
+  const copilot = await readFile(
+    join(cwd, ".github/copilot-instructions.md"),
+    "utf8",
+  );
+
+  expect(exitCode).toBe(0);
+  expect(stderr).toBe("");
+  expect(stdout).toContain("No Next.js project detected");
+  expect(stdout).toContain("created .cms-lab/agent-context.md");
+  expect(context).toContain("Frontend: not detected");
+  expect(context).toContain("CMS provider: directus");
+  expect(context).toContain("branch (branches)");
+  expect(context).toContain("pricing (item_branch_pricing)");
+  expect(context).toContain("Route scans require a running frontend");
+  expect(prompt).toContain("frontend has not been detected yet");
+  expect(prompt).toContain(
+    "Add frontend route config before running route scans",
+  );
+  expect(claude).toContain("frontend has not been detected yet");
+  expect(gemini).toContain("frontend has not been detected yet");
+  expect(copilot).toContain("frontend has not been detected yet");
+});
+
+test("runCli agent-context can require Next.js detection explicitly", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: {
+          provider: 'directus',
+          url: 'http://localhost:8055',
+          collections: [{ type: 'page', collection: 'pages' }],
+        },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let stderr = "";
+  const exitCode = await runCli(
+    ["agent-context", "--config", configPath, "--mode", "next"],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: (text) => {
+        stderr += text;
+      },
+    },
+  );
+
+  expect(exitCode).toBe(2);
+  expect(stderr).toContain("No Next.js project detected");
+});
+
 test("runCli agent-context refuses to overwrite existing files without force", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "app"), { recursive: true });
