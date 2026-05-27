@@ -1,4 +1,4 @@
-import { retryDelayMs, scanDocuments } from "@cms-lab/core";
+import { redactSensitive, retryDelayMs, scanDocuments } from "@cms-lab/core";
 
 const baseConfig = {
   site: { url: "http://localhost:3000" },
@@ -1294,4 +1294,103 @@ test("scanDocuments backs off with growing delays on repeated 503", async () => 
   expect(attempts).toBe(3);
   expect(sleepCalls).toHaveLength(2);
   expect(sleepCalls[1]).toBeGreaterThan(sleepCalls[0]);
+});
+
+test("redactSensitive scrubs URL query token shapes", () => {
+  const input =
+    "GET https://api.example.com/?access_token=alpha&token=beta&password=gamma&secret=delta&api_key=eps&api-key=zeta&apikey=eta&x-api-key=theta&authorization=iota";
+  const out = redactSensitive(input);
+
+  for (const value of [
+    "alpha",
+    "beta",
+    "gamma",
+    "delta",
+    "eps",
+    "zeta",
+    "eta",
+    "theta",
+    "iota",
+  ]) {
+    expect(out).not.toContain(value);
+  }
+  expect(out).toContain("access_token=[redacted]");
+  expect(out).toContain("token=[redacted]");
+  expect(out).toContain("password=[redacted]");
+  expect(out).toContain("secret=[redacted]");
+  expect(out).toContain("api_key=[redacted]");
+  expect(out).toContain("api-key=[redacted]");
+  expect(out).toContain("apikey=[redacted]");
+  expect(out).toContain("x-api-key=[redacted]");
+  expect(out).toContain("authorization=[redacted]");
+});
+
+test("redactSensitive scrubs Bearer headers and basic auth in URLs", () => {
+  const out = redactSensitive(
+    "Bearer abc123.def-456_789 from https://user:hunter2@example.com/path",
+  );
+  expect(out).not.toContain("abc123.def-456_789");
+  expect(out).not.toContain("hunter2");
+  expect(out).toContain("Bearer [redacted]");
+  expect(out).toContain("https://[redacted]@example.com");
+});
+
+test("redactSensitive scrubs JWT tokens that are not prefixed with Bearer", () => {
+  const jwt =
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
+  const out = redactSensitive(`token: ${jwt} captured`);
+  expect(out).not.toContain(jwt);
+  expect(out).toContain("[redacted]");
+  expect(out).toContain("captured");
+});
+
+test("redactSensitive scrubs Stripe-style sk_/pk_/rk_ keys", () => {
+  // Constructed via concatenation so GitHub Push Protection does not flag
+  // these synthetic fixtures as real Stripe keys.
+  const inputs = [
+    "sk" + "_live_" + "FIXTUREFIXTUREFIXTURE001",
+    "sk" + "_test_" + "FIXTUREFIXTUREFIXTURE002",
+    "pk" + "_live_" + "FIXTUREFIXTUREFIXTURE003",
+    "rk" + "_live_" + "FIXTUREFIXTUREFIXTURE004",
+  ];
+  for (const key of inputs) {
+    const out = redactSensitive(`leaked: ${key}`);
+    expect(out, key).not.toContain(key);
+    expect(out, key).toContain("[redacted]");
+  }
+});
+
+test("redactSensitive scrubs OpenAI / Anthropic style sk- keys", () => {
+  // Constructed via concatenation so secret scanners do not flag fixtures.
+  const inputs = [
+    "sk-" + "proj-" + "FIXTUREFIXTUREFIXTUREFIXTURE01",
+    "sk-" + "ant-" + "FIXTUREFIXTUREFIXTUREFIXTURE02",
+  ];
+  for (const key of inputs) {
+    const out = redactSensitive(`leaked: ${key}`);
+    expect(out, key).not.toContain(key);
+  }
+});
+
+test("redactSensitive scrubs GitHub PATs", () => {
+  // Constructed via concatenation so GitHub Push Protection does not flag
+  // these synthetic fixtures as real PATs.
+  const inputs = [
+    "ghp" + "_" + "FIXTUREFIXTUREFIXTUREFIXTUREfix01",
+    "gho" + "_" + "FIXTUREFIXTUREFIXTUREFIXTUREfix02",
+    "ghs" + "_" + "FIXTUREFIXTUREFIXTUREFIXTUREfix03",
+    "ghu" + "_" + "FIXTUREFIXTUREFIXTUREFIXTUREfix04",
+    "ghr" + "_" + "FIXTUREFIXTUREFIXTUREFIXTUREfix05",
+    "github" + "_pat_" + "FIXTUREFIXTUREFIXTUREFIXTURE_fix06",
+  ];
+  for (const key of inputs) {
+    const out = redactSensitive(`see ${key} now`);
+    expect(out, key).not.toContain(key);
+  }
+});
+
+test("redactSensitive leaves harmless text alone", () => {
+  const text =
+    "Scan complete. 0 errors, 2 warnings. Site http://example.com responded with HTTP 200.";
+  expect(redactSensitive(text)).toBe(text);
 });
