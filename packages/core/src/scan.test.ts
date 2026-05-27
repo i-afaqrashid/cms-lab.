@@ -1,4 +1,4 @@
-import { scanDocuments } from "@cms-lab/core";
+import { retryDelayMs, scanDocuments } from "@cms-lab/core";
 
 const baseConfig = {
   site: { url: "http://localhost:3000" },
@@ -1153,6 +1153,7 @@ test("scanDocuments retries transient route probe failures", async () => {
       },
     ],
     retries: 1,
+    sleep: async () => {},
     fetch: async (url) => {
       if (String(url).endsWith("/flaky")) {
         attempts += 1;
@@ -1167,4 +1168,130 @@ test("scanDocuments retries transient route probe failures", async () => {
 
   expect(attempts).toBe(2);
   expect(result.diagnostics).toEqual([]);
+});
+
+test("retryDelayMs honours Retry-After seconds and caps at 30s", () => {
+  const headers = (value: string) =>
+    new Response("", { headers: { "Retry-After": value } });
+
+  expect(retryDelayMs(0, headers("2"))).toBe(2000);
+  expect(retryDelayMs(0, headers("0"))).toBe(0);
+  // 60 seconds is over the 30s cap
+  expect(retryDelayMs(0, headers("60"))).toBe(30_000);
+});
+
+test("retryDelayMs honours Retry-After HTTP-date", () => {
+  const futureSeconds = 5;
+  const future = new Date(Date.now() + futureSeconds * 1000).toUTCString();
+  const response = new Response("", { headers: { "Retry-After": future } });
+  const delay = retryDelayMs(0, response);
+  // Allow a small clock skew window: 4s..6s
+  expect(delay).toBeGreaterThanOrEqual(3_500);
+  expect(delay).toBeLessThanOrEqual(6_500);
+});
+
+test("retryDelayMs falls back to exponential backoff when no header is present", () => {
+  // attempt 0: base 250 + jitter [0..250) -> [250..500)
+  const d0 = retryDelayMs(0);
+  expect(d0).toBeGreaterThanOrEqual(250);
+  expect(d0).toBeLessThan(500);
+
+  // attempt 1: base 500 + jitter -> [500..750)
+  const d1 = retryDelayMs(1);
+  expect(d1).toBeGreaterThanOrEqual(500);
+  expect(d1).toBeLessThan(750);
+
+  // attempt 4: base 4000 + jitter -> [4000..4250)
+  const d4 = retryDelayMs(4);
+  expect(d4).toBeGreaterThanOrEqual(4000);
+  expect(d4).toBeLessThan(4250);
+
+  // attempt 10 would explode without the cap; ensure we cap at 8000
+  expect(retryDelayMs(10)).toBe(8_000);
+});
+
+test("scanDocuments waits Retry-After before a 429 retry", async () => {
+  const sleepCalls: number[] = [];
+  let attempts = 0;
+
+  const result = await scanDocuments({
+    config: baseConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "doc-1",
+        type: "page",
+        uid: "rate-limited",
+        status: "published",
+        data: { meta_title: "Rate", meta_description: "Rate-limited page" },
+      },
+    ],
+    retries: 1,
+    sleep: async (ms) => {
+      sleepCalls.push(ms);
+    },
+    fetch: async (url) => {
+      if (String(url).endsWith("/rate-limited")) {
+        attempts += 1;
+        if (attempts === 1) {
+          return new Response("slow down", {
+            status: 429,
+            headers: { "Retry-After": "2" },
+          });
+        }
+      }
+
+      return new Response("ok");
+    },
+  });
+
+  expect(attempts).toBe(2);
+  expect(sleepCalls).toEqual([2000]);
+  expect(result.diagnostics).toEqual([]);
+});
+
+test("scanDocuments backs off with growing delays on repeated 503", async () => {
+  const sleepCalls: number[] = [];
+  let attempts = 0;
+
+  await scanDocuments({
+    config: baseConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "doc-1",
+        type: "page",
+        uid: "down",
+        status: "published",
+        data: { meta_title: "Down", meta_description: "Down page" },
+      },
+    ],
+    retries: 2,
+    sleep: async (ms) => {
+      sleepCalls.push(ms);
+    },
+    fetch: async (url) => {
+      if (String(url).endsWith("/down")) {
+        attempts += 1;
+        return new Response("server error", { status: 503 });
+      }
+
+      return new Response("ok");
+    },
+  });
+
+  // 1 initial attempt + 2 retries = 3 attempts, so 2 sleeps between them
+  expect(attempts).toBe(3);
+  expect(sleepCalls).toHaveLength(2);
+  expect(sleepCalls[1]).toBeGreaterThan(sleepCalls[0]);
 });
