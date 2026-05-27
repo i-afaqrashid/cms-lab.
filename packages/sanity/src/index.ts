@@ -41,7 +41,148 @@ export async function fetchSanityDocuments(
     );
   }
 
+  await hydrateImageAssetMetadata(config, fetchImpl, documents);
+
   return documents;
+}
+
+/**
+ * Side-load `sanity.imageAsset` documents that are referenced inside
+ * fetched content and copy their `altText` / `description` / `title`
+ * onto the matching `asset` reference. Lets the cms-lab image-alt
+ * check honour alt text set on the asset (a common Sanity studio
+ * convention) instead of false-flagging images that only have
+ * asset-level alt.
+ *
+ * Any field already present on the asset reference is preserved.
+ */
+async function hydrateImageAssetMetadata(
+  config: SanityCmsProviderConfig,
+  fetchImpl: FetchLike,
+  documents: CMSDocument[],
+): Promise<void> {
+  const assetIds = new Set<string>();
+  for (const document of documents) {
+    collectImageAssetIds(document.data, assetIds);
+  }
+
+  if (assetIds.size === 0) {
+    return;
+  }
+
+  const url = sanityQueryUrl(config);
+  url.searchParams.set(
+    "query",
+    '*[_type == "sanity.imageAsset" && _id in $ids]{ _id, altText, description, title }',
+  );
+  url.searchParams.set("$ids", JSON.stringify([...assetIds]));
+  url.searchParams.set("perspective", config.perspective ?? "published");
+
+  const response = await fetchJson<SanityResponse>(
+    fetchImpl,
+    url,
+    authHeaders(config.token),
+  );
+  const rows = Array.isArray(response.result) ? response.result : [];
+  const assetMap = new Map<
+    string,
+    { altText?: string; description?: string; title?: string }
+  >();
+
+  for (const row of rows) {
+    const record = asRecord(row);
+    const id = record._id;
+    if (typeof id !== "string") {
+      continue;
+    }
+
+    assetMap.set(id, {
+      altText: typeof record.altText === "string" ? record.altText : undefined,
+      description:
+        typeof record.description === "string" ? record.description : undefined,
+      title: typeof record.title === "string" ? record.title : undefined,
+    });
+  }
+
+  for (const document of documents) {
+    decorateImageAssets(document.data, assetMap);
+  }
+}
+
+function collectImageAssetIds(value: unknown, ids: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectImageAssetIds(item, ids);
+    }
+    return;
+  }
+
+  if (!value || typeof value !== "object") {
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  const asset = record.asset;
+  if (asset && typeof asset === "object") {
+    const ref = (asset as Record<string, unknown>)._ref;
+    if (typeof ref === "string" && ref.startsWith("image-")) {
+      ids.add(ref);
+    }
+  }
+
+  for (const nested of Object.values(record)) {
+    collectImageAssetIds(nested, ids);
+  }
+}
+
+function decorateImageAssets(
+  value: unknown,
+  assetMap: Map<
+    string,
+    { altText?: string; description?: string; title?: string }
+  >,
+): void {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      decorateImageAssets(item, assetMap);
+    }
+    return;
+  }
+
+  if (!value || typeof value !== "object") {
+    return;
+  }
+
+  const record = value as Record<string, unknown>;
+  const asset = record.asset;
+  if (asset && typeof asset === "object") {
+    const assetRecord = asset as Record<string, unknown>;
+    const ref = assetRecord._ref;
+    if (typeof ref === "string" && ref.startsWith("image-")) {
+      const metadata = assetMap.get(ref);
+      if (metadata) {
+        if (
+          metadata.altText !== undefined &&
+          assetRecord.altText === undefined
+        ) {
+          assetRecord.altText = metadata.altText;
+        }
+        if (
+          metadata.description !== undefined &&
+          assetRecord.description === undefined
+        ) {
+          assetRecord.description = metadata.description;
+        }
+        if (metadata.title !== undefined && assetRecord.title === undefined) {
+          assetRecord.title = metadata.title;
+        }
+      }
+    }
+  }
+
+  for (const nested of Object.values(record)) {
+    decorateImageAssets(nested, assetMap);
+  }
 }
 
 export function normalizeSanityDocument(

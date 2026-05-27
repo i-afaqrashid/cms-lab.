@@ -926,7 +926,20 @@ function imageAltCandidate(
     "asset" in record &&
     (asRecord(record.asset)?._ref || asRecord(record.asset)?._id)
   ) {
-    return { isImage: true, value: record.alt };
+    const fieldAlt = record.alt;
+    if (!isBlank(fieldAlt)) {
+      return { isImage: true, value: fieldAlt };
+    }
+
+    // Fall back to alt set on the referenced sanity.imageAsset.
+    // hydrateImageAssetMetadata in @cms-lab/sanity copies altText /
+    // description / title onto the asset reference for us.
+    const assetRecord = asRecord(record.asset);
+    return {
+      isImage: true,
+      value:
+        assetRecord?.altText ?? assetRecord?.description ?? assetRecord?.title,
+    };
   }
 
   return { isImage: false, value: undefined };

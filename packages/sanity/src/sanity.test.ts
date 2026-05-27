@@ -167,3 +167,153 @@ test("fetchSanityDocuments reports HTTP failures", async () => {
     ),
   ).rejects.toThrow("Sanity request failed with HTTP 403");
 });
+
+test("fetchSanityDocuments hydrates altText from referenced image assets", async () => {
+  const queries: string[] = [];
+
+  const documents = await fetchSanityDocuments(
+    {
+      provider: "sanity",
+      projectId: "project123",
+      dataset: "production",
+      contentTypes: [{ type: "page", documentType: "page" }],
+    },
+    {
+      fetch: async (url) => {
+        const href = String(url);
+        queries.push(href);
+
+        if (href.includes("sanity.imageAsset")) {
+          return Response.json({
+            result: [
+              {
+                _id: "image-cat-100x100-jpg",
+                altText: "A grey cat napping in the sun",
+                description: undefined,
+                title: undefined,
+              },
+              {
+                _id: "image-dog-200x200-jpg",
+                altText: undefined,
+                description: "Golden retriever on a beach",
+                title: undefined,
+              },
+            ],
+          });
+        }
+
+        return Response.json({
+          result: [
+            {
+              _id: "page-1",
+              _type: "page",
+              slug: { current: "home" },
+              hero: {
+                _type: "image",
+                asset: { _ref: "image-cat-100x100-jpg", _type: "reference" },
+              },
+              gallery: [
+                {
+                  _type: "image",
+                  asset: { _ref: "image-dog-200x200-jpg", _type: "reference" },
+                },
+              ],
+            },
+          ],
+        });
+      },
+    },
+  );
+
+  expect(queries).toHaveLength(2);
+  expect(queries[1]).toContain("sanity.imageAsset");
+  expect(queries[1]).toContain(encodeURIComponent("image-cat-100x100-jpg"));
+
+  const data = documents[0]?.data as {
+    hero: { asset: Record<string, unknown> };
+    gallery: Array<{ asset: Record<string, unknown> }>;
+  };
+  expect(data.hero.asset.altText).toBe("A grey cat napping in the sun");
+  expect(data.gallery[0]?.asset.description).toBe(
+    "Golden retriever on a beach",
+  );
+});
+
+test("fetchSanityDocuments skips the asset hydration query when no image refs exist", async () => {
+  const queries: string[] = [];
+
+  await fetchSanityDocuments(
+    {
+      provider: "sanity",
+      projectId: "project123",
+      dataset: "production",
+      contentTypes: [{ type: "page", documentType: "page" }],
+    },
+    {
+      fetch: async (url) => {
+        queries.push(String(url));
+        return Response.json({
+          result: [
+            {
+              _id: "page-1",
+              _type: "page",
+              slug: { current: "no-images" },
+              body: "All text, no pictures.",
+            },
+          ],
+        });
+      },
+    },
+  );
+
+  expect(queries).toHaveLength(1);
+  expect(queries[0]).not.toContain("sanity.imageAsset");
+});
+
+test("fetchSanityDocuments preserves pre-resolved altText on the asset reference", async () => {
+  const documents = await fetchSanityDocuments(
+    {
+      provider: "sanity",
+      projectId: "project123",
+      dataset: "production",
+      contentTypes: [{ type: "page", documentType: "page" }],
+    },
+    {
+      fetch: async (url) => {
+        const href = String(url);
+        if (href.includes("sanity.imageAsset")) {
+          return Response.json({
+            result: [
+              {
+                _id: "image-cat-100x100-jpg",
+                altText: "From asset doc",
+              },
+            ],
+          });
+        }
+        return Response.json({
+          result: [
+            {
+              _id: "page-1",
+              _type: "page",
+              slug: { current: "pre-resolved" },
+              hero: {
+                _type: "image",
+                asset: {
+                  _ref: "image-cat-100x100-jpg",
+                  _type: "reference",
+                  altText: "Pre-resolved in user query",
+                },
+              },
+            },
+          ],
+        });
+      },
+    },
+  );
+
+  const data = documents[0]?.data as {
+    hero: { asset: Record<string, unknown> };
+  };
+  expect(data.hero.asset.altText).toBe("Pre-resolved in user query");
+});
