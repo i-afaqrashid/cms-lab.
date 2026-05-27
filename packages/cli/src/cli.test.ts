@@ -1585,6 +1585,214 @@ test("runCli explains diagnostic codes", async () => {
   expect(stdout).toContain("route mapping resolved to a URL");
 });
 
+test("runCli baseline write produces a file the next scan reads", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  const documents = [
+    {
+      id: "doc-1",
+      type: "page",
+      uid: "missing",
+      status: "published" as const,
+      data: { meta_title: "Missing", meta_description: "Missing page" },
+    },
+  ];
+  const fetchImpl = async (url: URL | RequestInfo) => {
+    if (String(url) === "http://localhost:3000/") {
+      return new Response("ok");
+    }
+    return new Response("missing", { status: 404 });
+  };
+
+  let baselineStdout = "";
+  const baselineExit = await runCli(
+    ["baseline", "write", "--config", configPath],
+    {
+      cwd,
+      stdout: (text) => {
+        baselineStdout += text;
+      },
+      stderr: () => {},
+      fetchPrismicDocuments: async () => documents,
+      fetch: fetchImpl,
+    },
+  );
+
+  expect(baselineExit).toBe(0);
+  expect(baselineStdout).toContain(
+    "wrote 1 diagnostic to .cms-lab/baseline.json",
+  );
+  const baselineFile = JSON.parse(
+    await readFile(join(cwd, ".cms-lab/baseline.json"), "utf8"),
+  );
+  expect(baselineFile.version).toBe(1);
+  expect(baselineFile.entries[0].code).toBe("CMS-ROUTE-404");
+
+  let scanStdout = "";
+  const scanExit = await runCli(["scan", "--config", configPath], {
+    cwd,
+    stdout: (text) => {
+      scanStdout += text;
+    },
+    stderr: () => {},
+    fetchPrismicDocuments: async () => documents,
+    fetch: fetchImpl,
+  });
+
+  expect(scanExit).toBe(0);
+  expect(scanStdout).toContain("baseline 1 item suppressed");
+});
+
+test("runCli scan still fails when a net-new diagnostic appears vs baseline", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  await runCli(["baseline", "write", "--config", configPath], {
+    cwd,
+    stdout: () => {},
+    stderr: () => {},
+    fetchPrismicDocuments: async () => [
+      {
+        id: "doc-1",
+        type: "page",
+        uid: "missing",
+        status: "published",
+        data: { meta_title: "M", meta_description: "M" },
+      },
+    ],
+    fetch: async (url) =>
+      String(url) === "http://localhost:3000/"
+        ? new Response("ok")
+        : new Response("missing", { status: 404 }),
+  });
+
+  let stdout = "";
+  const exit = await runCli(["scan", "--config", configPath], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+    fetchPrismicDocuments: async () => [
+      {
+        id: "doc-1",
+        type: "page",
+        uid: "missing",
+        status: "published",
+        data: { meta_title: "M", meta_description: "M" },
+      },
+      {
+        id: "doc-2",
+        type: "page",
+        uid: "new-missing",
+        status: "published",
+        data: { meta_title: "N", meta_description: "N" },
+      },
+    ],
+    fetch: async (url) =>
+      String(url) === "http://localhost:3000/"
+        ? new Response("ok")
+        : new Response("missing", { status: 404 }),
+  });
+
+  expect(exit).toBe(1);
+  expect(stdout).toContain("baseline 1 item suppressed");
+});
+
+test("runCli scan --no-baseline ignores an existing baseline file", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await mkdir(join(cwd, ".cms-lab"), { recursive: true });
+  await writeFile(
+    join(cwd, ".cms-lab/baseline.json"),
+    JSON.stringify({
+      version: 1,
+      createdAt: new Date().toISOString(),
+      entries: [
+        {
+          severity: "error",
+          code: "CMS-ROUTE-404",
+          path: "/missing",
+          source: "prismic:page#doc-1",
+        },
+      ],
+    }),
+  );
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  const exit = await runCli(["scan", "--config", configPath, "--no-baseline"], {
+    cwd,
+    stdout: () => {},
+    stderr: () => {},
+    fetchPrismicDocuments: async () => [
+      {
+        id: "doc-1",
+        type: "page",
+        uid: "missing",
+        status: "published",
+        data: { meta_title: "M", meta_description: "M" },
+      },
+    ],
+    fetch: async (url) =>
+      String(url) === "http://localhost:3000/"
+        ? new Response("ok")
+        : new Response("missing", { status: 404 }),
+  });
+
+  expect(exit).toBe(1);
+});
+
 test("runCli init writes a starter config and refuses to overwrite by default", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
 
