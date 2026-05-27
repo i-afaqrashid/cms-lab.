@@ -103,7 +103,12 @@ Or use the GitHub Action:
   with:
     config: cms-lab.config.ts
     report: true
+    # node-version: "20"   # default; override to "22" or "24" if you need
 ```
+
+The action installs Node 20 by default to match `@cms-lab/cli`'s
+`engines.node >= 20.10`. Override with `node-version` if your workflow
+runs on a newer Node line.
 
 ## CMS Adapters
 
