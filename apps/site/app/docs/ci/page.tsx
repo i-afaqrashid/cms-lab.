@@ -15,6 +15,7 @@ export default function CiPage() {
         { href: "#copy-paste", label: "Copy-paste workflow" },
         { href: "#thresholds", label: "Thresholds" },
         { href: "#baseline", label: "Baseline" },
+        { href: "#compare", label: "Compare reports" },
         { href: "#artifacts", label: "Artifacts" },
       ]}
     >
@@ -98,6 +99,24 @@ npx @cms-lab/cli scan --ci --no-baseline`}</CodeBlock>
         committing and shrink it over time as you fix the legacy diagnostics and
         re-run <code>cms-lab baseline write</code>.
       </p>
+
+      <h2 id="compare">Compare reports</h2>
+      <p>
+        For PR pipelines the useful question is &quot;did this PR introduce new
+        diagnostics vs <code>main</code>?&quot; <code>cms-lab compare</code>{" "}
+        diffs two scan JSON outputs by a stable fingerprint and exits 1 only
+        when there are net-new errors.
+      </p>
+      <CodeBlock>{`# scan main and the PR head, then diff
+npx @cms-lab/cli scan --json > main.json
+npx @cms-lab/cli scan --json > head.json
+npx @cms-lab/cli compare main.json head.json
+
+# paste-ready PR comment
+npx @cms-lab/cli compare main.json head.json --markdown diff.md
+
+# machine-readable form
+npx @cms-lab/cli compare main.json head.json --json`}</CodeBlock>
 
       <h2 id="artifacts">Artifacts</h2>
       <p>

@@ -1585,6 +1585,166 @@ test("runCli explains diagnostic codes", async () => {
   expect(stdout).toContain("route mapping resolved to a URL");
 });
 
+test("runCli compare reports added and removed diagnostics and exits 1 on new errors", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  const beforeFile = join(cwd, "before.json");
+  const afterFile = join(cwd, "after.json");
+  await writeFile(
+    beforeFile,
+    JSON.stringify({
+      diagnostics: [
+        {
+          severity: "error",
+          code: "CMS-ROUTE-404",
+          message: "Route /about returned 404",
+          path: "/about",
+          source: "prismic:page#about",
+        },
+        {
+          severity: "warning",
+          code: "SEO-META-MISSING",
+          message: "x",
+          source: "prismic:page#about",
+        },
+      ],
+    }),
+  );
+  await writeFile(
+    afterFile,
+    JSON.stringify({
+      diagnostics: [
+        {
+          severity: "warning",
+          code: "SEO-META-MISSING",
+          message: "x",
+          source: "prismic:page#about",
+        },
+        {
+          severity: "error",
+          code: "CMS-ROUTE-500",
+          message: "Route /pricing returned 503",
+          path: "/pricing",
+          source: "prismic:page#pricing",
+        },
+      ],
+    }),
+  );
+
+  let stdout = "";
+  const exit = await runCli(["compare", beforeFile, afterFile], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+  });
+
+  expect(exit).toBe(1);
+  expect(stdout).toContain("cms-lab compare");
+  expect(stdout).toContain("CMS-ROUTE-500");
+  expect(stdout).toContain("/pricing");
+  expect(stdout).toContain("fixed diagnostics");
+  expect(stdout).toContain("CMS-ROUTE-404");
+});
+
+test("runCli compare exits 0 when no new errors appear", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  const same = JSON.stringify({
+    diagnostics: [
+      {
+        severity: "warning",
+        code: "SEO-META-MISSING",
+        message: "x",
+        source: "prismic:page#a",
+      },
+    ],
+  });
+  const beforeFile = join(cwd, "b.json");
+  const afterFile = join(cwd, "a.json");
+  await writeFile(beforeFile, same);
+  await writeFile(afterFile, same);
+
+  let stdout = "";
+  const exit = await runCli(["compare", beforeFile, afterFile], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+  });
+
+  expect(exit).toBe(0);
+  expect(stdout).toContain("added     0 errors");
+});
+
+test("runCli compare --json prints a structured diff", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await writeFile(join(cwd, "b.json"), JSON.stringify({ diagnostics: [] }));
+  await writeFile(
+    join(cwd, "a.json"),
+    JSON.stringify({
+      diagnostics: [
+        {
+          severity: "error",
+          code: "CMS-ROUTE-404",
+          message: "Route /pricing returned 404",
+          path: "/pricing",
+          source: "prismic:page#pricing",
+        },
+      ],
+    }),
+  );
+
+  let stdout = "";
+  const exit = await runCli(["compare", "b.json", "a.json", "--json"], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+  });
+
+  expect(exit).toBe(1);
+  const parsed = JSON.parse(stdout);
+  expect(parsed.added).toHaveLength(1);
+  expect(parsed.summary.added.errors).toBe(1);
+});
+
+test("runCli compare --markdown writes a PR-comment-ready file", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await writeFile(join(cwd, "b.json"), JSON.stringify({ diagnostics: [] }));
+  await writeFile(
+    join(cwd, "a.json"),
+    JSON.stringify({
+      diagnostics: [
+        {
+          severity: "error",
+          code: "CMS-ROUTE-404",
+          message: "Route /pricing returned 404",
+          path: "/pricing",
+          source: "prismic:page#pricing",
+        },
+      ],
+    }),
+  );
+
+  const target = join(cwd, "diff.md");
+  const exit = await runCli(
+    ["compare", "b.json", "a.json", "--markdown", target],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: () => {},
+    },
+  );
+
+  expect(exit).toBe(1);
+  const markdown = await readFile(target, "utf8");
+  expect(markdown).toContain("# cms-lab compare");
+  expect(markdown).toContain("CMS-ROUTE-404");
+  expect(markdown).toContain("| Added");
+});
+
 test("runCli baseline write produces a file the next scan reads", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "app"), { recursive: true });

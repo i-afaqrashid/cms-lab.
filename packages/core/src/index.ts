@@ -1,4 +1,5 @@
 export * from "./baseline.js";
+export * from "./compare.js";
 export * from "./config.js";
 export * from "./data-path.js";
 export * from "./diagnostics.js";

@@ -12,7 +12,10 @@ import {
   type CheckGroup,
   CmsFetchError,
   ConfigLoadError,
+  type Diagnostic,
+  type DiagnosticDiff,
   SiteUnreachableError,
+  diffDiagnostics,
   explainDiagnostic,
   loadCmsLabConfig,
   makeBaseline,
@@ -93,6 +96,12 @@ type BaselineCommandOptions = {
   path?: string;
   timeout?: string;
   retries?: string;
+};
+
+type CompareCommandOptions = {
+  json?: boolean;
+  markdown?: boolean | string;
+  failOn?: string;
 };
 
 type DoctorCommandOptions = {
@@ -279,6 +288,40 @@ Examples:
     .action(async (action: string, options: BaselineCommandOptions) => {
       exitCode = await runBaseline(action, options, dependencies);
     });
+
+  program
+    .command("compare")
+    .description(
+      "Diff two cms-lab scan JSON reports. Exits 1 when the second run has new errors.",
+    )
+    .argument("<before>", "Path to the older scan JSON (e.g. main)")
+    .argument("<after>", "Path to the newer scan JSON (e.g. the PR head)")
+    .option("--json", "Print the diff as JSON instead of human-readable text")
+    .option(
+      "--markdown [path]",
+      "Write a Markdown diff summary. Pass a path or omit to print to stdout.",
+    )
+    .option(
+      "--fail-on <level>",
+      "Exit 1 when added diagnostics include error or warning. Use error, warning, or never.",
+      "error",
+    )
+    .addHelpText(
+      "after",
+      `
+Examples:
+  cms-lab compare main.json head.json
+  cms-lab compare main.json head.json --json
+  cms-lab compare main.json head.json --markdown
+  cms-lab compare main.json head.json --markdown diff.md
+  cms-lab compare main.json head.json --fail-on warning
+`,
+    )
+    .action(
+      async (before: string, after: string, options: CompareCommandOptions) => {
+        exitCode = await runCompare(before, after, options, dependencies);
+      },
+    );
 
   program
     .command("doctor")
@@ -878,6 +921,218 @@ async function runBaseline(
     writeStderr(dependencies, `Unexpected error: ${safeMessageFrom(error)}\n`);
     return 2;
   }
+}
+
+async function runCompare(
+  beforePath: string,
+  afterPath: string,
+  options: CompareCommandOptions,
+  dependencies: CliDependencies,
+): Promise<number> {
+  const cwd = dependencies.cwd ?? process.cwd();
+  const failOn = parseFailOn(options.failOn);
+
+  try {
+    const beforeDiagnostics = await readScanDiagnostics(
+      resolve(cwd, beforePath),
+    );
+    const afterDiagnostics = await readScanDiagnostics(resolve(cwd, afterPath));
+
+    const diff = diffDiagnostics(beforeDiagnostics, afterDiagnostics);
+
+    if (options.markdown !== undefined && options.markdown !== false) {
+      const markdown = renderCompareMarkdown(
+        diff,
+        relative(cwd, resolve(cwd, beforePath)) || beforePath,
+        relative(cwd, resolve(cwd, afterPath)) || afterPath,
+      );
+      if (typeof options.markdown === "string") {
+        const target = resolve(cwd, options.markdown);
+        await mkdir(dirname(target), { recursive: true });
+        await writeFile(target, markdown, "utf8");
+        writeStdout(
+          dependencies,
+          `markdown ${relative(cwd, target) || target}\n`,
+        );
+      } else {
+        writeStdout(dependencies, `${markdown}\n`);
+      }
+    } else if (options.json) {
+      writeStdout(dependencies, `${JSON.stringify(diff, null, 2)}\n`);
+    } else {
+      writeStdout(dependencies, renderCompareText(diff));
+    }
+
+    if (failOn === "never") {
+      return 0;
+    }
+    if (diff.summary.added.errors > 0) {
+      return 1;
+    }
+    if (failOn === "warning" && diff.summary.added.warnings > 0) {
+      return 1;
+    }
+    return 0;
+  } catch (error) {
+    if (error instanceof ConfigLoadError) {
+      writeStderr(
+        dependencies,
+        `Config error: ${redactSensitive(error.message)}\n`,
+      );
+      return 2;
+    }
+    writeStderr(dependencies, `Unexpected error: ${safeMessageFrom(error)}\n`);
+    return 2;
+  }
+}
+
+async function readScanDiagnostics(path: string): Promise<Diagnostic[]> {
+  let raw: string;
+  try {
+    raw = await readFile(path, "utf8");
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") {
+      throw new ConfigLoadError(`Scan report ${path} does not exist`);
+    }
+    throw error;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new ConfigLoadError(
+      `Scan report ${path} is not valid JSON: ${safeMessageFrom(error)}`,
+    );
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    throw new ConfigLoadError(
+      `Scan report ${path} is not a cms-lab scan result`,
+    );
+  }
+  const record = parsed as Record<string, unknown>;
+  if (!Array.isArray(record.diagnostics)) {
+    throw new ConfigLoadError(
+      `Scan report ${path} is missing a diagnostics array`,
+    );
+  }
+
+  const diagnostics: Diagnostic[] = [];
+  for (const item of record.diagnostics) {
+    if (!item || typeof item !== "object") continue;
+    const entry = item as Record<string, unknown>;
+    if (
+      (entry.severity !== "error" &&
+        entry.severity !== "warning" &&
+        entry.severity !== "info") ||
+      typeof entry.code !== "string"
+    ) {
+      continue;
+    }
+    diagnostics.push({
+      severity: entry.severity,
+      code: entry.code,
+      message: typeof entry.message === "string" ? entry.message : "",
+      ...(typeof entry.path === "string" ? { path: entry.path } : {}),
+      ...(typeof entry.source === "string" ? { source: entry.source } : {}),
+    });
+  }
+  return diagnostics;
+}
+
+function renderCompareText(diff: DiagnosticDiff): string {
+  const lines: string[] = [];
+  lines.push("cms-lab compare");
+  lines.push(`  added     ${countsString(diff.summary.added)}`);
+  lines.push(`  removed   ${countsString(diff.summary.removed)}`);
+  lines.push(`  unchanged ${countsString(diff.summary.unchanged)}`);
+
+  if (diff.added.length > 0) {
+    lines.push("");
+    lines.push("new diagnostics:");
+    for (const diagnostic of diff.added) {
+      lines.push(`  ${formatDiagnosticLine(diagnostic)}`);
+    }
+  }
+
+  if (diff.removed.length > 0) {
+    lines.push("");
+    lines.push("fixed diagnostics:");
+    for (const diagnostic of diff.removed) {
+      lines.push(`  ${formatDiagnosticLine(diagnostic)}`);
+    }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+function renderCompareMarkdown(
+  diff: DiagnosticDiff,
+  beforeLabel: string,
+  afterLabel: string,
+): string {
+  const lines: string[] = [];
+  lines.push("# cms-lab compare");
+  lines.push("");
+  lines.push(`before: \`${beforeLabel}\``);
+  lines.push(`after: \`${afterLabel}\``);
+  lines.push("");
+  lines.push("|           | Errors | Warnings | Info |");
+  lines.push("| --------- | ------ | -------- | ---- |");
+  lines.push(
+    `| Added     | ${diff.summary.added.errors} | ${diff.summary.added.warnings} | ${diff.summary.added.info} |`,
+  );
+  lines.push(
+    `| Removed   | ${diff.summary.removed.errors} | ${diff.summary.removed.warnings} | ${diff.summary.removed.info} |`,
+  );
+  lines.push(
+    `| Unchanged | ${diff.summary.unchanged.errors} | ${diff.summary.unchanged.warnings} | ${diff.summary.unchanged.info} |`,
+  );
+
+  if (diff.added.length > 0) {
+    lines.push("");
+    lines.push("## New diagnostics");
+    lines.push("");
+    for (const diagnostic of diff.added) {
+      lines.push(`- ${formatDiagnosticMarkdown(diagnostic)}`);
+    }
+  }
+
+  if (diff.removed.length > 0) {
+    lines.push("");
+    lines.push("## Fixed diagnostics");
+    lines.push("");
+    for (const diagnostic of diff.removed) {
+      lines.push(`- ${formatDiagnosticMarkdown(diagnostic)}`);
+    }
+  }
+
+  return `${lines.join("\n")}\n`;
+}
+
+function countsString(summary: {
+  errors: number;
+  warnings: number;
+  info: number;
+}): string {
+  return `${summary.errors} ${plural(summary.errors, "error")}, ${summary.warnings} ${plural(summary.warnings, "warning")}, ${summary.info} info`;
+}
+
+function formatDiagnosticLine(diagnostic: Diagnostic): string {
+  const parts = [diagnostic.severity.toUpperCase(), diagnostic.code];
+  if (diagnostic.path) parts.push(diagnostic.path);
+  if (diagnostic.source) parts.push(`(${diagnostic.source})`);
+  return parts.join(" ");
+}
+
+function formatDiagnosticMarkdown(diagnostic: Diagnostic): string {
+  const head = `\`${diagnostic.code}\``;
+  const where = diagnostic.path ? ` ${diagnostic.path}` : "";
+  const source = diagnostic.source ? ` _(${diagnostic.source})_` : "";
+  const message = diagnostic.message ? ` — ${diagnostic.message}` : "";
+  return `${head}${where}${source}${message}`;
 }
 
 function runExplain(code: string, dependencies: CliDependencies): number {
