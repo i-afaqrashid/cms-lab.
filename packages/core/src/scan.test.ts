@@ -1394,3 +1394,108 @@ test("redactSensitive leaves harmless text alone", () => {
     "Scan complete. 0 errors, 2 warnings. Site http://example.com responded with HTTP 200.";
   expect(redactSensitive(text)).toBe(text);
 });
+
+test("scanDocuments flags WordPress block-editor img tags missing alt", async () => {
+  const wordpressConfig = {
+    site: { url: "http://localhost:3000" },
+    framework: { type: "next" as const, router: "app" as const },
+    cms: {
+      provider: "wordpress" as const,
+      url: "http://localhost:8080",
+    },
+    routes: [
+      {
+        type: "post",
+        pattern: "/blog/:uid",
+        getPath: (doc: { uid?: string }) => `/blog/${doc.uid}`,
+      },
+    ],
+  };
+
+  const result = await scanDocuments({
+    config: wordpressConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "post-1",
+        type: "post",
+        uid: "hello-world",
+        status: "published",
+        data: {
+          meta_title: "Hello",
+          meta_description: "Hello world post",
+          content: {
+            rendered:
+              '<p>Hello there.</p>\n<figure class="wp-block-image"><img src="https://example.com/cat.jpg" alt=""/></figure>\n<p>And again:</p>\n<figure class="wp-block-image"><img src="https://example.com/dog.jpg" alt="image"/></figure>\n<figure class="wp-block-image"><img src="https://example.com/bird.jpg" alt="A goldfinch on a branch"/></figure>',
+          },
+        },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  const altDiagnostics = result.diagnostics.filter(
+    (diagnostic) => diagnostic.code === "A11Y-IMG-ALT",
+  );
+
+  // Two missing-or-placeholder alts (cat blank, dog "image"); bird is fine.
+  expect(altDiagnostics).toHaveLength(2);
+  expect(altDiagnostics[0].message).toContain("data.content.rendered[0].alt");
+  expect(altDiagnostics[1].message).toContain("data.content.rendered[1].alt");
+});
+
+test("scanDocuments leaves WordPress posts with usable alt text silent", async () => {
+  const wordpressConfig = {
+    site: { url: "http://localhost:3000" },
+    framework: { type: "next" as const, router: "app" as const },
+    cms: {
+      provider: "wordpress" as const,
+      url: "http://localhost:8080",
+    },
+    routes: [
+      {
+        type: "post",
+        pattern: "/blog/:uid",
+        getPath: (doc: { uid?: string }) => `/blog/${doc.uid}`,
+      },
+    ],
+  };
+
+  const result = await scanDocuments({
+    config: wordpressConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "post-2",
+        type: "post",
+        uid: "alt-ok",
+        status: "published",
+        data: {
+          meta_title: "Alt OK",
+          meta_description: "All good",
+          content: {
+            rendered:
+              "<p>Intro.</p><figure><img src=\"https://example.com/a.jpg\" alt='A close-up of green leaves'></figure>",
+          },
+        },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(
+    result.diagnostics.filter(
+      (diagnostic) => diagnostic.code === "A11Y-IMG-ALT",
+    ),
+  ).toEqual([]);
+});
