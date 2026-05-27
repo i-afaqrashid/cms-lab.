@@ -1141,10 +1141,40 @@ function messageFrom(error: unknown): string {
   );
 }
 
-function redactSensitive(value: string): string {
+/**
+ * Strip well-known token and credential shapes out of a string so it
+ * is safe to surface in CLI output, debug logs, JUnit/Markdown/Slack
+ * exports, or HTML reports.
+ *
+ * Patterns covered:
+ *   - URL query params: `access_token=…`, `[?&]token=…`,
+ *     `[?&]password=…`, `[?&]secret=…`, `[?&]api_key=`/`api-key=`/`apikey=`,
+ *     `[?&]x-api-key=…`, `[?&]authorization=…`
+ *   - `Bearer …` headers
+ *   - Basic auth in URLs: `https://user:pass@host`
+ *   - JWTs (`eyJ…\.…\.…`)
+ *   - Stripe-style keys (`sk_live_…`, `sk_test_…`, `pk_live_…`, `rk_live_…`, etc.)
+ *   - OpenAI / Anthropic-style keys (`sk-…`, including `sk-ant-…` and `sk-proj-…`)
+ *   - GitHub PATs (`ghp_…`, `gho_…`, `ghs_…`, `ghr_…`, `ghu_…`, `github_pat_…`)
+ */
+export function redactSensitive(value: string): string {
   return value
     .replaceAll(/(access_token=)[^&\s]+/gi, "$1[redacted]")
-    .replaceAll(/([?&](?:token|password|secret)=)[^&\s]+/gi, "$1[redacted]")
+    .replaceAll(
+      /([?&](?:token|password|secret|api[-_]?key|apikey|x-api-key|authorization)=)[^&\s]+/gi,
+      "$1[redacted]",
+    )
     .replaceAll(/\bBearer\s+[-._~+/=a-z0-9]+/gi, "Bearer [redacted]")
-    .replaceAll(/(https?:\/\/)([^:\s/@]+):([^@\s/]+)@/gi, "$1[redacted]@");
+    .replaceAll(/(https?:\/\/)([^:\s/@]+):([^@\s/]+)@/gi, "$1[redacted]@")
+    .replaceAll(
+      /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+/g,
+      "[redacted]",
+    )
+    .replaceAll(
+      /\b(?:sk|pk|rk)_(?:live|test)_[A-Za-z0-9]{16,}\b/g,
+      "[redacted]",
+    )
+    .replaceAll(/\bsk-[A-Za-z0-9_-]{20,}\b/g, "[redacted]")
+    .replaceAll(/\bgh[pousr]_[A-Za-z0-9]{20,}\b/g, "[redacted]")
+    .replaceAll(/\bgithub_pat_[A-Za-z0-9_]{20,}\b/g, "[redacted]");
 }

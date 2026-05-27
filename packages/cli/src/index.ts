@@ -14,6 +14,7 @@ import {
   SiteUnreachableError,
   explainDiagnostic,
   loadCmsLabConfig,
+  redactSensitive,
   resolveSiteHealthUrl,
   scanDocuments,
   type CMSDocument,
@@ -832,14 +833,6 @@ function messageFrom(error: unknown): string {
 
 function safeMessageFrom(error: unknown): string {
   return redactSensitive(messageFrom(error));
-}
-
-function redactSensitive(value: string): string {
-  return value
-    .replaceAll(/(access_token=)[^&\s]+/gi, "$1[redacted]")
-    .replaceAll(/([?&](?:token|password|secret)=)[^&\s]+/gi, "$1[redacted]")
-    .replaceAll(/\bBearer\s+[-._~+/=a-z0-9]+/gi, "Bearer [redacted]")
-    .replaceAll(/(https?:\/\/)([^:\s/@]+):([^@\s/]+)@/gi, "$1[redacted]@");
 }
 
 function jsonOutputResult(
