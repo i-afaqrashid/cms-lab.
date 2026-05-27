@@ -82,6 +82,14 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Make the getPath function tolerate optional fields and return a clear absolute path for every routable document.",
   },
   {
+    code: "CMS-ROUTE-SOFT-404",
+    severity: "warning",
+    title: "CMS route returned a soft-404 body",
+    meaning:
+      "The route returned a 2xx response, but the body matched a configured not-found marker (string or <title> pattern). The framework or theme is rendering a fallback for missing content even though the status code says success.",
+    fix: "Fix the missing data path so the route returns a real 404, or remove this content from the CMS so it stops resolving to a route. Tune checks.routes.soft404 if the detection is too eager.",
+  },
+  {
     code: "SEO-META-MISSING",
     severity: "warning",
     title: "SEO metadata is missing",

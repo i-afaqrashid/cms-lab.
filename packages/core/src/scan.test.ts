@@ -1449,6 +1449,102 @@ test("scanDocuments flags WordPress block-editor img tags missing alt", async ()
   expect(altDiagnostics[1].message).toContain("data.content.rendered[1].alt");
 });
 
+test("scanDocuments flags soft-404 bodies when checks.routes.soft404 is configured", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: {
+        routes: {
+          soft404: {
+            strings: ["Page not found"],
+            titlePattern: "^404",
+          },
+        },
+      },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "doc-missing-content",
+        type: "page",
+        uid: "ghost",
+        status: "published",
+        data: { meta_title: "Ghost", meta_description: "ghost page" },
+      },
+      {
+        id: "doc-404-title",
+        type: "page",
+        uid: "stale",
+        status: "published",
+        data: { meta_title: "Stale", meta_description: "stale page" },
+      },
+      {
+        id: "doc-fine",
+        type: "page",
+        uid: "real",
+        status: "published",
+        data: { meta_title: "Real", meta_description: "real page" },
+      },
+    ],
+    fetch: async (url) => {
+      const href = String(url);
+      if (href.endsWith("/ghost")) {
+        return new Response(
+          "<html><body><h1>Page not found</h1></body></html>",
+        );
+      }
+      if (href.endsWith("/stale")) {
+        return new Response(
+          "<html><head><title>404 - Stale post</title></head><body>oops</body></html>",
+        );
+      }
+      return new Response(
+        "<html><head><title>Real page</title></head><body>welcome</body></html>",
+      );
+    },
+  });
+
+  const soft404 = result.diagnostics.filter(
+    (diagnostic) => diagnostic.code === "CMS-ROUTE-SOFT-404",
+  );
+  expect(soft404).toHaveLength(2);
+  expect(soft404.map((d) => d.path).sort()).toEqual(["/ghost", "/stale"]);
+});
+
+test("scanDocuments leaves soft-404 detection off when not configured", async () => {
+  const result = await scanDocuments({
+    config: baseConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "doc",
+        type: "page",
+        uid: "ghost",
+        status: "published",
+        data: { meta_title: "Ghost", meta_description: "ghost page" },
+      },
+    ],
+    fetch: async () =>
+      new Response("<html><body><h1>Page not found</h1></body></html>"),
+  });
+
+  expect(
+    result.diagnostics.filter(
+      (diagnostic) => diagnostic.code === "CMS-ROUTE-SOFT-404",
+    ),
+  ).toEqual([]);
+});
+
 test("scanDocuments accepts Sanity asset-level altText when field alt is blank", async () => {
   const sanityConfig = {
     site: { url: "http://localhost:3000" },

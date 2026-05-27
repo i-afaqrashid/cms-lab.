@@ -49,6 +49,17 @@ export type RequiredFieldRule = {
   severity?: "error" | "warning";
 };
 
+export type Soft404Options = {
+  /** Case-insensitive substring matches in the response body. */
+  strings?: string[];
+  /** Regex source matched (case-insensitive) against the `<title>` of the body. */
+  titlePattern?: string;
+};
+
+export type RouteChecksOptions = {
+  soft404?: Soft404Options;
+};
+
 export type RelationshipRule = {
   from: string;
   to: string;
@@ -172,7 +183,7 @@ export type CmsLabConfig = {
   cms: CmsProviderConfig;
   routes: RouteDefinition[];
   checks?: {
-    routes?: boolean;
+    routes?: boolean | RouteChecksOptions;
     seo?: boolean | { metaTitle?: boolean; metaDescription?: boolean };
     images?: boolean;
     a11y?: boolean | { imgAlt?: boolean };

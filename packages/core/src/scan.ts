@@ -11,6 +11,7 @@ import type {
   ProjectInfo,
   RelationshipRule,
   RequiredFieldRule,
+  RouteChecksOptions,
   RouteDefinition,
   ScanFilters,
   ScanResult,
@@ -275,12 +276,72 @@ async function checkRouteReachability(
           source: sourceFor(config, candidate.document),
         }),
       );
+      return diagnostics;
+    }
+
+    // Soft-404 detection: 2xx responses whose body looks like a not-found
+    // page (common Next.js / framework fallback shape). Only runs when
+    // explicitly enabled via checks.routes.soft404.
+    const soft404 = soft404Options(config);
+    if (soft404 && status >= 200 && status < 300) {
+      try {
+        const body = await response.text();
+        if (matchesSoft404Body(body, soft404)) {
+          diagnostics.push(
+            createDiagnostic({
+              severity: "warning",
+              code: "CMS-ROUTE-SOFT-404",
+              message: `Route ${diagnosticPath} returned ${status} but the body looks like a not-found page`,
+              path: diagnosticPath,
+              source: sourceFor(config, candidate.document),
+            }),
+          );
+        }
+      } catch {
+        // Body read errors are not actionable here; leave as silent.
+      }
     }
 
     return diagnostics;
   });
 
   return results.flat();
+}
+
+function soft404Options(
+  config: CmsLabConfig,
+): NonNullable<RouteChecksOptions["soft404"]> | undefined {
+  const routes = config.checks?.routes;
+  if (typeof routes !== "object" || routes === null) {
+    return undefined;
+  }
+  return routes.soft404;
+}
+
+function matchesSoft404Body(
+  body: string,
+  soft404: NonNullable<RouteChecksOptions["soft404"]>,
+): boolean {
+  if (soft404.strings && soft404.strings.length > 0) {
+    const lower = body.toLowerCase();
+    if (
+      soft404.strings.some((needle) => lower.includes(needle.toLowerCase()))
+    ) {
+      return true;
+    }
+  }
+
+  if (soft404.titlePattern) {
+    const titleMatch = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(body);
+    if (titleMatch) {
+      const pattern = new RegExp(soft404.titlePattern, "i");
+      if (pattern.test(titleMatch[1] ?? "")) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 export function resolveSiteHealthUrl(site: CmsLabConfig["site"]): URL {
@@ -1005,7 +1066,11 @@ function shouldRunCheck(
   }
 
   if (group === "routes") {
-    return isCheckEnabled(config.checks?.routes, true);
+    const routes = config.checks?.routes;
+    if (typeof routes === "object" && routes !== null) {
+      return true;
+    }
+    return isCheckEnabled(routes, true);
   }
 
   if (group === "seo") {

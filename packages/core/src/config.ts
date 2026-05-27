@@ -179,7 +179,22 @@ const relationshipRuleSchema = z
 
 const checksSchema = z
   .object({
-    routes: z.boolean().optional(),
+    routes: z
+      .union([
+        z.boolean(),
+        z
+          .object({
+            soft404: z
+              .object({
+                strings: z.array(z.string()).optional(),
+                titlePattern: z.string().optional(),
+              })
+              .strict()
+              .optional(),
+          })
+          .strict(),
+      ])
+      .optional(),
     seo: z
       .union([
         z.boolean(),
