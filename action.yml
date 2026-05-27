@@ -11,6 +11,10 @@ inputs:
     description: npm version or dist-tag for @cms-lab/cli.
     required: false
     default: latest
+  node-version:
+    description: Node.js version to install for the cms-lab step. Defaults to 20 to match the @cms-lab/cli engines >=20.10 floor.
+    required: false
+    default: "20"
   working-directory:
     description: Directory that contains cms-lab.config.ts.
     required: false
@@ -105,7 +109,7 @@ runs:
     - name: Setup Node
       uses: actions/setup-node@v6
       with:
-        node-version: 24
+        node-version: ${{ inputs.node-version }}
         package-manager-cache: false
 
     - name: Run cms-lab

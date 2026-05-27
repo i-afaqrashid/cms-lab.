@@ -9,7 +9,10 @@ test("GitHub Action metadata exposes the cms-lab scan wrapper", async () => {
 
   expect(action).toContain("name: cms-lab CMS Scan");
   expect(action).toContain("using: composite");
-  expect(action).toContain("node-version: 24");
+  expect(action).toContain("node-version: ${{ inputs.node-version }}");
+  expect(action).toMatch(
+    /node-version:\s*\n\s*description:.*\n\s*required: false\s*\n\s*default: "20"/,
+  );
   expect(action).toContain("scripts/github-action.sh");
   expect(action).toContain("version:");
   expect(action).toContain("config:");
