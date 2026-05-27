@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander";
 import { readFileSync } from "node:fs";
-import { access, mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { performance } from "node:perf_hooks";
 
@@ -8,15 +8,19 @@ const packageJson = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 ) as { version: string };
 import {
+  applyBaseline,
   type CheckGroup,
   CmsFetchError,
   ConfigLoadError,
   SiteUnreachableError,
   explainDiagnostic,
   loadCmsLabConfig,
+  makeBaseline,
+  parseBaseline,
   redactSensitive,
   resolveSiteHealthUrl,
   scanDocuments,
+  summarizeDiagnostics,
   type CMSDocument,
   type CmsProviderConfig,
   type FetchLike,
@@ -77,9 +81,18 @@ type ScanCommandOptions = {
   notifyOn?: string;
   includeSensitiveOutput?: boolean;
   shareReport?: boolean;
+  baseline?: boolean | string;
   debug?: boolean;
   verbose?: string;
   color?: boolean;
+};
+
+type BaselineCommandOptions = {
+  config?: string;
+  url?: string;
+  path?: string;
+  timeout?: string;
+  retries?: string;
 };
 
 type DoctorCommandOptions = {
@@ -214,6 +227,11 @@ Examples:
     .option("--timeout <ms>", "Per-route HTTP timeout in milliseconds")
     .option("--concurrency <count>", "Maximum concurrent route probes")
     .option("--retries <count>", "Retry transient route probe failures", "1")
+    .option(
+      "--baseline [path]",
+      "Subtract diagnostics listed in a baseline file before computing exit code. Defaults to .cms-lab/baseline.json when the file exists.",
+    )
+    .option("--no-baseline", "Ignore .cms-lab/baseline.json even if present")
     .option("--debug", "Write debug logs to stderr")
     .option("--verbose <level>", "Debug verbosity level: 0, 1, 2, or 3")
     .option("--no-color", "Disable ANSI color in terminal output")
@@ -226,10 +244,40 @@ Examples:
   cms-lab scan --ci --report
   cms-lab scan --json --include-sensitive-output
   cms-lab scan --only routes,fields --fail-on warning
+  cms-lab scan --baseline .cms-lab/baseline.json
+  cms-lab scan --no-baseline
 `,
     )
     .action(async (options: ScanCommandOptions) => {
       exitCode = await runScan(options, dependencies);
+    });
+
+  program
+    .command("baseline")
+    .description(
+      "Write a cms-lab baseline file from a fresh scan. Subsequent scans subtract these accepted diagnostics before computing the exit code.",
+    )
+    .argument("[action]", "Subcommand: write", "write")
+    .option("--config <path>", "Path to cms-lab config file")
+    .option("--url <url>", "Override config.site.url")
+    .option(
+      "--path <path>",
+      "Baseline file path. Defaults to .cms-lab/baseline.json",
+    )
+    .option("--timeout <ms>", "Per-route HTTP timeout in milliseconds")
+    .option("--retries <count>", "Retry transient route probe failures", "1")
+    .addHelpText(
+      "after",
+      `
+Examples:
+  cms-lab baseline
+  cms-lab baseline write
+  cms-lab baseline write --path .cms-lab/baseline.json
+  cms-lab baseline write --config cms-lab.config.ts
+`,
+    )
+    .action(async (action: string, options: BaselineCommandOptions) => {
+      exitCode = await runBaseline(action, options, dependencies);
     });
 
   program
@@ -429,7 +477,7 @@ async function runScan(
     assertTypeFilterMatched(documents, filters.types);
 
     const endScan = debug.time("scan", 2);
-    const result = await scanDocuments({
+    const rawResult = await scanDocuments({
       config,
       project,
       documents,
@@ -442,8 +490,22 @@ async function runScan(
     endScan();
     debug.log(
       1,
-      `summary errors=${result.summary.errors} warnings=${result.summary.warnings} info=${result.summary.info}`,
+      `summary errors=${rawResult.summary.errors} warnings=${rawResult.summary.warnings} info=${rawResult.summary.info}`,
     );
+
+    const endBaseline = debug.time("baseline", 2);
+    const { result, suppressed, baselinePath, baselineLoadError } =
+      await applyBaselineToResult(options.baseline, rawResult, cwd);
+    endBaseline();
+    if (baselinePath) {
+      debug.log(1, `baseline ${baselinePath} suppressed=${suppressed}`);
+    }
+    if (baselineLoadError) {
+      writeStderr(
+        dependencies,
+        `Warning: baseline load failed - ${baselineLoadError}\n`,
+      );
+    }
 
     const exitCode = exitCodeForResult(result, {
       failOn,
@@ -497,6 +559,12 @@ async function runScan(
           hints: !options.ci,
         }),
       );
+      if (suppressed > 0 && baselinePath) {
+        writeStdout(
+          dependencies,
+          `baseline ${suppressed} ${plural(suppressed, "item")} suppressed (${relative(cwd, baselinePath) || baselinePath})\n`,
+        );
+      }
       if (options.report) {
         writeStdout(
           dependencies,
@@ -651,6 +719,162 @@ async function runDoctor(
       return 4;
     }
 
+    writeStderr(dependencies, `Unexpected error: ${safeMessageFrom(error)}\n`);
+    return 2;
+  }
+}
+
+const DEFAULT_BASELINE_PATH = ".cms-lab/baseline.json";
+
+async function applyBaselineToResult(
+  baselineOption: boolean | string | undefined,
+  result: ScanResult,
+  cwd: string,
+): Promise<{
+  result: ScanResult;
+  suppressed: number;
+  baselinePath?: string;
+  baselineLoadError?: string;
+}> {
+  if (baselineOption === false) {
+    return { result, suppressed: 0 };
+  }
+
+  const explicit = typeof baselineOption === "string";
+  const path = resolve(
+    cwd,
+    typeof baselineOption === "string" ? baselineOption : DEFAULT_BASELINE_PATH,
+  );
+
+  let raw: string;
+  try {
+    raw = await readFile(path, "utf8");
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT" && !explicit) {
+      return { result, suppressed: 0 };
+    }
+    if (code === "ENOENT" && explicit) {
+      throw new ConfigLoadError(`Baseline file ${path} does not exist`);
+    }
+    return {
+      result,
+      suppressed: 0,
+      baselineLoadError: redactSensitive(safeMessageFrom(error)),
+    };
+  }
+
+  let parsed;
+  try {
+    parsed = parseBaseline(JSON.parse(raw));
+  } catch (error) {
+    if (explicit) {
+      throw new ConfigLoadError(
+        `Baseline file ${path} is not valid: ${safeMessageFrom(error)}`,
+      );
+    }
+    return {
+      result,
+      suppressed: 0,
+      baselineLoadError: redactSensitive(safeMessageFrom(error)),
+    };
+  }
+
+  const applied = applyBaseline(result.diagnostics, parsed);
+  const filtered: ScanResult = {
+    ...result,
+    diagnostics: applied.remaining,
+    summary: summarizeDiagnostics(applied.remaining),
+    diagnosticGroups: undefined,
+  };
+
+  return {
+    result: filtered,
+    suppressed: applied.suppressed,
+    baselinePath: path,
+  };
+}
+
+async function runBaseline(
+  action: string,
+  options: BaselineCommandOptions,
+  dependencies: CliDependencies,
+): Promise<number> {
+  const cwd = dependencies.cwd ?? process.cwd();
+
+  if (action !== "write") {
+    writeStderr(
+      dependencies,
+      `Unknown baseline subcommand "${action}". Expected: write\n`,
+    );
+    return 2;
+  }
+
+  try {
+    const timeoutMs = parseTimeout(options.timeout);
+    const retries = parseRetries(options.retries);
+
+    const loaded = await loadCmsLabConfig({
+      cwd,
+      configPath: options.config,
+    });
+    const config = {
+      ...loaded.config,
+      site: {
+        ...loaded.config.site,
+        url: options.url ?? loaded.config.site.url,
+      },
+    };
+
+    const project = await detectNextProject(cwd);
+    assertConfiguredRouterMatchesProject(config.framework.router, project);
+
+    const documents = await fetchCmsDocuments(config.cms, dependencies);
+
+    const result = await scanDocuments({
+      config,
+      project,
+      documents,
+      fetch: dependencies.fetch,
+      timeoutMs,
+      retries,
+    });
+
+    const baseline = makeBaseline(result.diagnostics);
+    const path = resolve(cwd, options.path ?? DEFAULT_BASELINE_PATH);
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, `${JSON.stringify(baseline, null, 2)}\n`, "utf8");
+
+    writeStdout(
+      dependencies,
+      `wrote ${result.diagnostics.length} ${plural(
+        result.diagnostics.length,
+        "diagnostic",
+      )} to ${relative(cwd, path) || path}\n`,
+    );
+    return 0;
+  } catch (error) {
+    if (error instanceof ConfigLoadError) {
+      writeStderr(
+        dependencies,
+        `Config error: ${redactSensitive(error.message)}\n`,
+      );
+      return 2;
+    }
+    if (error instanceof CmsFetchError) {
+      writeStderr(
+        dependencies,
+        `CMS error: ${redactSensitive(error.message)}\n`,
+      );
+      return 3;
+    }
+    if (error instanceof SiteUnreachableError) {
+      writeStderr(
+        dependencies,
+        `Site error: ${redactSensitive(error.message)}\n`,
+      );
+      return 4;
+    }
     writeStderr(dependencies, `Unexpected error: ${safeMessageFrom(error)}\n`);
     return 2;
   }

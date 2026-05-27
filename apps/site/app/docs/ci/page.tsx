@@ -14,6 +14,7 @@ export default function CiPage() {
         { href: "#github-actions", label: "GitHub Actions" },
         { href: "#copy-paste", label: "Copy-paste workflow" },
         { href: "#thresholds", label: "Thresholds" },
+        { href: "#baseline", label: "Baseline" },
         { href: "#artifacts", label: "Artifacts" },
       ]}
     >
@@ -73,6 +74,30 @@ npx @cms-lab/cli scan --ci --max-warnings 0
 npx @cms-lab/cli scan --ci --max-info 0
 npx @cms-lab/cli scan --ci --strict
 npx @cms-lab/cli scan --ci --fail-on never`}</CodeBlock>
+
+      <h2 id="baseline">Baseline</h2>
+      <p>
+        Turning cms-lab on against an existing repo with legacy warnings is
+        easier with a baseline. Capture the current diagnostics once, commit the
+        file, and subsequent scans exit 0 unless something new appears.
+      </p>
+      <CodeBlock>{`# capture the current diagnostics
+npx @cms-lab/cli baseline write
+
+# commit the file so CI uses the same set
+git add .cms-lab/baseline.json
+git commit -m "chore: cms-lab baseline"
+
+# scan in CI; only NEW diagnostics fail the build
+npx @cms-lab/cli scan --ci
+
+# ignore the baseline temporarily to see everything
+npx @cms-lab/cli scan --ci --no-baseline`}</CodeBlock>
+      <p>
+        The baseline file is small, human-readable JSON. Inspect it before
+        committing and shrink it over time as you fix the legacy diagnostics and
+        re-run <code>cms-lab baseline write</code>.
+      </p>
 
       <h2 id="artifacts">Artifacts</h2>
       <p>
