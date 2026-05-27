@@ -48,11 +48,6 @@ for (const packageJson of publishablePackages) {
   }
 }
 
-const cliSource = readFileSync("packages/cli/src/index.ts", "utf8");
-if (!cliSource.includes(`.version("${version}")`)) {
-  fail(`packages/cli/src/index.ts must expose CLI version ${version}.`);
-}
-
 console.log(
   `Release tag ${tagName} matches ${publishablePackages.length} publishable packages.`,
 );

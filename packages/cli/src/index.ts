@@ -1,7 +1,12 @@
 import { Command, CommanderError } from "commander";
+import { readFileSync } from "node:fs";
 import { access, mkdir, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { performance } from "node:perf_hooks";
+
+const packageJson = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
 import {
   type CheckGroup,
   CmsFetchError,
@@ -114,7 +119,7 @@ export async function runCli(
   const program = new Command()
     .name("cms-lab")
     .description("Catch CMS bugs before deploy.")
-    .version("1.2.6")
+    .version(packageJson.version)
     .exitOverride()
     .configureOutput({
       writeOut: (text) => writeStdout(dependencies, text),

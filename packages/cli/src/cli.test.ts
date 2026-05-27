@@ -1,8 +1,13 @@
+import { readFileSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { CmsFetchError } from "@cms-lab/core";
 import { runCli } from "@cms-lab/cli";
+
+const cliPackageJson = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
 
 test("runCli prints JSON scan results and returns 1 when errors exist", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
@@ -878,7 +883,7 @@ test("runCli maps site connectivity failures to exit code 4", async () => {
   expect(stderr).toContain("connection refused");
 });
 
-test("runCli supports version output", async () => {
+test("runCli --version matches the published package.json version", async () => {
   let stdout = "";
   const exitCode = await runCli(["--version"], {
     stdout: (text) => {
@@ -888,7 +893,8 @@ test("runCli supports version output", async () => {
   });
 
   expect(exitCode).toBe(0);
-  expect(stdout).toContain("1.2.6");
+  expect(cliPackageJson.version).toMatch(/^\d+\.\d+\.\d+/);
+  expect(stdout.trim()).toBe(cliPackageJson.version);
 });
 
 test("runCli scan help includes examples and color controls", async () => {
