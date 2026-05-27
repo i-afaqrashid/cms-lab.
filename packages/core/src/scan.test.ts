@@ -1449,6 +1449,116 @@ test("scanDocuments flags WordPress block-editor img tags missing alt", async ()
   expect(altDiagnostics[1].message).toContain("data.content.rendered[1].alt");
 });
 
+test("scanDocuments accepts Sanity asset-level altText when field alt is blank", async () => {
+  const sanityConfig = {
+    site: { url: "http://localhost:3000" },
+    framework: { type: "next" as const, router: "app" as const },
+    cms: {
+      provider: "sanity" as const,
+      projectId: "demo",
+      dataset: "production",
+      contentTypes: [{ type: "page", documentType: "page" }],
+    },
+    routes: [
+      {
+        type: "page",
+        pattern: "/:uid",
+        getPath: (doc: { uid?: string }) => `/${doc.uid}`,
+      },
+    ],
+  };
+
+  const result = await scanDocuments({
+    config: sanityConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "page-1",
+        type: "page",
+        uid: "asset-alt",
+        status: "published",
+        data: {
+          meta_title: "Asset alt",
+          meta_description: "asset alt page",
+          hero: {
+            _type: "image",
+            asset: {
+              _ref: "image-cat-100x100-jpg",
+              altText: "Cat napping in sun",
+            },
+            // No field-level alt; asset-level altText should rescue it.
+          },
+        },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(
+    result.diagnostics.filter(
+      (diagnostic) => diagnostic.code === "A11Y-IMG-ALT",
+    ),
+  ).toEqual([]);
+});
+
+test("scanDocuments still flags Sanity images with no field or asset alt", async () => {
+  const sanityConfig = {
+    site: { url: "http://localhost:3000" },
+    framework: { type: "next" as const, router: "app" as const },
+    cms: {
+      provider: "sanity" as const,
+      projectId: "demo",
+      dataset: "production",
+      contentTypes: [{ type: "page", documentType: "page" }],
+    },
+    routes: [
+      {
+        type: "page",
+        pattern: "/:uid",
+        getPath: (doc: { uid?: string }) => `/${doc.uid}`,
+      },
+    ],
+  };
+
+  const result = await scanDocuments({
+    config: sanityConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "page-2",
+        type: "page",
+        uid: "no-alt",
+        status: "published",
+        data: {
+          meta_title: "No alt",
+          meta_description: "page with no alt anywhere",
+          hero: {
+            _type: "image",
+            asset: { _ref: "image-cat-100x100-jpg" },
+          },
+        },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(
+    result.diagnostics.filter(
+      (diagnostic) => diagnostic.code === "A11Y-IMG-ALT",
+    ),
+  ).toHaveLength(1);
+});
+
 test("scanDocuments leaves WordPress posts with usable alt text silent", async () => {
   const wordpressConfig = {
     site: { url: "http://localhost:3000" },
