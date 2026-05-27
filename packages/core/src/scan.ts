@@ -25,7 +25,17 @@ export type ScanDocumentsOptions = {
   concurrency?: number;
   retries?: number;
   filters?: ScanFilters;
+  /**
+   * Optional sleep used between retry attempts. Defaults to setTimeout.
+   * Useful for tests that need to assert backoff timing without waiting.
+   */
+  sleep?: (ms: number) => Promise<void>;
 };
+
+const MAX_BACKOFF_MS = 8_000;
+const MAX_RETRY_AFTER_MS = 30_000;
+const BASE_BACKOFF_MS = 250;
+const MAX_JITTER_MS = 250;
 
 type RouteCandidate = {
   document: CMSDocument;
@@ -40,6 +50,7 @@ export async function scanDocuments(
   const timeoutMs = options.timeoutMs ?? 5000;
   const concurrency = normalizeConcurrency(options.concurrency);
   const retries = normalizeRetries(options.retries);
+  const sleep = options.sleep ?? defaultSleep;
   const documents = filterDocuments(options.documents, options.filters);
   const diagnostics: Diagnostic[] = [];
 
@@ -48,6 +59,7 @@ export async function scanDocuments(
     fetchImpl,
     timeoutMs,
     retries,
+    sleep,
   );
 
   const shouldRunRoutes = shouldRunCheck(
@@ -68,6 +80,7 @@ export async function scanDocuments(
         timeoutMs,
         concurrency,
         retries,
+        sleep,
       )),
     );
   }
@@ -181,6 +194,7 @@ async function checkRouteReachability(
   timeoutMs: number,
   concurrency: number,
   retries: number,
+  sleep: (ms: number) => Promise<void>,
 ): Promise<Diagnostic[]> {
   const results = await mapLimit(candidates, concurrency, async (candidate) => {
     const diagnostics: Diagnostic[] = [];
@@ -203,7 +217,13 @@ async function checkRouteReachability(
     }
 
     try {
-      response = await fetchWithRetries(fetchImpl, url, timeoutMs, retries);
+      response = await fetchWithRetries(
+        fetchImpl,
+        url,
+        timeoutMs,
+        retries,
+        sleep,
+      );
     } catch (error) {
       diagnostics.push(
         createDiagnostic({
@@ -290,6 +310,7 @@ async function assertSiteReachable(
   fetchImpl: FetchLike,
   timeoutMs: number,
   retries: number,
+  sleep: (ms: number) => Promise<void>,
 ): Promise<void> {
   try {
     const response = await fetchWithRetries(
@@ -297,6 +318,7 @@ async function assertSiteReachable(
       new URL(siteUrl),
       timeoutMs,
       retries,
+      sleep,
     );
     if (!response.ok) {
       throw new SiteUnreachableError(
@@ -336,6 +358,7 @@ async function fetchWithRetries(
   url: URL,
   timeoutMs: number,
   retries: number,
+  sleep: (ms: number) => Promise<void>,
 ): Promise<Response> {
   let lastError: unknown;
 
@@ -343,6 +366,7 @@ async function fetchWithRetries(
     try {
       const response = await fetchWithTimeout(fetchImpl, url, timeoutMs);
       if (attempt < retries && isRetryableStatus(response.status)) {
+        await sleep(retryDelayMs(attempt, response));
         continue;
       }
 
@@ -352,10 +376,48 @@ async function fetchWithRetries(
       if (attempt >= retries) {
         break;
       }
+      await sleep(retryDelayMs(attempt));
     }
   }
 
   throw lastError;
+}
+
+export function retryDelayMs(attempt: number, response?: Response): number {
+  if (response) {
+    const retryAfter = response.headers.get("retry-after");
+    if (retryAfter) {
+      const seconds = Number(retryAfter);
+      if (Number.isFinite(seconds) && seconds >= 0) {
+        return clamp(seconds * 1000, 0, MAX_RETRY_AFTER_MS);
+      }
+
+      const dateMs = Date.parse(retryAfter);
+      if (!Number.isNaN(dateMs)) {
+        const wait = dateMs - Date.now();
+        if (wait > 0) {
+          return Math.min(wait, MAX_RETRY_AFTER_MS);
+        }
+      }
+    }
+  }
+
+  const safeAttempt = Math.max(0, attempt);
+  const exponent = Math.min(safeAttempt, 30);
+  const base = BASE_BACKOFF_MS * 2 ** exponent;
+  const jitter = Math.floor(Math.random() * MAX_JITTER_MS);
+  return Math.min(base + jitter, MAX_BACKOFF_MS);
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function defaultSleep(ms: number): Promise<void> {
+  if (ms <= 0) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function checkSeoFields(
