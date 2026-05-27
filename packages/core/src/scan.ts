@@ -825,6 +825,13 @@ function collectImagesMissingAlt(
     );
   }
 
+  if (typeof value === "string") {
+    if (provider === "wordpress") {
+      return collectHtmlImagesMissingAlt(value, path);
+    }
+    return [];
+  }
+
   const record = asRecord(value);
   if (!record) {
     return [];
@@ -838,6 +845,45 @@ function collectImagesMissingAlt(
   return Object.entries(record).flatMap(([key, nested]) =>
     collectImagesMissingAlt(nested, provider, `${path}.${key}`),
   );
+}
+
+/**
+ * Walk a WordPress-rendered HTML string (e.g. `content.rendered`,
+ * `excerpt.rendered`, ACF wysiwyg fields) for `<img>` tags and return
+ * the data paths of any image whose `alt` is missing, blank, or a
+ * known placeholder.
+ *
+ * We use a small regex tokenizer instead of a full HTML parser because
+ * the goal is alt-only inspection; we never modify or re-emit the
+ * markup.
+ */
+function collectHtmlImagesMissingAlt(html: string, path: string): string[] {
+  if (!html.includes("<img")) {
+    return [];
+  }
+
+  const imgPattern = /<img\b[^>]*>/gi;
+  const altPattern = /\balt\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>=`]+))/i;
+  const missing: string[] = [];
+  let match: RegExpExecArray | null;
+  let index = 0;
+
+  while ((match = imgPattern.exec(html)) !== null) {
+    const tag = match[0];
+    const altMatch = altPattern.exec(tag);
+    const altValue =
+      altMatch === null
+        ? undefined
+        : (altMatch[1] ?? altMatch[2] ?? altMatch[3]);
+
+    if (isBlankOrPlaceholderAlt(altValue)) {
+      missing.push(`${path}[${index}].alt`);
+    }
+
+    index += 1;
+  }
+
+  return missing;
 }
 
 function imageAltCandidate(
