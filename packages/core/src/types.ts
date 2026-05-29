@@ -71,6 +71,83 @@ export type RelationshipRule = {
   severity?: DiagnosticSeverity;
 };
 
+/**
+ * Declarative assertion applied to the value at a custom rule's `path`.
+ *
+ * String shorthands cover the param-less checks. The object form combines
+ * one or more constraints; the value must satisfy every constraint present
+ * for the rule to pass.
+ */
+export type CustomAssertion =
+  | "present"
+  | "futureDate"
+  | "pastDate"
+  | {
+      /** Value must be present (not null, undefined, blank, or empty array). */
+      present?: boolean;
+      /** Numeric value (or numeric string) compared with the bound. */
+      gt?: number;
+      gte?: number;
+      lt?: number;
+      lte?: number;
+      /** Stringified value must be one of these. */
+      oneOf?: (string | number | boolean)[];
+      /** String value must match this regular expression source. */
+      matches?: string;
+      /** String value must NOT match this regular expression source. */
+      notMatches?: string;
+      /** Length bounds for strings and arrays. */
+      minLength?: number;
+      maxLength?: number;
+      /** Value must parse to a date strictly in the future / past. */
+      futureDate?: boolean;
+      pastDate?: boolean;
+      /** Value must parse to a date newer / older than `now - duration`. */
+      newerThan?: string;
+      olderThan?: string;
+    };
+
+/**
+ * Declarative custom rule. Applies to every document of `type` (optionally
+ * narrowed by `filter`), reads the value at `path` within `document.data`,
+ * and emits a diagnostic when `assert` fails.
+ */
+export type CustomDeclarativeRule = {
+  /** Diagnostic code. Defaults to `CUSTOM-RULE`. */
+  code?: string;
+  type: string;
+  /** Only apply to documents whose data matches every key/value here. */
+  filter?: Record<string, string | number | boolean>;
+  path: string;
+  assert: CustomAssertion;
+  severity?: DiagnosticSeverity;
+  /** Override the generated diagnostic message. */
+  message?: string;
+};
+
+/**
+ * Context passed to a functional custom rule. The `error`/`warning`/`info`
+ * helpers push diagnostics that flow through every cms-lab report format.
+ */
+export type CustomRuleContext = {
+  document: CMSDocument;
+  documents: CMSDocument[];
+  config: CmsLabConfig;
+  /** Read a dotted path out of `document.data`. */
+  readPath: (path: string) => unknown;
+  error: (code: string, message: string, options?: { path?: string }) => void;
+  warning: (code: string, message: string, options?: { path?: string }) => void;
+  info: (code: string, message: string, options?: { path?: string }) => void;
+};
+
+/** Functional custom rule. Called once per document. */
+export type CustomRuleFn = (
+  document: CMSDocument,
+  context: CustomRuleContext,
+) => void;
+
+export type CustomRule = CustomDeclarativeRule | CustomRuleFn;
+
 export type PrismicCmsProviderConfig = {
   provider: "prismic";
   repositoryName: string;
@@ -189,6 +266,7 @@ export type CmsLabConfig = {
     a11y?: boolean | { imgAlt?: boolean };
     fields?: boolean | { required?: RequiredFieldRule[] };
     relationships?: RelationshipRule[];
+    custom?: CustomRule[];
   };
 };
 
@@ -225,7 +303,8 @@ export type CheckGroup =
   | "a11y"
   | "images"
   | "fields"
-  | "relationships";
+  | "relationships"
+  | "custom";
 
 export type ScanFilters = {
   types?: string[];

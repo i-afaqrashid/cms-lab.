@@ -121,6 +121,14 @@ const explanations: DiagnosticExplanation[] = [
       "A relationship rule expected a document to have one or more matching related records, but cms-lab found fewer than the configured minimum.",
     fix: "Check the related CMS collection, the join fields in checks.relationships, and whether the related content should be published or active.",
   },
+  {
+    code: "CUSTOM-RULE",
+    severity: "error",
+    title: "Custom rule failed",
+    meaning:
+      "A project-specific rule declared in checks.custom did not hold for a document. This is the default code for declarative custom rules; functional rules may emit their own codes.",
+    fix: "Fix the CMS content so it satisfies the rule, or adjust the rule in checks.custom (path, assert, filter, or severity).",
+  },
 ];
 
 export function explainDiagnostic(

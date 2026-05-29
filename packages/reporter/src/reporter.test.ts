@@ -382,6 +382,36 @@ test("renderHtmlReport filter script hides non-matching diagnostics", () => {
   ]);
 });
 
+test("renderHtmlReport groups custom-rule diagnostics under a custom group", () => {
+  const result: ScanResult = {
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      { id: "doc-1", type: "menu_item", status: "published", data: {} },
+    ],
+    diagnostics: [
+      {
+        severity: "error",
+        code: "CUSTOM-RULE",
+        message: "Menu item price must be greater than 0",
+        path: "data.price",
+        source: "directus:menu_item#doc-1",
+      },
+    ],
+    summary: { errors: 1, warnings: 0, info: 0 },
+  };
+
+  const html = renderHtmlReport(result);
+
+  expect(html).toContain('data-diagnostic data-group="custom"');
+  expect(html).toContain("CUSTOM-RULE");
+  expect(html).toContain("Menu item price must be greater than 0");
+});
+
 function extractSingleScriptContent(html: string): string | undefined {
   const openingTag = "<script>";
   const closingTag = "</script>";

@@ -646,6 +646,7 @@ function groupDiagnostics(diagnostics: Diagnostic[]): DiagnosticGroup[] {
     "relationships",
     "seo",
     "a11y",
+    "custom",
     "other",
   ];
   const groups = new Map<string, Diagnostic[]>();
@@ -682,6 +683,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
 
   if (diagnostic.code.startsWith("A11Y-")) {
     return "a11y";
+  }
+
+  if (diagnostic.code.startsWith("CUSTOM")) {
+    return "custom";
   }
 
   return "other";

@@ -104,6 +104,11 @@ export default function DiagnosticsPage() {
             A CMS image field is missing useful alt text in the provider native
             alt field.
           </DiagnosticCode>
+          <DiagnosticCode code="CUSTOM-RULE" severity="mixed" group="custom">
+            A project-specific rule declared in <code>checks.custom</code> did
+            not hold. Default code for declarative rules; functional rules may
+            emit their own codes. Severity follows that rule.
+          </DiagnosticCode>
         </tbody>
       </table>
 

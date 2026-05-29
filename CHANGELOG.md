@@ -4,6 +4,30 @@ All notable cms-lab changes are recorded here. GitHub Releases should use the
 same summaries, and npm package READMEs link back to this file so the public
 history stays consistent across GitHub and npm.
 
+## Unreleased
+
+### Added
+
+- Added `checks.custom` for project-specific validation. Declarative rules
+  apply an assertion (`gt`/`gte`/`lt`/`lte`, `oneOf`, `matches`/`notMatches`,
+  `minLength`/`maxLength`, `present`, `futureDate`/`pastDate`,
+  `newerThan`/`olderThan`) to the value at a `path`, with an optional `filter`
+  to narrow by document fields. Functional rules receive each document and a
+  context with `readPath` plus `error`/`warning`/`info` helpers.
+- Added the default `CUSTOM-RULE` diagnostic code and a `custom` check group.
+  Custom diagnostics flow through terminal, JSON, Markdown, JUnit, Slack, and
+  HTML output and respect `--only custom` / `--skip custom`.
+
+### Documentation
+
+- Documented declarative and functional custom rules in the configuration docs
+  and added `CUSTOM-RULE` to the diagnostics reference.
+
+### Verification
+
+- Added core custom-rule, scan, config-schema, HTML reporter, and CLI exporter
+  tests covering user-defined diagnostics.
+
 ## 1.2.6 - 2026-05-26
 
 ### Added
