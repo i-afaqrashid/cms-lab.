@@ -2098,3 +2098,89 @@ test("canonical validation does not read response bodies when disabled", async (
   ).toEqual([]);
   expect(textReads).toBe(0);
 });
+
+async function scanForRelationship(
+  targets: Array<{ id: string; status: "published" | "draft" }>,
+) {
+  return scanDocuments({
+    config: {
+      ...baseConfig,
+      routes: [
+        {
+          type: "menu_item",
+          pattern: "/menu/:uid",
+          getPath: (doc: { uid?: string }) => `/menu/${doc.uid}`,
+        },
+      ],
+      checks: {
+        routes: false,
+        seo: false,
+        a11y: false,
+        images: false,
+        fields: false,
+        relationships: [
+          {
+            from: "menu_item",
+            to: "pricing",
+            where: { fromField: "id", toField: "menu_item_id" },
+            min: 1,
+          },
+        ],
+      },
+    } as never,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "item-1",
+        type: "menu_item",
+        uid: "burger",
+        status: "published",
+        data: { id: "item-1" },
+      },
+      ...targets.map((t) => ({
+        id: t.id,
+        type: "pricing" as const,
+        status: t.status,
+        routable: false,
+        data: { id: t.id, menu_item_id: "item-1" },
+      })),
+    ],
+    fetch: async () => new Response("ok"),
+  });
+}
+
+test("flags a published document linking only to unpublished related records", async () => {
+  const result = await scanForRelationship([
+    { id: "price-draft", status: "draft" },
+  ]);
+  const codes = result.diagnostics.map((d) => d.code);
+  expect(codes).toContain("CMS-RELATIONSHIP-UNPUBLISHED");
+  expect(codes).not.toContain("CMS-RELATIONSHIP-MISSING");
+  const diag = result.diagnostics.find(
+    (d) => d.code === "CMS-RELATIONSHIP-UNPUBLISHED",
+  );
+  expect(diag?.severity).toBe("warning");
+  expect(diag?.message).toContain("price-draft");
+});
+
+test("stays silent when at least one related record is published", async () => {
+  const result = await scanForRelationship([
+    { id: "price-draft", status: "draft" },
+    { id: "price-live", status: "published" },
+  ]);
+  expect(
+    result.diagnostics.filter((d) => d.code.startsWith("CMS-RELATIONSHIP")),
+  ).toEqual([]);
+});
+
+test("reports MISSING (not UNPUBLISHED) when there are no related records", async () => {
+  const result = await scanForRelationship([]);
+  const codes = result.diagnostics.map((d) => d.code);
+  expect(codes).toContain("CMS-RELATIONSHIP-MISSING");
+  expect(codes).not.toContain("CMS-RELATIONSHIP-UNPUBLISHED");
+});

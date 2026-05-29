@@ -101,6 +101,14 @@ export default function DiagnosticsPage() {
             than expected. Severity follows that relationship rule.
           </DiagnosticCode>
           <DiagnosticCode
+            code="CMS-RELATIONSHIP-UNPUBLISHED"
+            severity="warning"
+            group="relationships"
+          >
+            A published document&apos;s relationship is satisfied only by draft
+            records, so it links to nothing live at runtime.
+          </DiagnosticCode>
+          <DiagnosticCode
             code="SEO-META-MISSING"
             severity="warning"
             group="seo"

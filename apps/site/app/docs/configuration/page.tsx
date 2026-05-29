@@ -376,6 +376,13 @@ export default defineConfig({
         required fields or project checks until adapter-specific rules exist.
       </div>
       <div className="callout">
+        <strong>Unpublished targets</strong>
+        Relationship rules are status-aware: when a published document&apos;s
+        rule is satisfied only by draft records, cms-lab emits{" "}
+        <code>CMS-RELATIONSHIP-UNPUBLISHED</code>, since the live page links to
+        nothing live at runtime.
+      </div>
+      <div className="callout">
         <strong>Provider fields</strong>
         SEO and image checks understand the common native shapes from the
         bundled adapters, including Strapi <code>seo.metaTitle</code>, Directus{" "}

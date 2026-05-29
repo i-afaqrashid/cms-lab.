@@ -23,6 +23,9 @@ history stays consistent across GitHub and npm.
   and `routable`, JWT or API-key auth, and checks SEO and media alt text. Added
   `cms-lab init --cms payload`.
 
+- Added `CMS-RELATIONSHIP-UNPUBLISHED` (warning): a published document whose
+  relationship rule is satisfied only by draft records links to nothing live at
+  runtime. Relationship checks are now status-aware.
 - Added `CMS-ROUTE-DUPLICATE` (error): flags two or more published documents
   that resolve to the same route path. Drafts are ignored; the first document
   in scan order is treated as the winner.
