@@ -2342,3 +2342,63 @@ test("localization skips documents without a locale and respects --skip", async 
     skipped.diagnostics.filter((d) => d.code === "CMS-LOCALE-MISSING"),
   ).toEqual([]);
 });
+
+async function scanForImageDimensions(
+  images: unknown,
+  data: Record<string, unknown>,
+) {
+  return scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: { routes: false, seo: false, a11y: false, fields: false, images },
+    } as never,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      { id: "doc-1", type: "page", uid: "home", status: "published", data },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+}
+
+test("image-dimension check is opt-in via checks.images.dimensions", async () => {
+  const data = {
+    hero: { url: "https://x/a.jpg", alt: "Hero" },
+  };
+
+  const off = await scanForImageDimensions(true, data);
+  expect(
+    off.diagnostics.filter((d) => d.code === "CMS-IMG-DIMENSIONS"),
+  ).toEqual([]);
+
+  const on = await scanForImageDimensions({ dimensions: true }, data);
+  expect(on.diagnostics.map((d) => d.code)).toContain("CMS-IMG-DIMENSIONS");
+});
+
+test("image-dimension check accepts common provider dimension shapes", async () => {
+  const cases = [
+    { url: "https://x/a.jpg", alt: "a", width: 800, height: 600 },
+    {
+      url: "https://x/b.jpg",
+      alt: "b",
+      dimensions: { width: 800, height: 600 },
+    },
+  ];
+
+  for (const hero of cases) {
+    const result = await scanForImageDimensions({ dimensions: true }, { hero });
+    expect(
+      result.diagnostics.filter((d) => d.code === "CMS-IMG-DIMENSIONS"),
+    ).toEqual([]);
+  }
+
+  const zero = await scanForImageDimensions(
+    { dimensions: true },
+    { hero: { url: "https://x/c.jpg", alt: "c", width: 0, height: 0 } },
+  );
+  expect(zero.diagnostics.map((d) => d.code)).toContain("CMS-IMG-DIMENSIONS");
+});

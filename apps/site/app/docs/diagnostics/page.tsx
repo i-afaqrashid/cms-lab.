@@ -184,6 +184,14 @@ export default function DiagnosticsPage() {
             A CMS image field is missing useful alt text in the provider native
             alt field.
           </DiagnosticCode>
+          <DiagnosticCode
+            code="CMS-IMG-DIMENSIONS"
+            severity="warning"
+            group="images"
+          >
+            A CMS image field exposes no width/height, a common cause of layout
+            shift (CLS). Opt-in via <code>checks.images.dimensions</code>.
+          </DiagnosticCode>
           <DiagnosticCode code="CUSTOM-RULE" severity="mixed" group="custom">
             A project-specific rule declared in <code>checks.custom</code> did
             not hold. Default code for declarative rules; functional rules may

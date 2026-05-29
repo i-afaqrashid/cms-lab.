@@ -329,7 +329,13 @@ export type CmsLabConfig = {
                 twitter?: boolean;
               };
         };
-    images?: boolean;
+    /**
+     * Master toggle for image checks. `false` disables the image alt-text
+     * check. The object form opts into intrinsic-dimension validation
+     * (`dimensions: true`), which flags images with no width/height (a common
+     * cause of layout shift / CLS).
+     */
+    images?: boolean | { dimensions?: boolean };
     a11y?: boolean | { imgAlt?: boolean };
     fields?: boolean | { required?: RequiredFieldRule[] };
     relationships?: RelationshipRule[];

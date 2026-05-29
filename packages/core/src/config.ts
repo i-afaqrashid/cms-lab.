@@ -296,7 +296,12 @@ const checksSchema = z
           .strict(),
       ])
       .optional(),
-    images: z.boolean().optional(),
+    images: z
+      .union([
+        z.boolean(),
+        z.object({ dimensions: z.boolean().optional() }).strict(),
+      ])
+      .optional(),
     a11y: z
       .union([
         z.boolean(),

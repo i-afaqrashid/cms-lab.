@@ -101,6 +101,10 @@ export async function scanDocuments(
     diagnostics.push(...checkImageAltText(options.config, documents));
   }
 
+  if (shouldRunImageDimensionsCheck(options.config, options.filters)) {
+    diagnostics.push(...checkImageDimensions(options.config, documents));
+  }
+
   if (shouldRunCheck("fields", options.config, options.filters)) {
     diagnostics.push(...checkRequiredFields(options.config, documents));
   }
@@ -1031,6 +1035,33 @@ function checkImageAltText(
   return diagnostics;
 }
 
+function checkImageDimensions(
+  config: CmsLabConfig,
+  documents: CMSDocument[],
+): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+
+  for (const document of documents) {
+    const missingPaths = collectImagesMissingDimensions(
+      document.data,
+      config.cms.provider,
+    );
+
+    for (const path of missingPaths) {
+      diagnostics.push(
+        createDiagnostic({
+          severity: "warning",
+          code: "CMS-IMG-DIMENSIONS",
+          message: `Image field ${path} has no width/height, which can cause layout shift (CLS)`,
+          source: sourceFor(config, document),
+        }),
+      );
+    }
+  }
+
+  return diagnostics;
+}
+
 function checkRequiredFields(
   config: CmsLabConfig,
   documents: CMSDocument[],
@@ -1504,6 +1535,64 @@ function collectImagesMissingAlt(
 }
 
 /**
+ * Walk document data for image-like records (same detection as the alt check)
+ * and return the paths of any image that exposes no usable width/height.
+ * Missing intrinsic dimensions are a common cause of layout shift (CLS),
+ * since the app cannot reserve space for the image before it loads.
+ */
+function collectImagesMissingDimensions(
+  value: unknown,
+  provider: CmsLabConfig["cms"]["provider"],
+  path = "data",
+): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((item, index) =>
+      collectImagesMissingDimensions(item, provider, `${path}[${index}]`),
+    );
+  }
+
+  const record = asRecord(value);
+  if (!record) {
+    return [];
+  }
+
+  if (imageAltCandidate(provider, record).isImage) {
+    return hasImageDimensions(record) ? [] : [path];
+  }
+
+  return Object.entries(record).flatMap(([key, nested]) =>
+    collectImagesMissingDimensions(nested, provider, `${path}.${key}`),
+  );
+}
+
+function hasImageDimensions(record: Record<string, unknown>): boolean {
+  const pairs: Array<[unknown, unknown]> = [
+    [record.width, record.height],
+    [asRecord(record.dimensions)?.width, asRecord(record.dimensions)?.height],
+    [
+      asRecord(record.media_details)?.width,
+      asRecord(record.media_details)?.height,
+    ],
+    [
+      asRecord(asRecord(asRecord(record.file)?.details)?.image)?.width,
+      asRecord(asRecord(asRecord(record.file)?.details)?.image)?.height,
+    ],
+    [
+      asRecord(asRecord(asRecord(record.asset)?.metadata)?.dimensions)?.width,
+      asRecord(asRecord(asRecord(record.asset)?.metadata)?.dimensions)?.height,
+    ],
+  ];
+
+  return pairs.some(
+    ([width, height]) => isPositiveNumber(width) && isPositiveNumber(height),
+  );
+}
+
+function isPositiveNumber(value: unknown): boolean {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+/**
  * Walk a WordPress-rendered HTML string (e.g. `content.rendered`,
  * `excerpt.rendered`, ACF wysiwyg fields) for `<img>` tags and return
  * the data paths of any image whose `alt` is missing, blank, or a
@@ -1724,6 +1813,33 @@ function shouldRunImageAltTextCheck(
   }
 
   if (only.length > 0 && !only.includes("a11y") && !only.includes("images")) {
+    return false;
+  }
+
+  return true;
+}
+
+function shouldRunImageDimensionsCheck(
+  config: CmsLabConfig,
+  filters?: ScanFilters,
+): boolean {
+  const images = config.checks?.images;
+  if (
+    typeof images !== "object" ||
+    images === null ||
+    images.dimensions !== true
+  ) {
+    return false;
+  }
+
+  const only = normalizeFilterList(filters?.only);
+  const skip = normalizeFilterList(filters?.skip);
+
+  if (skip.includes("images")) {
+    return false;
+  }
+
+  if (only.length > 0 && !only.includes("images")) {
     return false;
   }
 
