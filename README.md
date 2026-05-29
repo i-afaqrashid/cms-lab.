@@ -440,10 +440,23 @@ packages/directus   Directus adapter
 packages/wordpress  WordPress adapter
 packages/contentful Contentful adapter
 packages/sanity     Sanity adapter
+packages/payload    Payload adapter
 packages/reporter   local HTML report renderer
 apps/site           marketing site and docs
 test-fixtures/      public Prismic fixture
 ```
+
+## Community
+
+- [Discussions](https://github.com/i-afaqrashid/cms-lab/discussions) for
+  questions, ideas for new checks, and show-and-tell.
+- [Roadmap](https://cmslab.afaqrashid.com/roadmap) for what is shipped, planned,
+  and under research.
+- [Issues](https://github.com/i-afaqrashid/cms-lab/issues) for bugs and concrete
+  feature requests.
+
+Contributing or reviewing? See [CONTRIBUTING.md](./CONTRIBUTING.md) and
+[.github/CODEOWNERS](./.github/CODEOWNERS) for ownership and review paths.
 
 ## Launch And Maintenance
 

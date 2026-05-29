@@ -57,6 +57,14 @@ function SiteHeader() {
         <nav className="topnav" aria-label="Primary">
           <Link href="/docs">Docs</Link>
           <Link href="/docs/scan">Scan</Link>
+          <Link href="/roadmap">Roadmap</Link>
+          <a
+            href="https://github.com/i-afaqrashid/cms-lab/discussions"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Discussions
+          </a>
         </nav>
         <div className="topRight">
           <a
@@ -85,6 +93,14 @@ function SiteFooter() {
         <span className="footerLinks">
           <Link href="/docs">Docs</Link>
           <Link href="/docs/scan">Scan</Link>
+          <Link href="/roadmap">Roadmap</Link>
+          <a
+            href="https://github.com/i-afaqrashid/cms-lab/discussions"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Discussions
+          </a>
           <a href="https://www.npmjs.com/package/@cms-lab/cli">npm</a>
         </span>
       </div>

@@ -29,6 +29,9 @@ history stays consistent across GitHub and npm.
   and added `CUSTOM-RULE` to the diagnostics reference.
 - Added a Payload provider page, README config block, and tested-with matrix
   entry.
+- Replaced the `/roadmap` redirect with a real static roadmap page (Now / Next /
+  Later) and surfaced Roadmap and Discussions in the site nav, footer, docs
+  landing, and README.
 - Made the `/new` example page usable without JavaScript: dropped the
   meta-refresh shim, kept a JS redirect to StackBlitz, and added a copyable
   command, an accurate Open Graph target, and runnable example links.

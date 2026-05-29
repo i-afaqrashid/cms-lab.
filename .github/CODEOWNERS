@@ -1,0 +1,28 @@
+# Code owners for cms-lab. GitHub auto-requests these reviewers on PRs.
+# See https://docs.github.com/articles/about-code-owners
+
+# Default owner
+*                      @i-afaqrashid
+
+# Core
+packages/core/         @i-afaqrashid
+packages/cli/          @i-afaqrashid
+packages/reporter/     @i-afaqrashid
+packages/next/         @i-afaqrashid
+
+# Adapters
+packages/prismic/      @i-afaqrashid
+packages/strapi/       @i-afaqrashid
+packages/directus/     @i-afaqrashid
+packages/wordpress/    @i-afaqrashid
+packages/contentful/   @i-afaqrashid
+packages/sanity/       @i-afaqrashid
+packages/payload/      @i-afaqrashid
+
+# Site and docs
+apps/site/             @i-afaqrashid
+
+# CI, release, and automation
+.github/               @i-afaqrashid
+action.yml             @i-afaqrashid
+scripts/               @i-afaqrashid
