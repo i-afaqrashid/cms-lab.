@@ -644,6 +644,7 @@ function groupDiagnostics(diagnostics: Diagnostic[]): DiagnosticGroup[] {
     "routes",
     "fields",
     "relationships",
+    "localization",
     "seo",
     "a11y",
     "custom",
@@ -675,6 +676,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
 
   if (diagnostic.code.startsWith("CMS-RELATIONSHIP")) {
     return "relationships";
+  }
+
+  if (diagnostic.code.startsWith("CMS-LOCALE")) {
+    return "localization";
   }
 
   if (diagnostic.code.startsWith("SEO-")) {
