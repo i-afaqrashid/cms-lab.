@@ -2,9 +2,19 @@
 
 Catch CMS bugs before deploy.
 
-`cms-lab` is a CLI for checking headless CMS content against the routes and fields your Next.js app expects. It runs locally, reads your config, fetches CMS entries, probes your site, and writes terminal, JSON, Markdown, JUnit, Slack, and HTML report output.
+[![npm](https://img.shields.io/npm/v/@cms-lab/cli)](https://www.npmjs.com/package/@cms-lab/cli)
+[![CI](https://github.com/i-afaqrashid/cms-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/i-afaqrashid/cms-lab/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-There is no hosted cms-lab service. The CLI runs inside your project and talks directly to the CMS endpoints you configure.
+`cms-lab` catches the bugs that show up when your headless CMS and your Next.js routes drift apart - broken routes, duplicate slugs, links to unpublished content, missing SEO/OG/canonical/JSON-LD, image alt and dimensions, and locale gaps - and fails CI before they reach production. Works with Prismic, Strapi, Directus, WordPress, Contentful, Sanity, and Payload.
+
+Run it with no install:
+
+```sh
+npx @cms-lab/cli scan
+```
+
+It reads your config, fetches CMS entries, probes your running site, and writes terminal, JSON, Markdown, JUnit, Slack, and HTML report output. There is no hosted cms-lab service. The CLI runs inside your project and talks directly to the CMS endpoints you configure.
 
 ![cms-lab HTML report showing route errors, field warnings, SEO warnings, and image alt text warnings from the broken Prismic demo](./assets/launch/report-screenshot.png)
 
