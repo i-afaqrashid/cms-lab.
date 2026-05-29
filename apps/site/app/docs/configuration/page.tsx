@@ -316,6 +316,9 @@ export default defineConfig({
   seo: {
     metaTitle: true,
     metaDescription: true,
+    // Open Graph / X (Twitter) cards are opt-in. "true" checks og:image.
+    og: true,
+    // Or enable more: { image: true, title: true, description: true, twitter: true }
   },
   a11y: {
     imgAlt: true,
@@ -331,6 +334,14 @@ export default defineConfig({
         <strong>Path format</strong>
         Required field paths are read from <code>document.data</code>. Use
         dotted paths for nested objects, for example <code>author.name</code>.
+      </div>
+      <div className="callout">
+        <strong>Social cards are opt-in</strong>
+        <code>checks.seo.og</code> validates Open Graph and X (Twitter) card
+        fields at the CMS level. It is off by default because many Next.js apps
+        generate social cards at runtime with <code>generateMetadata</code> or{" "}
+        <code>next/og</code> rather than storing them in the CMS. Enable it only
+        when editors author those fields.
       </div>
       <h2 id="relationships">Relationships</h2>
       <p>

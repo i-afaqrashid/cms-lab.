@@ -277,6 +277,19 @@ const checksSchema = z
           .object({
             metaTitle: z.boolean().optional(),
             metaDescription: z.boolean().optional(),
+            og: z
+              .union([
+                z.boolean(),
+                z
+                  .object({
+                    image: z.boolean().optional(),
+                    title: z.boolean().optional(),
+                    description: z.boolean().optional(),
+                    twitter: z.boolean().optional(),
+                  })
+                  .strict(),
+              ])
+              .optional(),
           })
           .strict(),
       ])

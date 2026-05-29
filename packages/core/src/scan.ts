@@ -587,9 +587,207 @@ function checkSeoFields(
         }),
       );
     }
+
+    diagnostics.push(...checkOgFields(config, document, data));
   }
 
   return diagnostics;
+}
+
+type OgOptions = {
+  image: boolean;
+  title: boolean;
+  description: boolean;
+  twitter: boolean;
+};
+
+function resolveOgOptions(config: CmsLabConfig): OgOptions | undefined {
+  const seo = config.checks?.seo;
+  if (typeof seo !== "object" || seo === null) {
+    return undefined;
+  }
+
+  const og = seo.og;
+  if (og === undefined || og === false) {
+    return undefined;
+  }
+
+  if (og === true) {
+    return { image: true, title: false, description: false, twitter: false };
+  }
+
+  return {
+    image: og.image !== false,
+    title: og.title === true,
+    description: og.description === true,
+    twitter: og.twitter === true,
+  };
+}
+
+function checkOgFields(
+  config: CmsLabConfig,
+  document: CMSDocument,
+  data: Record<string, unknown>,
+): Diagnostic[] {
+  const options = resolveOgOptions(config);
+  if (!options) {
+    return [];
+  }
+
+  const provider = config.cms.provider;
+  const diagnostics: Diagnostic[] = [];
+
+  if (options.image && !hasImageReference(data, ogImagePaths(provider))) {
+    diagnostics.push(
+      createDiagnostic({
+        severity: "warning",
+        code: "SEO-OG-IMAGE-MISSING",
+        message: `Document ${document.id} is missing an Open Graph image (og:image)`,
+        source: sourceFor(config, document),
+      }),
+    );
+  }
+
+  const missingText: string[] = [];
+  if (options.title && isBlankSeoText(data, ogFieldPaths("title"))) {
+    missingText.push("og:title");
+  }
+  if (
+    options.description &&
+    isBlankSeoText(data, ogFieldPaths("description"))
+  ) {
+    missingText.push("og:description");
+  }
+  if (missingText.length > 0) {
+    diagnostics.push(
+      createDiagnostic({
+        severity: "warning",
+        code: "SEO-OG-MISSING",
+        message: `Document ${document.id} is missing ${missingText.join(", ")}`,
+        source: sourceFor(config, document),
+      }),
+    );
+  }
+
+  if (options.twitter && !hasImageReference(data, twitterImagePaths())) {
+    diagnostics.push(
+      createDiagnostic({
+        severity: "info",
+        code: "SEO-TWITTER-MISSING",
+        message: `Document ${document.id} is missing an X (Twitter) card image (twitter:image)`,
+        source: sourceFor(config, document),
+      }),
+    );
+  }
+
+  return diagnostics;
+}
+
+function isBlankSeoText(
+  data: Record<string, unknown>,
+  paths: string[],
+): boolean {
+  return !paths.some((path) => !isBlank(readCmsDataPath(data, path)));
+}
+
+/**
+ * An image reference counts as present when a field path holds a non-empty
+ * string URL, or an object/array that looks like a CMS asset reference
+ * (url, src, asset, _ref, filename, source_url). This avoids false positives
+ * for providers that store images as objects rather than plain URLs.
+ */
+function hasImageReference(
+  data: Record<string, unknown>,
+  paths: string[],
+): boolean {
+  return paths.some((path) => isUsableImageRef(readCmsDataPath(data, path)));
+}
+
+function isUsableImageRef(value: unknown): boolean {
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((item) => isUsableImageRef(item));
+  }
+
+  const record = asRecord(value);
+  if (!record) {
+    return false;
+  }
+
+  if (
+    ["url", "src", "source_url", "filename", "_ref", "_id"].some(
+      (key) => typeof record[key] === "string" && record[key].trim().length > 0,
+    )
+  ) {
+    return true;
+  }
+
+  const asset = asRecord(record.asset);
+  return Boolean(asset && (asset._ref || asset._id || asset.url));
+}
+
+function ogImagePaths(provider: CmsLabConfig["cms"]["provider"]): string[] {
+  const common = [
+    "og_image",
+    "ogImage",
+    "og.image",
+    "openGraph.image",
+    "openGraphImage",
+    "seo.ogImage",
+    "seo.og_image",
+    "seo.openGraphImage",
+    "seo.image",
+    "seo.shareImage",
+    "seo.metaImage",
+    "meta.image",
+    "meta.ogImage",
+    "social.image",
+    "shareImage",
+    "share_image",
+  ];
+
+  if (provider === "wordpress") {
+    return [...common, "yoast_head_json.og_image", "rank_math_facebook_image"];
+  }
+
+  return common;
+}
+
+function twitterImagePaths(): string[] {
+  return [
+    "twitter_image",
+    "twitterImage",
+    "twitter.image",
+    "seo.twitterImage",
+    "seo.twitter_image",
+    "meta.twitterImage",
+    "yoast_head_json.twitter_image",
+  ];
+}
+
+function ogFieldPaths(kind: "title" | "description"): string[] {
+  if (kind === "title") {
+    return [
+      "og_title",
+      "ogTitle",
+      "og.title",
+      "openGraph.title",
+      "seo.ogTitle",
+      "meta.ogTitle",
+    ];
+  }
+
+  return [
+    "og_description",
+    "ogDescription",
+    "og.description",
+    "openGraph.description",
+    "seo.ogDescription",
+    "meta.ogDescription",
+  ];
 }
 
 function checkImageAltText(

@@ -106,6 +106,30 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Fill the missing CMS fields or disable the SEO check if this content type intentionally does not use metadata.",
   },
   {
+    code: "SEO-OG-IMAGE-MISSING",
+    severity: "warning",
+    title: "Open Graph image is missing",
+    meaning:
+      "Open Graph validation is enabled (checks.seo.og) and a document has no og:image in the known CMS field paths. Shares of this page on social and chat apps fall back to a blank or generic preview.",
+    fix: "Add an OG image field in the CMS, or disable checks.seo.og if your app generates social cards at runtime (generateMetadata / next/og).",
+  },
+  {
+    code: "SEO-OG-MISSING",
+    severity: "warning",
+    title: "Open Graph title or description is missing",
+    meaning:
+      "Open Graph title/description validation is enabled and a document is missing og:title or og:description in the known CMS field paths.",
+    fix: "Fill the Open Graph fields in the CMS, or narrow checks.seo.og so only the fields you author are required.",
+  },
+  {
+    code: "SEO-TWITTER-MISSING",
+    severity: "info",
+    title: "X (Twitter) card image is missing",
+    meaning:
+      "X (Twitter) card validation is enabled and a document has no twitter:image in the known CMS field paths. X falls back to the Open Graph image when one exists, so this is informational.",
+    fix: "Add an X (Twitter) card image field, or rely on the Open Graph image as the shared fallback.",
+  },
+  {
     code: "A11Y-IMG-ALT",
     severity: "warning",
     title: "Image alt text is missing",
