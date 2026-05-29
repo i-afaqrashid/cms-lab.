@@ -264,6 +264,9 @@ cms-lab init
 cms-lab init --cms strapi --router pages
 cms-lab init --cms directus --router pages
 cms-lab init --cms payload
+cms-lab init --cms wordpress
+cms-lab init --cms contentful --space-id my-space
+cms-lab init --cms sanity --project-id my-project
 cms-lab doctor
 cms-lab scan
 cms-lab agent-context
