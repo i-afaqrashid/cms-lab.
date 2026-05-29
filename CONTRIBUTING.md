@@ -155,6 +155,11 @@ HTML report changes should:
 - Work with zero diagnostics and large diagnostic sets.
 - Avoid fake future features such as hosted dashboards or unavailable buttons.
 
+After changing the reporter, run `pnpm report:fixture` and commit the updated
+`assets/launch/report-fixture.html`. CI re-renders it and fails on an
+unexpected diff, so the committed snapshot stays in sync with the reporter and
+the README screenshot does not silently rot.
+
 ## Docs And Copy
 
 Docs should be accurate to what the CLI ships today. Do not add fake stars, fake adapter maturity, unreleased flags, or claims like "no external services" when the CLI is talking to a user's CMS. Use "no cms-lab hosted service" when describing the architecture.

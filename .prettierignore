@@ -10,3 +10,4 @@ customtypes
 prismicio-types.d.ts
 slices
 scripts/github-action.sh
+assets/launch/report-fixture.html

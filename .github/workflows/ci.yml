@@ -124,6 +124,11 @@ jobs:
       - name: Build packages
         run: pnpm build
 
+      - name: Check report fixture is current
+        run: |
+          pnpm report:fixture
+          git diff --exit-code assets/launch/report-fixture.html
+
       - name: Build site
         run: pnpm site:build
 

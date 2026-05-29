@@ -34,7 +34,8 @@
     "release:publish-tarballs": "node scripts/publish-packages.mjs",
     "prepublishOnly": "pnpm verify",
     "live:doctor": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js doctor",
-    "live:scan": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js scan --ci --report --only routes,fields"
+    "live:scan": "cd test-fixtures/live-prismic-next && node ../../packages/cli/dist/bin.js scan --ci --report --only routes,fields",
+    "report:fixture": "node scripts/render-report-fixture.mjs"
   },
   "engines": {
     "node": ">=20.10"
