@@ -82,6 +82,14 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Make the getPath function tolerate optional fields and return a clear absolute path for every routable document.",
   },
   {
+    code: "CMS-ROUTE-DUPLICATE",
+    severity: "error",
+    title: "Two documents resolve to the same route",
+    meaning:
+      "More than one published CMS document maps to the same site path. Only one wins at runtime, so the others are unreachable content debt. Editors can update the wrong one and lose changes. Draft documents are ignored.",
+    fix: "Give each document a unique slug or route, unpublish the duplicate, or change the route mapping so locale or content type keeps the paths distinct.",
+  },
+  {
     code: "CMS-ROUTE-SOFT-404",
     severity: "warning",
     title: "CMS route returned a soft-404 body",

@@ -1848,3 +1848,73 @@ test("scanDocuments flags Payload media missing alt and SEO meta", async () => {
     result.diagnostics.filter((d) => d.code === "SEO-META-MISSING"),
   ).toEqual([]);
 });
+
+test("scanDocuments flags two published documents that resolve to the same route", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: { seo: false, a11y: false, images: false, fields: false },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "winner",
+        type: "page",
+        uid: "about",
+        status: "published",
+        data: {},
+      },
+      {
+        id: "loser",
+        type: "page",
+        uid: "about",
+        status: "published",
+        data: {},
+      },
+      // Draft sharing the same slug must NOT be flagged.
+      { id: "draft", type: "page", uid: "about", status: "draft", data: {} },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  const dupes = result.diagnostics.filter(
+    (d) => d.code === "CMS-ROUTE-DUPLICATE",
+  );
+  expect(dupes).toHaveLength(1);
+  expect(dupes[0]).toMatchObject({
+    severity: "error",
+    code: "CMS-ROUTE-DUPLICATE",
+    path: "/about",
+    source: "prismic:page#loser",
+  });
+  expect(dupes[0].message).toContain("winner");
+});
+
+test("scanDocuments does not flag duplicates across distinct paths", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: { seo: false, a11y: false, images: false, fields: false },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      { id: "a", type: "page", uid: "about", status: "published", data: {} },
+      { id: "b", type: "page", uid: "contact", status: "published", data: {} },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(
+    result.diagnostics.filter((d) => d.code === "CMS-ROUTE-DUPLICATE"),
+  ).toEqual([]);
+});
