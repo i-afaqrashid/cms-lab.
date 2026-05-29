@@ -44,8 +44,10 @@ describe("public runnable examples", () => {
     expect(docsExamples).toContain("href={example.url}");
     expect(docsExamples).toContain("Run in StackBlitz");
     expect(newPage).toContain("stackBlitzStarterUrl");
-    expect(newPage).toContain('httpEquiv="refresh"');
     expect(newPage).toContain("window.location.replace");
+    // No-JS fallback: the page stays usable without the redirect.
+    expect(newPage).toContain("npx @cms-lab/cli scan");
+    expect(newPage).toContain("exampleProjects.map");
 
     for (const example of exampleProjects) {
       const directory = example.path;
