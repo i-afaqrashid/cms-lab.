@@ -178,6 +178,14 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Check the related CMS collection, the join fields in checks.relationships, and whether the related content should be published or active.",
   },
   {
+    code: "CMS-RELATIONSHIP-UNPUBLISHED",
+    severity: "warning",
+    title: "Published document links only to unpublished content",
+    meaning:
+      "A relationship rule is satisfied by count, but every matched related document is a draft. The source page is published, so at runtime it links to content that is not live.",
+    fix: "Publish the related document, point the relationship at a published record, or unpublish the source until the related content is live.",
+  },
+  {
     code: "CUSTOM-RULE",
     severity: "error",
     title: "Custom rule failed",

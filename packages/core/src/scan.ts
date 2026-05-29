@@ -1008,26 +1008,45 @@ function checkRelationships(
 
     for (const document of documentsByType.get(rule.from) ?? []) {
       const fromValues = relationshipValues(document, rule.where.fromField);
-      const matchCount = targets.filter((target) =>
+      const matched = targets.filter((target) =>
         hasRelationshipMatch(
           fromValues,
           relationshipValues(target, rule.where.toField),
         ),
-      ).length;
+      );
 
-      if (matchCount >= min) {
+      if (matched.length < min) {
+        diagnostics.push(
+          createDiagnostic({
+            severity: rule.severity ?? "warning",
+            code: "CMS-RELATIONSHIP-MISSING",
+            message: `Document ${document.id} of type ${document.type} has ${matched.length} ${rule.to} records matching ${rule.where.fromField} -> ${rule.where.toField}; expected at least ${min}`,
+            path: `relationships.${rule.from}.${rule.to}`,
+            source: sourceFor(config, document),
+          }),
+        );
         continue;
       }
 
-      diagnostics.push(
-        createDiagnostic({
-          severity: rule.severity ?? "warning",
-          code: "CMS-RELATIONSHIP-MISSING",
-          message: `Document ${document.id} of type ${document.type} has ${matchCount} ${rule.to} records matching ${rule.where.fromField} -> ${rule.where.toField}; expected at least ${min}`,
-          path: `relationships.${rule.from}.${rule.to}`,
-          source: sourceFor(config, document),
-        }),
-      );
+      // Status-aware: a published document whose relationship is satisfied
+      // only by draft targets links to nothing live. The count rule passes,
+      // but at runtime the related content is unpublished.
+      if (
+        document.status === "published" &&
+        matched.length > 0 &&
+        matched.every((target) => target.status === "draft")
+      ) {
+        const example = matched[0];
+        diagnostics.push(
+          createDiagnostic({
+            severity: rule.severity ?? "warning",
+            code: "CMS-RELATIONSHIP-UNPUBLISHED",
+            message: `Published document ${document.id} of type ${document.type} links only to unpublished ${rule.to} records (e.g. ${example.id}) via ${rule.where.fromField} -> ${rule.where.toField}`,
+            path: `relationships.${rule.from}.${rule.to}`,
+            source: sourceFor(config, document),
+          }),
+        );
+      }
     }
   }
 
