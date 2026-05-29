@@ -35,6 +35,29 @@ const now: Item[] = [
     href: `${ISSUES}/67`,
   },
   {
+    title: "Duplicate route detection",
+    detail:
+      "CMS-ROUTE-DUPLICATE flags two published documents that resolve to the same path; only one wins at runtime.",
+  },
+  {
+    title: "Canonical, OG, and JSON-LD checks",
+    detail:
+      "Opt-in route-level SEO: canonical link validation, Open Graph / X (Twitter) card fields, and JSON-LD structured data.",
+    href: `${ISSUES}/76`,
+  },
+  {
+    title: "Localization completeness",
+    detail:
+      "checks.localization flags content groups missing a published translation in a configured locale.",
+    href: `${ISSUES}/73`,
+  },
+  {
+    title: "Status-aware relationships",
+    detail:
+      "CMS-RELATIONSHIP-UNPUBLISHED flags a published document whose relationships resolve only to drafts.",
+    href: `${ISSUES}/71`,
+  },
+  {
     title: "Soft-404 detection",
     detail:
       "Flags 2xx responses whose body looks like a not-found page via checks.routes.soft404.",
@@ -50,22 +73,19 @@ const now: Item[] = [
 
 const next: Item[] = [
   {
-    title: "Status-aware scanning rules per adapter",
+    title: "Parallel CMS document fetch",
     detail:
-      "Let adapters express draft/published and active/archived semantics so checks reflect real publish state.",
-    href: `${ISSUES}/71`,
+      "Fetch collections concurrently with a bounded pool to speed up scans of large multi-collection catalogs.",
   },
   {
-    title: "Localization completeness checks",
+    title: "Streaming scan for large catalogs",
     detail:
-      "Detect locale parity gaps, such as a document published in one locale but missing in another.",
-    href: `${ISSUES}/73`,
+      "Yield diagnostics as they are produced instead of buffering the full document set in memory.",
   },
   {
-    title: "OG and social image validation",
+    title: "Watch mode for local development",
     detail:
-      "Validate Open Graph and Twitter card images alongside the existing SEO metadata checks.",
-    href: `${ISSUES}/76`,
+      "cms-lab watch re-runs the scan as content and config change during local dev.",
   },
 ];
 
