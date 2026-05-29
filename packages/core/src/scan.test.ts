@@ -2184,3 +2184,52 @@ test("reports MISSING (not UNPUBLISHED) when there are no related records", asyn
   expect(codes).toContain("CMS-RELATIONSHIP-MISSING");
   expect(codes).not.toContain("CMS-RELATIONSHIP-UNPUBLISHED");
 });
+
+async function scanForStructuredData(body: string) {
+  return scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: {
+        routes: { structuredData: true },
+        seo: false,
+        a11y: false,
+        images: false,
+        fields: false,
+      },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      { id: "doc-1", type: "page", uid: "home", status: "published", data: {} },
+    ],
+    fetch: async () => new Response(body, { status: 200 }),
+  });
+}
+
+test("structured-data validation flags malformed JSON-LD", async () => {
+  const result = await scanForStructuredData(
+    '<script type="application/ld+json">{ "@type": "Article", }</script>',
+  );
+  const codes = result.diagnostics.map((d) => d.code);
+  expect(codes).toContain("SEO-JSONLD-INVALID");
+  expect(codes).not.toContain("SEO-JSONLD-MISSING");
+});
+
+test("structured-data validation passes valid JSON-LD", async () => {
+  const result = await scanForStructuredData(
+    '<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article"}</script>',
+  );
+  expect(
+    result.diagnostics.filter((d) => d.code.startsWith("SEO-JSONLD")),
+  ).toEqual([]);
+});
+
+test("structured-data validation reports routes with no JSON-LD as info", async () => {
+  const result = await scanForStructuredData("<html><head></head></html>");
+  const diag = result.diagnostics.find((d) => d.code === "SEO-JSONLD-MISSING");
+  expect(diag?.severity).toBe("info");
+});

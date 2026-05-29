@@ -130,6 +130,22 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Point the canonical at the route's own path, or confirm the redirect target is intentional.",
   },
   {
+    code: "SEO-JSONLD-INVALID",
+    severity: "warning",
+    title: "JSON-LD structured data is malformed",
+    meaning:
+      "Structured-data validation is enabled (checks.routes.structuredData) and a route has an application/ld+json block that is not valid JSON. Search engines skip malformed structured data, so rich results break silently.",
+    fix: "Fix the JSON-LD output (often an unescaped value or template interpolation bug) so the block parses as valid JSON.",
+  },
+  {
+    code: "SEO-JSONLD-MISSING",
+    severity: "info",
+    title: "No JSON-LD structured data",
+    meaning:
+      "Structured-data validation is enabled and a route renders no application/ld+json block. This is informational: many pages do not need structured data.",
+    fix: "Add JSON-LD (for example Article, Product, or BreadcrumbList) if this page should produce rich results, or ignore this code for routes that do not need it.",
+  },
+  {
     code: "SEO-OG-IMAGE-MISSING",
     severity: "warning",
     title: "Open Graph image is missing",
