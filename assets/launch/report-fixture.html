@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cms-lab report</title>
+  <link rel="icon" href="data:image/svg+xml,%0A%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23111110%22%2F%3E%0A%20%20%3Cg%20transform%3D%22translate(16%2016)%20scale(1.3333333)%22%20stroke%3D%22%23c8ea3a%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M3%207V5a2%202%200%200%201%202-2h2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M17%203h2a2%202%200%200%201%202%202v2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M21%2017v2a2%202%200%200%201-2%202h-2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M7%2021H5a2%202%200%200%201-2-2v-2%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22m16%2016-1.9-1.9%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+  <link rel="shortcut icon" href="data:image/svg+xml,%0A%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23111110%22%2F%3E%0A%20%20%3Cg%20transform%3D%22translate(16%2016)%20scale(1.3333333)%22%20stroke%3D%22%23c8ea3a%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M3%207V5a2%202%200%200%201%202-2h2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M17%203h2a2%202%200%200%201%202%202v2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M21%2017v2a2%202%200%200%201-2%202h-2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M7%2021H5a2%202%200%200%201-2-2v-2%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22m16%2016-1.9-1.9%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%0A%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23111110%22%2F%3E%0A%20%20%3Cg%20transform%3D%22translate(16%2016)%20scale(1.3333333)%22%20stroke%3D%22%23c8ea3a%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M3%207V5a2%202%200%200%201%202-2h2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M17%203h2a2%202%200%200%201%202%202v2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M21%2017v2a2%202%200%200%201-2%202h-2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M7%2021H5a2%202%200%200%201-2-2v-2%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22m16%2016-1.9-1.9%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E">
+  <style>
+    :root {
+      --bg: #f6f5ef;
+      --surface: #ffffff;
+      --surface-2: #fbfaf4;
+      --ink: #111110;
+      --ink-2: #2a2a26;
+      --muted: #6b6b63;
+      --border: #e4e1d6;
+      --border-strong: #cfccc0;
+      --accent: #c8ea3a;
+      --error: #c0382a;
+      --error-bg: #fbe7e3;
+      --warning: #9a6a14;
+      --warning-bg: #f9ecc9;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      --maxw: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1, h2, h3 { font-weight: 600; letter-spacing: -0.012em; color: var(--ink); }
+    code { font-family: var(--mono); font-size: 0.9em; }
+    .page { min-height: 100vh; display: flex; flex-direction: column; }
+    .page main { flex: 1; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; }
+    .topbar {
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: saturate(140%) blur(6px);
+    }
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 56px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 600;
+      flex: 0 0 auto;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: block;
+      object-fit: cover;
+      flex: 0 0 auto;
+      box-shadow: 0 0 0 1px var(--border-strong);
+    }
+    .brand-name {
+      font-family: var(--mono);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .brand-version {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+    }
+    .top-right {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .meta-line {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .report-shell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .report-head {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .report-title-block {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .report-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: block;
+      object-fit: cover;
+      box-shadow: 0 0 0 1px var(--border-strong), 0 14px 24px -20px rgba(0,0,0,0.35);
+    }
+    .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .report-head h1 {
+      font-size: 22px;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    .subtitle {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+    .badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+    }
+    .report-meta {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat {
+      background: var(--surface);
+      padding: 16px;
+    }
+    .stat .k {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .stat .v {
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--ink);
+      margin-top: 4px;
+    }
+    .stat .sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .stat.err .v { color: var(--error); }
+    .report-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      flex-wrap: wrap;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-2);
+      cursor: pointer;
+    }
+    button.chip { appearance: none; }
+    .chip:focus-visible {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+    .chip .n { color: var(--muted); }
+    .chip.active { background: var(--ink); color: #f6f5ef; border-color: var(--ink); }
+    .chip.active .n { color: #b8b7ad; }
+    .repeated {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .repeated h2 {
+      font-size: 13px;
+      margin-bottom: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0;
+    }
+    .repeated-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .repeated-list li {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+      font-size: 13px;
+    }
+    .repeated-main { min-width: 0; }
+    .repeated-title {
+      font-family: var(--mono);
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+    .repeated-examples {
+      color: var(--muted);
+      margin-top: 2px;
+      overflow-wrap: anywhere;
+    }
+    .repeated-count {
+      font-family: var(--mono);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .group-header {
+      padding: 10px 20px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .group-header .count { color: var(--ink-2); }
+    .diagnostic-group.is-hidden,
+    .diag.is-hidden {
+      display: none;
+    }
+    .diag {
+      display: grid;
+      grid-template-columns: 32px 110px minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+      font-size: 14px;
+    }
+    .diag > * { min-width: 0; }
+    .diag:last-child { border-bottom: 0; }
+    .diag .col-num {
+      width: 18px;
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+    .diag .sev {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 2px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .diag .sev .marker {
+      width: 9px;
+      height: 9px;
+      display: inline-block;
+    }
+    .diag.error .sev { color: var(--error); }
+    .diag.error .sev .marker { background: var(--error); }
+    .diag.warning .sev { color: var(--warning); }
+    .diag.warning .sev .marker { background: var(--warning); }
+    .diag.info .sev { color: var(--muted); }
+    .diag.info .sev .marker { background: var(--muted); }
+    .diag .msg {
+      color: var(--ink);
+      min-width: 0;
+    }
+    .diag .msg strong { font-weight: 600; }
+    .diag .ctx {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      margin-top: 5px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 0;
+    }
+    .diag .ctx span {
+      display: inline;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .diag-code {
+      display: inline-flex;
+      white-space: nowrap;
+      color: var(--ink-2);
+    }
+    .path-code {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--ink-2);
+      overflow-wrap: anywhere;
+    }
+    .empty-state {
+      padding: 24px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .report-foot {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface-2);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .footer {
+      padding: 36px 0 56px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .muted { color: var(--muted); }
+    @media (max-width: 820px) {
+      .report-meta { grid-template-columns: 1fr 1fr; }
+      .diag { grid-template-columns: 92px 1fr; }
+      .diag .col-num { display: none; }
+    }
+    @media (max-width: 560px) {
+      .wrap { padding: 0 16px; }
+      .topbar-inner { gap: 10px; }
+      .brand { gap: 7px; }
+      .brand-mark { width: 30px; height: 30px; }
+      .brand-name { font-size: 13px; }
+      .brand-version { display: none; }
+      .report-head { padding: 20px; }
+      .report-title-block {
+        grid-template-columns: 48px 1fr;
+        gap: 12px;
+      }
+      .report-logo {
+        width: 48px;
+        height: 48px;
+      }
+      .report-meta .stat { padding: 14px 16px; }
+      .report-toolbar { padding: 12px 16px; }
+      .diag {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        padding: 14px 16px;
+      }
+      .diag .sev { padding: 0; }
+    }
+  </style>
+</head>
+<body class="page">
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <span class="brand" aria-label="cms-lab">
+        <img class="brand-mark" src="data:image/svg+xml,%0A%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23111110%22%2F%3E%0A%20%20%3Cg%20transform%3D%22translate(16%2016)%20scale(1.3333333)%22%20stroke%3D%22%23c8ea3a%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M3%207V5a2%202%200%200%201%202-2h2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M17%203h2a2%202%200%200%201%202%202v2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M21%2017v2a2%202%200%200%201-2%202h-2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M7%2021H5a2%202%200%200%201-2-2v-2%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22m16%2016-1.9-1.9%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E" width="34" height="34" alt="" aria-hidden="true">
+        <span class="brand-name">cms-lab</span>
+        <span class="brand-version">report</span>
+      </span>
+      <div class="top-right">.cms-lab/report.html</div>
+    </div>
+  </header>
+  <main>
+    <div class="wrap" style="padding-top:32px; padding-bottom:64px;">
+      <div class="meta-line">cms-lab report · generated 1970-01-01T00:00:00.000Z</div>
+
+      <div class="report-shell">
+        <div class="report-head">
+          <div class="report-title-block">
+            <img class="report-logo" src="data:image/svg+xml,%0A%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%20fill%3D%22none%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23111110%22%2F%3E%0A%20%20%3Cg%20transform%3D%22translate(16%2016)%20scale(1.3333333)%22%20stroke%3D%22%23c8ea3a%22%20stroke-width%3D%221.9%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%20%20%20%20%3Cpath%20d%3D%22M3%207V5a2%202%200%200%201%202-2h2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M17%203h2a2%202%200%200%201%202%202v2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M21%2017v2a2%202%200%200%201-2%202h-2%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22M7%2021H5a2%202%200%200%201-2-2v-2%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%223%22%2F%3E%0A%20%20%20%20%3Cpath%20d%3D%22m16%2016-1.9-1.9%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E" width="56" height="56" alt="cms-lab logo">
+            <div>
+              <div class="title-row">
+                <h1>Scan failed</h1>
+                <span class="badge fail">2 errors</span>
+                <span class="badge warn">2 warnings</span>
+                <span class="badge info">1 info item</span>
+                
+              </div>
+              <div class="subtitle">
+                Next.js App Router · 3 documents
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-meta">
+          <div class="stat err"><div class="k">Errors</div><div class="v">2</div></div>
+          <div class="stat warn"><div class="k">Warnings</div><div class="v">2</div></div>
+          <div class="stat info"><div class="k">Info</div><div class="v">1</div></div>
+          <div class="stat"><div class="k">Documents</div><div class="v">3</div></div>
+          
+        </div>
+
+        <section class="repeated" aria-label="Repeated findings">
+  <h2>Repeated findings</h2>
+  <ul class="repeated-list">
+    <li>
+      <div class="repeated-main">
+        <div class="repeated-title">page · CMS-ROUTE-404</div>
+        <div class="repeated-examples">/about, /blog/launch</div>
+      </div>
+      <div class="repeated-count">x2</div>
+    </li>
+  </ul>
+</section>
+
+        <div class="report-toolbar" aria-label="Diagnostic filters">
+          <button class="chip active" type="button" data-filter-kind="all" data-filter-value="all">All <span class="n">5</span></button>
+          <button class="chip" type="button" data-filter-kind="severity" data-filter-value="error">Errors <span class="n">2</span></button>
+          <button class="chip" type="button" data-filter-kind="severity" data-filter-value="warning">Warnings <span class="n">2</span></button>
+          <button class="chip" type="button" data-filter-kind="severity" data-filter-value="info">Info <span class="n">1</span></button>
+          <button class="chip" type="button" data-filter-kind="group" data-filter-value="routes">routes <span class="n">3</span></button><button class="chip" type="button" data-filter-kind="group" data-filter-value="seo">seo <span class="n">1</span></button><button class="chip" type="button" data-filter-kind="group" data-filter-value="a11y">a11y <span class="n">1</span></button>
+        </div>
+
+        <section class="diagnostic-group" data-diagnostic-group="routes">
+  <div class="group-header">
+    <span>routes</span> · <span class="count" data-visible-count>3 diagnostics</span>
+  </div>
+  <div class="diag error" data-diagnostic data-group="routes" data-severity="error">
+    <div class="col-num">1</div>
+    <div class="sev"><span class="marker"></span>error</div>
+    <div class="msg">
+      <strong>/about</strong> Route /about returned 404
+      <span class="ctx"><span class="diag-code">CMS-ROUTE-404</span> <span aria-hidden="true">·</span> <span>prismic:page#about</span></span>
+    </div>
+  </div><div class="diag error" data-diagnostic data-group="routes" data-severity="error">
+    <div class="col-num">2</div>
+    <div class="sev"><span class="marker"></span>error</div>
+    <div class="msg">
+      <strong>/blog/launch</strong> Route /blog/launch returned 404
+      <span class="ctx"><span class="diag-code">CMS-ROUTE-404</span> <span aria-hidden="true">·</span> <span>prismic:post#launch</span></span>
+    </div>
+  </div><div class="diag info" data-diagnostic data-group="routes" data-severity="info">
+    <div class="col-num">3</div>
+    <div class="sev"><span class="marker"></span>info</div>
+    <div class="msg">
+      Document settings of type settings has no configured route mapping
+      <span class="ctx"><span class="diag-code">CMS-ROUTE-UNMAPPED</span> <span aria-hidden="true">·</span> <span>prismic:settings#settings</span></span>
+    </div>
+  </div>
+  </section><section class="diagnostic-group" data-diagnostic-group="seo">
+  <div class="group-header">
+    <span>seo</span> · <span class="count" data-visible-count>1 diagnostic</span>
+  </div>
+  <div class="diag warning" data-diagnostic data-group="seo" data-severity="warning">
+    <div class="col-num">1</div>
+    <div class="sev"><span class="marker"></span>warning</div>
+    <div class="msg">
+      Document home is missing meta_title, meta_description
+      <span class="ctx"><span class="diag-code">SEO-META-MISSING</span> <span aria-hidden="true">·</span> <span>prismic:page#home</span></span>
+    </div>
+  </div>
+  </section><section class="diagnostic-group" data-diagnostic-group="a11y">
+  <div class="group-header">
+    <span>a11y</span> · <span class="count" data-visible-count>1 diagnostic</span>
+  </div>
+  <div class="diag warning" data-diagnostic data-group="a11y" data-severity="warning">
+    <div class="col-num">1</div>
+    <div class="sev"><span class="marker"></span>warning</div>
+    <div class="msg">
+      Image field data.hero is missing useful alt text
+      <span class="ctx"><span class="diag-code">A11Y-IMG-ALT</span> <span aria-hidden="true">·</span> <span>prismic:page#home</span></span>
+    </div>
+  </div>
+  </section>
+
+        <div class="report-foot">
+          <span>project: <span class="path-code">next app</span></span>
+          <span>documents: 3</span>
+          <span>diagnostics: 5</span>
+          <span>generated: 1970-01-01T00:00:00.000Z</span>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="wrap">Generated by cms-lab</div>
+  </footer>
+  <script>
+    (() => {
+      const chips = [...document.querySelectorAll("[data-filter-kind]")];
+      const groups = [...document.querySelectorAll("[data-diagnostic-group]")];
+
+      function applyFilter(kind, value) {
+        chips.forEach((chip) => {
+          chip.classList.toggle("active", chip.dataset.filterKind === kind && chip.dataset.filterValue === value);
+        });
+
+        groups.forEach((group) => {
+          let visibleCount = 0;
+          group.querySelectorAll("[data-diagnostic]").forEach((diagnostic) => {
+            const visible =
+              kind === "all" ||
+              (kind === "severity" && diagnostic.dataset.severity === value) ||
+              (kind === "group" && diagnostic.dataset.group === value);
+
+            diagnostic.classList.toggle("is-hidden", !visible);
+            if (visible) {
+              visibleCount += 1;
+            }
+          });
+
+          group.classList.toggle("is-hidden", visibleCount === 0);
+          const count = group.querySelector("[data-visible-count]");
+          if (count) {
+            count.textContent = visibleCount + " " + (visibleCount === 1 ? "diagnostic" : "diagnostics");
+          }
+        });
+      }
+
+      chips.forEach((chip) => {
+        chip.addEventListener("click", () => {
+          applyFilter(chip.dataset.filterKind || "all", chip.dataset.filterValue || "all");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
