@@ -351,12 +351,18 @@ async function checkRouteReachability(
     }
 
     // Body-level checks on 2xx responses. Only run (and only read the body)
-    // when explicitly enabled, since both require the response body:
+    // when explicitly enabled, since each requires the response body:
     //   - soft-404 detection via checks.routes.soft404
     //   - canonical validation via checks.routes.canonical
+    //   - structured-data validation via checks.routes.structuredData
     const soft404 = soft404Options(config);
     const canonicalEnabled = canonicalCheckEnabled(config);
-    if ((soft404 || canonicalEnabled) && status >= 200 && status < 300) {
+    const structuredDataEnabled = structuredDataCheckEnabled(config);
+    if (
+      (soft404 || canonicalEnabled || structuredDataEnabled) &&
+      status >= 200 &&
+      status < 300
+    ) {
       try {
         const body = await response.text();
 
@@ -375,6 +381,12 @@ async function checkRouteReachability(
         if (canonicalEnabled) {
           diagnostics.push(
             ...checkCanonical(config, candidate, diagnosticPath, url, body),
+          );
+        }
+
+        if (structuredDataEnabled) {
+          diagnostics.push(
+            ...checkStructuredData(config, candidate, diagnosticPath, body),
           );
         }
       } catch {
@@ -533,6 +545,84 @@ function extractCanonicalHref(body: string): string | undefined {
 
 function normalizeCanonicalPath(pathname: string): string {
   return (pathname.replace(/\/+$/, "") || "/").toLowerCase();
+}
+
+function structuredDataCheckEnabled(config: CmsLabConfig): boolean {
+  const routes = config.checks?.routes;
+  return (
+    typeof routes === "object" &&
+    routes !== null &&
+    routes.structuredData === true
+  );
+}
+
+/**
+ * Validate JSON-LD structured data on a 2xx route. Every
+ * `<script type="application/ld+json">` block must contain valid JSON; a
+ * malformed block (a common template-interpolation bug) breaks rich results
+ * silently. A route with no JSON-LD at all is reported as info.
+ */
+function checkStructuredData(
+  config: CmsLabConfig,
+  candidate: RouteCandidate,
+  diagnosticPath: string,
+  body: string,
+): Diagnostic[] {
+  const blocks = extractJsonLdBlocks(body);
+  const source = sourceFor(config, candidate.document);
+
+  if (blocks.length === 0) {
+    return [
+      createDiagnostic({
+        severity: "info",
+        code: "SEO-JSONLD-MISSING",
+        message: `Route ${diagnosticPath} has no JSON-LD structured data`,
+        path: diagnosticPath,
+        source,
+      }),
+    ];
+  }
+
+  const invalid = blocks.filter((block) => !isParseableJson(block));
+  if (invalid.length > 0) {
+    return [
+      createDiagnostic({
+        severity: "warning",
+        code: "SEO-JSONLD-INVALID",
+        message: `Route ${diagnosticPath} has ${invalid.length} malformed JSON-LD block(s)`,
+        path: diagnosticPath,
+        source,
+      }),
+    ];
+  }
+
+  return [];
+}
+
+function extractJsonLdBlocks(body: string): string[] {
+  const pattern =
+    /<script\b[^>]*\btype\s*=\s*("application\/ld\+json"|'application\/ld\+json')[^>]*>([\s\S]*?)<\/script>/gi;
+  const blocks: string[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(body)) !== null) {
+    blocks.push((match[2] ?? "").trim());
+  }
+
+  return blocks;
+}
+
+function isParseableJson(value: string): boolean {
+  if (value.length === 0) {
+    return false;
+  }
+
+  try {
+    JSON.parse(value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function resolveSiteHealthUrl(site: CmsLabConfig["site"]): URL {

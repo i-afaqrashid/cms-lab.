@@ -29,6 +29,10 @@ history stays consistent across GitHub and npm.
 - Added `CMS-ROUTE-DUPLICATE` (error): flags two or more published documents
   that resolve to the same route path. Drafts are ignored; the first document
   in scan order is treated as the winner.
+- Added opt-in JSON-LD structured-data validation via
+  `checks.routes.structuredData`. On 2xx routes it parses
+  `application/ld+json` blocks and flags malformed JSON (`SEO-JSONLD-INVALID`,
+  warning) or a route with no structured data (`SEO-JSONLD-MISSING`, info).
 - Added opt-in canonical validation via `checks.routes.canonical`. On 2xx
   routes it parses `<link rel="canonical">` and flags a missing canonical
   (`SEO-CANONICAL-MISSING`, warning), a canonical on a different origin

@@ -352,6 +352,14 @@ export default defineConfig({
         disagrees with the route is a warning. It is off by default because it
         requires reading response bodies.
       </div>
+      <div className="callout">
+        <strong>Structured data is opt-in</strong>
+        <code>{`checks: { routes: { structuredData: true } }`}</code> parses
+        each 2xx route&apos;s <code>application/ld+json</code> blocks: a
+        malformed block is a warning (<code>SEO-JSONLD-INVALID</code>) and a
+        route with no structured data is info (<code>SEO-JSONLD-MISSING</code>).
+        Off by default because it reads response bodies.
+      </div>
       <h2 id="relationships">Relationships</h2>
       <p>
         Relationship checks compare one field on a source document with one

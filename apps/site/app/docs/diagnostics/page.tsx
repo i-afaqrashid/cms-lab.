@@ -141,6 +141,18 @@ export default function DiagnosticsPage() {
             and case.
           </DiagnosticCode>
           <DiagnosticCode
+            code="SEO-JSONLD-INVALID"
+            severity="warning"
+            group="seo"
+          >
+            A route has a malformed <code>application/ld+json</code> block.
+            Opt-in via <code>checks.routes.structuredData</code>.
+          </DiagnosticCode>
+          <DiagnosticCode code="SEO-JSONLD-MISSING" severity="info" group="seo">
+            A route renders no JSON-LD structured data. Informational; enabled
+            via <code>checks.routes.structuredData</code>.
+          </DiagnosticCode>
+          <DiagnosticCode
             code="SEO-OG-IMAGE-MISSING"
             severity="warning"
             group="seo"

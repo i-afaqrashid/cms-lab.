@@ -267,6 +267,7 @@ const checksSchema = z
               .strict()
               .optional(),
             canonical: z.boolean().optional(),
+            structuredData: z.boolean().optional(),
           })
           .strict(),
       ])

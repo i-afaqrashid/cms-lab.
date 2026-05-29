@@ -65,6 +65,12 @@ export type RouteChecksOptions = {
    * hostname), and a canonical whose path disagrees with the probed path.
    */
   canonical?: boolean;
+  /**
+   * Validate JSON-LD structured data on each 2xx route. Opt-in, since it
+   * requires reading the response body. Flags malformed `application/ld+json`
+   * blocks and reports routes with no structured data.
+   */
+  structuredData?: boolean;
 };
 
 export type RelationshipRule = {
