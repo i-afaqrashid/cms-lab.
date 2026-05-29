@@ -1,5 +1,6 @@
 import {
   CmsFetchError,
+  mapWithConcurrency,
   readCmsDataPath,
   type CMSDocument,
   type FetchLike,
@@ -7,6 +8,8 @@ import {
   type StrapiCollectionConfig,
   type StrapiSingleTypeConfig,
 } from "@cms-lab/core";
+
+const COLLECTION_CONCURRENCY = 6;
 
 type StrapiResponse = {
   data?: unknown[];
@@ -31,61 +34,73 @@ export async function fetchStrapiDocuments(
   options: FetchStrapiDocumentsOptions = {},
 ): Promise<CMSDocument[]> {
   const fetchImpl = options.fetch ?? fetch;
-  const documents: CMSDocument[] = [];
 
-  for (const collection of config.collections ?? []) {
-    let page = 1;
+  const collectionDocuments = await mapWithConcurrency(
+    config.collections ?? [],
+    COLLECTION_CONCURRENCY,
+    async (collection) => {
+      const documents: CMSDocument[] = [];
+      let page = 1;
 
-    while (true) {
-      const url = strapiEndpointUrl(config.url, collection.endpoint);
-      url.searchParams.set("pagination[pageSize]", "100");
-      url.searchParams.set("pagination[page]", String(page));
+      while (true) {
+        const url = strapiEndpointUrl(config.url, collection.endpoint);
+        url.searchParams.set("pagination[pageSize]", "100");
+        url.searchParams.set("pagination[page]", String(page));
+        url.searchParams.set("populate", "*");
+        applyLocale(url, collection.locale ?? config.locale);
+
+        const response = await fetchJson<StrapiResponse>(
+          fetchImpl,
+          url,
+          authHeaders(config.token),
+        );
+        documents.push(
+          ...(response.data ?? []).map((item) =>
+            normalizeStrapiItem(collection, item, { entryKind: "collection" }),
+          ),
+        );
+        const pageCount = response.meta?.pagination?.pageCount ?? page;
+
+        if (page >= pageCount) {
+          break;
+        }
+
+        page += 1;
+      }
+
+      return documents;
+    },
+  );
+
+  const singleTypeDocuments = await mapWithConcurrency(
+    config.singleTypes ?? [],
+    COLLECTION_CONCURRENCY,
+    async (singleType) => {
+      const url = strapiEndpointUrl(config.url, singleType.endpoint);
       url.searchParams.set("populate", "*");
-      applyLocale(url, collection.locale ?? config.locale);
+      applyLocale(url, singleType.locale ?? config.locale);
 
-      const response = await fetchJson<StrapiResponse>(
+      const response = await fetchJson<StrapiSingleTypeResponse>(
         fetchImpl,
         url,
         authHeaders(config.token),
       );
-      documents.push(
-        ...(response.data ?? []).map((item) =>
-          normalizeStrapiItem(collection, item, { entryKind: "collection" }),
-        ),
-      );
-      const pageCount = response.meta?.pagination?.pageCount ?? page;
 
-      if (page >= pageCount) {
-        break;
+      if (response.data != null) {
+        return [
+          normalizeStrapiItem(singleType, response.data, {
+            fallbackUid: false,
+            routable: false,
+            entryKind: "single",
+          }),
+        ];
       }
 
-      page += 1;
-    }
-  }
+      return [];
+    },
+  );
 
-  for (const singleType of config.singleTypes ?? []) {
-    const url = strapiEndpointUrl(config.url, singleType.endpoint);
-    url.searchParams.set("populate", "*");
-    applyLocale(url, singleType.locale ?? config.locale);
-
-    const response = await fetchJson<StrapiSingleTypeResponse>(
-      fetchImpl,
-      url,
-      authHeaders(config.token),
-    );
-
-    if (response.data != null) {
-      documents.push(
-        normalizeStrapiItem(singleType, response.data, {
-          fallbackUid: false,
-          routable: false,
-          entryKind: "single",
-        }),
-      );
-    }
-  }
-
-  return documents;
+  return [...collectionDocuments.flat(), ...singleTypeDocuments.flat()];
 }
 
 export function normalizeStrapiItem(

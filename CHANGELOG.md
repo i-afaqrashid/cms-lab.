@@ -8,9 +8,10 @@ history stays consistent across GitHub and npm.
 
 ### Changed
 
-- The Directus and Payload adapters now fetch their collections concurrently
-  with a bounded pool (`mapWithConcurrency`, exported from `@cms-lab/core`),
-  speeding up scans of multi-collection catalogs. Document order is preserved.
+- All CMS adapters (Prismic aside, which has a single endpoint) now fetch their
+  collections, content types, and single types concurrently with a bounded pool
+  (`mapWithConcurrency`, exported from `@cms-lab/core`), speeding up scans of
+  multi-collection catalogs. Document order is preserved.
 
 ### Added
 

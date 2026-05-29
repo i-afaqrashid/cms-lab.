@@ -1,11 +1,14 @@
 import {
   CmsFetchError,
+  mapWithConcurrency,
   readCmsDataPath,
   type CMSDocument,
   type FetchLike,
   type SanityCmsProviderConfig,
   type SanityContentTypeConfig,
 } from "@cms-lab/core";
+
+const COLLECTION_CONCURRENCY = 6;
 
 type SanityResponse = {
   result?: unknown;
@@ -22,24 +25,29 @@ export async function fetchSanityDocuments(
   options: FetchSanityDocumentsOptions = {},
 ): Promise<CMSDocument[]> {
   const fetchImpl = options.fetch ?? fetch;
-  const documents: CMSDocument[] = [];
 
-  for (const contentType of config.contentTypes) {
-    const url = sanityQueryUrl(config);
-    url.searchParams.set("query", "*[_type == $type]");
-    url.searchParams.set("$type", JSON.stringify(contentType.documentType));
-    url.searchParams.set("perspective", config.perspective ?? "published");
+  const perContentType = await mapWithConcurrency(
+    config.contentTypes,
+    COLLECTION_CONCURRENCY,
+    async (contentType) => {
+      const url = sanityQueryUrl(config);
+      url.searchParams.set("query", "*[_type == $type]");
+      url.searchParams.set("$type", JSON.stringify(contentType.documentType));
+      url.searchParams.set("perspective", config.perspective ?? "published");
 
-    const response = await fetchJson<SanityResponse>(
-      fetchImpl,
-      url,
-      authHeaders(config.token),
-    );
-    const rows = Array.isArray(response.result) ? response.result : [];
-    documents.push(
-      ...rows.map((document) => normalizeSanityDocument(contentType, document)),
-    );
-  }
+      const response = await fetchJson<SanityResponse>(
+        fetchImpl,
+        url,
+        authHeaders(config.token),
+      );
+      const rows = Array.isArray(response.result) ? response.result : [];
+      return rows.map((document) =>
+        normalizeSanityDocument(contentType, document),
+      );
+    },
+  );
+
+  const documents = perContentType.flat();
 
   await hydrateImageAssetMetadata(config, fetchImpl, documents);
 

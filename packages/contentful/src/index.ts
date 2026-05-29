@@ -1,11 +1,14 @@
 import {
   CmsFetchError,
+  mapWithConcurrency,
   readCmsDataPath,
   type CMSDocument,
   type ContentfulCmsProviderConfig,
   type ContentfulContentTypeConfig,
   type FetchLike,
 } from "@cms-lab/core";
+
+const COLLECTION_CONCURRENCY = 6;
 
 type ContentfulResponse = {
   items?: unknown[];
@@ -37,40 +40,46 @@ export async function fetchContentfulDocuments(
   options: FetchContentfulDocumentsOptions = {},
 ): Promise<CMSDocument[]> {
   const fetchImpl = options.fetch ?? fetch;
-  const documents: CMSDocument[] = [];
 
-  for (const contentType of config.contentTypes) {
-    let skip = 0;
+  const perContentType = await mapWithConcurrency(
+    config.contentTypes,
+    COLLECTION_CONCURRENCY,
+    async (contentType) => {
+      const documents: CMSDocument[] = [];
+      let skip = 0;
 
-    while (true) {
-      const url = new URL(
-        `/spaces/${encodeURIComponent(config.spaceId)}/environments/${encodeURIComponent(config.environment ?? defaultEnvironment)}/entries`,
-        config.apiUrl ?? defaultApiUrl,
-      );
-      url.searchParams.set("content_type", contentType.contentType);
-      url.searchParams.set("limit", String(pageSize));
-      url.searchParams.set("skip", String(skip));
+      while (true) {
+        const url = new URL(
+          `/spaces/${encodeURIComponent(config.spaceId)}/environments/${encodeURIComponent(config.environment ?? defaultEnvironment)}/entries`,
+          config.apiUrl ?? defaultApiUrl,
+        );
+        url.searchParams.set("content_type", contentType.contentType);
+        url.searchParams.set("limit", String(pageSize));
+        url.searchParams.set("skip", String(skip));
 
-      const response = await fetchJson<ContentfulResponse>(
-        fetchImpl,
-        url,
-        authHeaders(config.accessToken),
-      );
-      const rows = response.items ?? [];
-      documents.push(
-        ...rows.map((entry) => normalizeContentfulEntry(contentType, entry)),
-      );
+        const response = await fetchJson<ContentfulResponse>(
+          fetchImpl,
+          url,
+          authHeaders(config.accessToken),
+        );
+        const rows = response.items ?? [];
+        documents.push(
+          ...rows.map((entry) => normalizeContentfulEntry(contentType, entry)),
+        );
 
-      skip += rows.length;
-      const total = response.total ?? skip;
+        skip += rows.length;
+        const total = response.total ?? skip;
 
-      if (rows.length === 0 || skip >= total) {
-        break;
+        if (rows.length === 0 || skip >= total) {
+          break;
+        }
       }
-    }
-  }
 
-  return documents;
+      return documents;
+    },
+  );
+
+  return perContentType.flat();
 }
 
 export function normalizeContentfulEntry(

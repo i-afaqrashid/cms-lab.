@@ -1,11 +1,14 @@
 import {
   CmsFetchError,
+  mapWithConcurrency,
   readCmsDataPath,
   type CMSDocument,
   type FetchLike,
   type WordPressCmsProviderConfig,
   type WordPressContentTypeConfig,
 } from "@cms-lab/core";
+
+const COLLECTION_CONCURRENCY = 6;
 
 type WordPressItem = Record<string, unknown>;
 
@@ -23,34 +26,40 @@ export async function fetchWordPressDocuments(
   options: FetchWordPressDocumentsOptions = {},
 ): Promise<CMSDocument[]> {
   const fetchImpl = options.fetch ?? fetch;
-  const documents: CMSDocument[] = [];
 
-  for (const contentType of config.contentTypes ?? defaultContentTypes) {
-    let page = 1;
+  const perContentType = await mapWithConcurrency(
+    config.contentTypes ?? defaultContentTypes,
+    COLLECTION_CONCURRENCY,
+    async (contentType) => {
+      const documents: CMSDocument[] = [];
+      let page = 1;
 
-    while (true) {
-      const url = new URL(
-        `/wp-json/wp/v2/${trimSlashes(contentType.endpoint)}`,
-        config.url,
-      );
-      url.searchParams.set("per_page", "100");
-      url.searchParams.set("page", String(page));
+      while (true) {
+        const url = new URL(
+          `/wp-json/wp/v2/${trimSlashes(contentType.endpoint)}`,
+          config.url,
+        );
+        url.searchParams.set("per_page", "100");
+        url.searchParams.set("page", String(page));
 
-      const { rows, pages } = await fetchRows(fetchImpl, url);
-      documents.push(
-        ...rows.map((row) => normalizeWordPressItem(contentType, row)),
-      );
-      const totalPages = pages;
+        const { rows, pages } = await fetchRows(fetchImpl, url);
+        documents.push(
+          ...rows.map((row) => normalizeWordPressItem(contentType, row)),
+        );
+        const totalPages = pages;
 
-      if (page >= totalPages) {
-        break;
+        if (page >= totalPages) {
+          break;
+        }
+
+        page += 1;
       }
 
-      page += 1;
-    }
-  }
+      return documents;
+    },
+  );
 
-  return documents;
+  return perContentType.flat();
 }
 
 async function fetchRows(
