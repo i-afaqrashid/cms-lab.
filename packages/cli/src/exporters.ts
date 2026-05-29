@@ -146,6 +146,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
     return "a11y";
   }
 
+  if (diagnostic.code.startsWith("CMS-IMG")) {
+    return "images";
+  }
+
   if (diagnostic.code.startsWith("CUSTOM")) {
     return "custom";
   }

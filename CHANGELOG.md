@@ -15,6 +15,10 @@ history stays consistent across GitHub and npm.
 
 ### Added
 
+- Added opt-in image-dimension validation via `checks.images.dimensions`. Flags
+  CMS image fields with no usable width/height (`CMS-IMG-DIMENSIONS`, warning),
+  a common cause of layout shift (CLS). Reuses the existing image detection and
+  understands the common provider dimension shapes.
 - Added `checks.custom` for project-specific validation. Declarative rules
   apply an assertion (`gt`/`gte`/`lt`/`lte`, `oneOf`, `matches`/`notMatches`,
   `minLength`/`maxLength`, `present`, `futureDate`/`pastDate`,

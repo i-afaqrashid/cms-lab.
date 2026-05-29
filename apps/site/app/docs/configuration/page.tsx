@@ -324,6 +324,8 @@ export default defineConfig({
   a11y: {
     imgAlt: true,
   },
+  // Opt into intrinsic-dimension (CLS) checks on CMS images.
+  images: { dimensions: true },
   fields: {
     required: [
       { type: "page", path: "title" },

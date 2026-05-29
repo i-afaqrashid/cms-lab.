@@ -647,6 +647,7 @@ function groupDiagnostics(diagnostics: Diagnostic[]): DiagnosticGroup[] {
     "localization",
     "seo",
     "a11y",
+    "images",
     "custom",
     "other",
   ];
@@ -688,6 +689,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
 
   if (diagnostic.code.startsWith("A11Y-")) {
     return "a11y";
+  }
+
+  if (diagnostic.code.startsWith("CMS-IMG")) {
+    return "images";
   }
 
   if (diagnostic.code.startsWith("CUSTOM")) {

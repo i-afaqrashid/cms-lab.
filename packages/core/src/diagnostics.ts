@@ -170,6 +170,14 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Add an X (Twitter) card image field, or rely on the Open Graph image as the shared fallback.",
   },
   {
+    code: "CMS-IMG-DIMENSIONS",
+    severity: "warning",
+    title: "Image has no intrinsic dimensions",
+    meaning:
+      "Image-dimension validation is enabled (checks.images.dimensions) and a CMS image field exposes no usable width/height. Without intrinsic dimensions the app cannot reserve space before the image loads, which causes layout shift (CLS).",
+    fix: "Store width/height on the image in the CMS (most adapters expose them), or disable checks.images.dimensions for providers that keep dimensions out of band.",
+  },
+  {
     code: "A11Y-IMG-ALT",
     severity: "warning",
     title: "Image alt text is missing",
