@@ -226,6 +226,18 @@ export default function DocsPage() {
           <Link href="/docs/large-catalogs">Scan larger catalogs safely</Link>
         </li>
       </ul>
+
+      <p>
+        Have a question or an idea for a check or adapter? Open a{" "}
+        <a
+          href="https://github.com/i-afaqrashid/cms-lab/discussions"
+          rel="noreferrer"
+          target="_blank"
+        >
+          discussion
+        </a>
+        , or see what is planned on the <Link href="/roadmap">roadmap</Link>.
+      </p>
     </DocsShell>
   );
 }
