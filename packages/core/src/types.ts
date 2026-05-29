@@ -276,7 +276,27 @@ export type CmsLabConfig = {
   routes: RouteDefinition[];
   checks?: {
     routes?: boolean | RouteChecksOptions;
-    seo?: boolean | { metaTitle?: boolean; metaDescription?: boolean };
+    seo?:
+      | boolean
+      | {
+          metaTitle?: boolean;
+          metaDescription?: boolean;
+          /**
+           * Open Graph / Twitter card validation at the CMS field level.
+           * Opt-in, because many Next.js apps generate social cards at
+           * runtime (generateMetadata / next/og) rather than storing them
+           * in the CMS. `true` checks og:image; the object form enables
+           * og:title/description and the Twitter image too.
+           */
+          og?:
+            | boolean
+            | {
+                image?: boolean;
+                title?: boolean;
+                description?: boolean;
+                twitter?: boolean;
+              };
+        };
     images?: boolean;
     a11y?: boolean | { imgAlt?: boolean };
     fields?: boolean | { required?: RequiredFieldRule[] };

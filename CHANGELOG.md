@@ -26,6 +26,12 @@ history stays consistent across GitHub and npm.
 - Added `CMS-ROUTE-DUPLICATE` (error): flags two or more published documents
   that resolve to the same route path. Drafts are ignored; the first document
   in scan order is treated as the winner.
+- Added opt-in Open Graph / X (Twitter) card validation via `checks.seo.og`.
+  `true` checks `og:image` (`SEO-OG-IMAGE-MISSING`); the object form also
+  enables `og:title`/`og:description` (`SEO-OG-MISSING`) and the X (Twitter)
+  card image (`SEO-TWITTER-MISSING`, info). Image fields accept string URLs and
+  CMS asset objects. Off by default to avoid false positives on apps that
+  generate social cards at runtime.
 
 ### Documentation
 

@@ -108,6 +108,26 @@ export default function DiagnosticsPage() {
             SEO title or description is blank across the provider-specific field
             shapes cms-lab understands.
           </DiagnosticCode>
+          <DiagnosticCode
+            code="SEO-OG-IMAGE-MISSING"
+            severity="warning"
+            group="seo"
+          >
+            Open Graph image is missing. Opt-in via <code>checks.seo.og</code>.
+          </DiagnosticCode>
+          <DiagnosticCode code="SEO-OG-MISSING" severity="warning" group="seo">
+            Open Graph title or description is missing. Enabled via the{" "}
+            <code>checks.seo.og</code> object form.
+          </DiagnosticCode>
+          <DiagnosticCode
+            code="SEO-TWITTER-MISSING"
+            severity="info"
+            group="seo"
+          >
+            X (Twitter) card image is missing. Enabled via the{" "}
+            <code>checks.seo.og</code> object form; X falls back to the Open
+            Graph image.
+          </DiagnosticCode>
           <DiagnosticCode code="A11Y-IMG-ALT" severity="warning" group="a11y">
             A CMS image field is missing useful alt text in the provider native
             alt field.

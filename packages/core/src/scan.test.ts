@@ -1918,3 +1918,73 @@ test("scanDocuments does not flag duplicates across distinct paths", async () =>
     result.diagnostics.filter((d) => d.code === "CMS-ROUTE-DUPLICATE"),
   ).toEqual([]);
 });
+
+async function scanForOg(seo: unknown, data: Record<string, unknown>) {
+  return scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: { routes: false, a11y: false, images: false, fields: false, seo },
+    } as never,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      { id: "doc-1", type: "page", uid: "home", status: "published", data },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+}
+
+test("og checks are off by default and opt in via checks.seo.og", async () => {
+  const off = await scanForOg(true, { meta_title: "T", meta_description: "D" });
+  expect(off.diagnostics.filter((d) => d.code.startsWith("SEO-OG"))).toEqual(
+    [],
+  );
+
+  const on = await scanForOg(
+    { og: true },
+    { meta_title: "T", meta_description: "D" },
+  );
+  expect(on.diagnostics.map((d) => d.code)).toContain("SEO-OG-IMAGE-MISSING");
+});
+
+test("og:image accepts string URLs and CMS asset objects", async () => {
+  const stringImage = await scanForOg(
+    { og: true },
+    { meta_title: "T", meta_description: "D", og_image: "https://x/og.png" },
+  );
+  expect(
+    stringImage.diagnostics.filter((d) => d.code === "SEO-OG-IMAGE-MISSING"),
+  ).toEqual([]);
+
+  const assetImage = await scanForOg(
+    { og: true },
+    {
+      meta_title: "T",
+      meta_description: "D",
+      seo: { ogImage: { asset: { _ref: "image-abc" } } },
+    },
+  );
+  expect(
+    assetImage.diagnostics.filter((d) => d.code === "SEO-OG-IMAGE-MISSING"),
+  ).toEqual([]);
+});
+
+test("og object form enables title, description, and X (Twitter) image", async () => {
+  const result = await scanForOg(
+    { og: { image: false, title: true, description: true, twitter: true } },
+    { meta_title: "T", meta_description: "D" },
+  );
+
+  const codes = result.diagnostics.map((d) => d.code);
+  expect(codes).toContain("SEO-OG-MISSING");
+  expect(codes).toContain("SEO-TWITTER-MISSING");
+  // image disabled, so no image diagnostic
+  expect(codes).not.toContain("SEO-OG-IMAGE-MISSING");
+  expect(
+    result.diagnostics.find((d) => d.code === "SEO-TWITTER-MISSING")?.severity,
+  ).toBe("info");
+});
