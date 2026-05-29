@@ -1,11 +1,14 @@
 import {
   CmsFetchError,
+  mapWithConcurrency,
   readCmsDataPath,
   type CMSDocument,
   type FetchLike,
   type PayloadCmsProviderConfig,
   type PayloadCollectionConfig,
 } from "@cms-lab/core";
+
+const COLLECTION_CONCURRENCY = 6;
 
 type PayloadResponse = {
   docs?: unknown[];
@@ -25,41 +28,47 @@ export async function fetchPayloadDocuments(
   options: FetchPayloadDocumentsOptions = {},
 ): Promise<CMSDocument[]> {
   const fetchImpl = options.fetch ?? fetch;
-  const documents: CMSDocument[] = [];
   const apiPath = normalizeApiPath(config.apiPath);
 
-  for (const collection of config.collections) {
-    let page = 1;
+  const perCollection = await mapWithConcurrency(
+    config.collections,
+    COLLECTION_CONCURRENCY,
+    async (collection) => {
+      const documents: CMSDocument[] = [];
+      let page = 1;
 
-    while (true) {
-      const url = new URL(
-        `${apiPath}/${trimSlashes(collection.collection)}`,
-        config.url,
-      );
-      url.searchParams.set("limit", String(PAGE_SIZE));
-      url.searchParams.set("page", String(page));
-      url.searchParams.set("depth", "1");
+      while (true) {
+        const url = new URL(
+          `${apiPath}/${trimSlashes(collection.collection)}`,
+          config.url,
+        );
+        url.searchParams.set("limit", String(PAGE_SIZE));
+        url.searchParams.set("page", String(page));
+        url.searchParams.set("depth", "1");
 
-      const response = await fetchJson<PayloadResponse>(
-        fetchImpl,
-        url,
-        authHeaders(config.token),
-      );
-      const rows = response.docs ?? [];
-      documents.push(
-        ...rows.map((item) => normalizePayloadDoc(collection, item)),
-      );
+        const response = await fetchJson<PayloadResponse>(
+          fetchImpl,
+          url,
+          authHeaders(config.token),
+        );
+        const rows = response.docs ?? [];
+        documents.push(
+          ...rows.map((item) => normalizePayloadDoc(collection, item)),
+        );
 
-      const hasMore = response.hasNextPage ?? rows.length === PAGE_SIZE;
-      if (!hasMore || rows.length === 0) {
-        break;
+        const hasMore = response.hasNextPage ?? rows.length === PAGE_SIZE;
+        if (!hasMore || rows.length === 0) {
+          break;
+        }
+
+        page += 1;
       }
 
-      page += 1;
-    }
-  }
+      return documents;
+    },
+  );
 
-  return documents;
+  return perCollection.flat();
 }
 
 export function normalizePayloadDoc(
