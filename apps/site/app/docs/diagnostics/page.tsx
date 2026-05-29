@@ -109,6 +109,30 @@ export default function DiagnosticsPage() {
             shapes cms-lab understands.
           </DiagnosticCode>
           <DiagnosticCode
+            code="SEO-CANONICAL-MISSING"
+            severity="warning"
+            group="seo"
+          >
+            A 2xx route has no <code>{`<link rel="canonical">`}</code>. Opt-in
+            via <code>checks.routes.canonical</code>.
+          </DiagnosticCode>
+          <DiagnosticCode
+            code="SEO-CANONICAL-OFF-ORIGIN"
+            severity="error"
+            group="seo"
+          >
+            Canonical points to a different origin, often a leftover staging
+            hostname.
+          </DiagnosticCode>
+          <DiagnosticCode
+            code="SEO-CANONICAL-MISMATCH"
+            severity="warning"
+            group="seo"
+          >
+            Canonical path disagrees with the probed path beyond trailing slash
+            and case.
+          </DiagnosticCode>
+          <DiagnosticCode
             code="SEO-OG-IMAGE-MISSING"
             severity="warning"
             group="seo"

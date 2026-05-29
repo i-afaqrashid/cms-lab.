@@ -106,6 +106,30 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Fill the missing CMS fields or disable the SEO check if this content type intentionally does not use metadata.",
   },
   {
+    code: "SEO-CANONICAL-MISSING",
+    severity: "warning",
+    title: "Canonical link is missing",
+    meaning:
+      'Canonical validation is enabled (checks.routes.canonical) and a 2xx route rendered no <link rel="canonical">. Search engines then guess the canonical, which can split ranking signals across duplicate URLs.',
+    fix: "Render a canonical link for the route (for example via Next.js generateMetadata alternates.canonical), or disable checks.routes.canonical for routes that intentionally omit it.",
+  },
+  {
+    code: "SEO-CANONICAL-OFF-ORIGIN",
+    severity: "error",
+    title: "Canonical points to a different origin",
+    meaning:
+      "The rendered canonical URL is on a different host than the configured site. This is often a leftover staging or preview hostname and can deindex the page from search.",
+    fix: "Build the canonical from the production origin. Check environment variables or the site URL used in metadata for a stale staging host.",
+  },
+  {
+    code: "SEO-CANONICAL-MISMATCH",
+    severity: "warning",
+    title: "Canonical path does not match the route",
+    meaning:
+      "The canonical path differs from the probed path beyond trailing slash and case. A canonical pointing at a stale slug after a rename quietly removes the real page from search.",
+    fix: "Point the canonical at the route's own path, or confirm the redirect target is intentional.",
+  },
+  {
     code: "SEO-OG-IMAGE-MISSING",
     severity: "warning",
     title: "Open Graph image is missing",

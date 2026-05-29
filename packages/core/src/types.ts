@@ -58,6 +58,13 @@ export type Soft404Options = {
 
 export type RouteChecksOptions = {
   soft404?: Soft404Options;
+  /**
+   * Validate the `<link rel="canonical">` of each 2xx route against the probed
+   * URL. Opt-in, since it requires reading the response body. Flags a missing
+   * canonical, a canonical on a different origin (e.g. a leftover staging
+   * hostname), and a canonical whose path disagrees with the probed path.
+   */
+  canonical?: boolean;
 };
 
 export type RelationshipRule = {
