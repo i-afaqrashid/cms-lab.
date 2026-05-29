@@ -455,6 +455,9 @@ test-fixtures/      public Prismic fixture
 - [Issues](https://github.com/i-afaqrashid/cms-lab/issues) for bugs and concrete
   feature requests.
 
+Contributing or reviewing? See [CONTRIBUTING.md](./CONTRIBUTING.md) and
+[.github/CODEOWNERS](./.github/CODEOWNERS) for ownership and review paths.
+
 ## Launch And Maintenance
 
 Read [CHANGELOG.md](./CHANGELOG.md) and
