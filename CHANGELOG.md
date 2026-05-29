@@ -15,6 +15,10 @@ history stays consistent across GitHub and npm.
 
 ### Added
 
+- Added `cms-lab watch`: re-runs the scan when `cms-lab.config.ts` changes (and
+  optionally on `--interval`), printing a short timestamped summary per run. It
+  reloads config each run and accepts the same `--only`/`--skip`/`--type`
+  filters as `scan`.
 - Added `cms-lab init` starters for WordPress, Contentful, and Sanity, so all
   six bundled adapters can be scaffolded (new flags: `--wp-url`, `--space-id`,
   `--environment`, `--project-id`, `--dataset`).
