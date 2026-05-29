@@ -125,6 +125,11 @@ type InitCommandOptions = {
   strapiLocale?: string;
   directusUrl?: string;
   payloadUrl?: string;
+  wpUrl?: string;
+  spaceId?: string;
+  environment?: string;
+  projectId?: string;
+  dataset?: string;
 };
 
 type AgentContextCommandOptions = {
@@ -372,7 +377,7 @@ Examples:
     .option("--force", "Overwrite an existing config file")
     .option(
       "--cms <provider>",
-      "Starter CMS provider: prismic, strapi, directus, or payload",
+      "Starter CMS provider: prismic, strapi, directus, payload, wordpress, contentful, or sanity",
       "prismic",
     )
     .option("--router <router>", "Next.js router: app or pages", "app")
@@ -390,6 +395,11 @@ Examples:
       "Payload REST API base URL",
       "http://localhost:3000",
     )
+    .option("--wp-url <url>", "WordPress site URL", "http://localhost:8080")
+    .option("--space-id <id>", "Contentful space ID", "my-space")
+    .option("--environment <env>", "Contentful environment", "master")
+    .option("--project-id <id>", "Sanity project ID", "my-project")
+    .option("--dataset <name>", "Sanity dataset", "production")
     .addHelpText(
       "after",
       `
@@ -399,6 +409,9 @@ Examples:
   cms-lab init --cms strapi --router pages --strapi-url http://localhost:1337
   cms-lab init --cms directus --router pages --directus-url http://localhost:8055
   cms-lab init --cms payload --payload-url http://localhost:3000
+  cms-lab init --cms wordpress --wp-url http://localhost:8080
+  cms-lab init --cms contentful --space-id my-space
+  cms-lab init --cms sanity --project-id my-project --dataset production
   cms-lab init --config cms-lab.config.ts --force
 `,
     )
@@ -2029,7 +2042,14 @@ function plural(value: number, singular: string): string {
 }
 
 type ParsedInitOptions = {
-  cms: "prismic" | "strapi" | "directus" | "payload";
+  cms:
+    | "prismic"
+    | "strapi"
+    | "directus"
+    | "payload"
+    | "wordpress"
+    | "contentful"
+    | "sanity";
   router: ProjectInfo["router"];
   repository: string;
   url: string;
@@ -2037,18 +2057,28 @@ type ParsedInitOptions = {
   strapiLocale?: string;
   directusUrl: string;
   payloadUrl: string;
+  wpUrl: string;
+  spaceId: string;
+  environment: string;
+  projectId: string;
+  dataset: string;
 };
+
+const INIT_CMS_VALUES = [
+  "prismic",
+  "strapi",
+  "directus",
+  "payload",
+  "wordpress",
+  "contentful",
+  "sanity",
+] as const;
 
 function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
   const cms = options.cms ?? "prismic";
-  if (
-    cms !== "prismic" &&
-    cms !== "strapi" &&
-    cms !== "directus" &&
-    cms !== "payload"
-  ) {
+  if (!(INIT_CMS_VALUES as readonly string[]).includes(cms)) {
     throw new ConfigLoadError(
-      "--cms must be one of: prismic, strapi, directus, payload",
+      `--cms must be one of: ${INIT_CMS_VALUES.join(", ")}`,
     );
   }
 
@@ -2058,7 +2088,7 @@ function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
   }
 
   return {
-    cms,
+    cms: cms as ParsedInitOptions["cms"],
     router,
     repository: options.repository ?? "my-repo",
     url: options.url ?? "http://localhost:3000",
@@ -2066,6 +2096,11 @@ function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
     strapiLocale: options.strapiLocale,
     directusUrl: options.directusUrl ?? "http://localhost:8055",
     payloadUrl: options.payloadUrl ?? "http://localhost:3000",
+    wpUrl: options.wpUrl ?? "http://localhost:8080",
+    spaceId: options.spaceId ?? "my-space",
+    environment: options.environment ?? "master",
+    projectId: options.projectId ?? "my-project",
+    dataset: options.dataset ?? "production",
   };
 }
 
@@ -2080,6 +2115,18 @@ function starterConfig(options: ParsedInitOptions): string {
 
   if (options.cms === "payload") {
     return payloadStarterConfig(options);
+  }
+
+  if (options.cms === "wordpress") {
+    return wordpressStarterConfig(options);
+  }
+
+  if (options.cms === "contentful") {
+    return contentfulStarterConfig(options);
+  }
+
+  if (options.cms === "sanity") {
+    return sanityStarterConfig(options);
   }
 
   return `import { defineConfig } from "@cms-lab/core";
@@ -2212,6 +2259,89 @@ export default defineConfig({
       ],
     },
   },
+});
+`;
+}
+
+function wordpressStarterConfig(options: ParsedInitOptions): string {
+  return `import { defineConfig } from "@cms-lab/core";
+
+export default defineConfig({
+  site: { url: ${JSON.stringify(options.url)} },
+  framework: { type: "next", router: ${JSON.stringify(options.router)} },
+  cms: {
+    provider: "wordpress",
+    url: ${JSON.stringify(options.wpUrl)},
+    contentTypes: [
+      { type: "page", endpoint: "pages" },
+      { type: "post", endpoint: "posts", uidField: "slug" },
+    ],
+  },
+  routes: [
+    { type: "page", pattern: "/:slug", getPath: (doc) => \`/\${doc.uid}\` },
+    {
+      type: "post",
+      pattern: "/blog/:slug",
+      getPath: (doc) => \`/blog/\${doc.uid}\`,
+    },
+  ],
+});
+`;
+}
+
+function contentfulStarterConfig(options: ParsedInitOptions): string {
+  return `import { defineConfig } from "@cms-lab/core";
+
+export default defineConfig({
+  site: { url: ${JSON.stringify(options.url)} },
+  framework: { type: "next", router: ${JSON.stringify(options.router)} },
+  cms: {
+    provider: "contentful",
+    spaceId: ${JSON.stringify(options.spaceId)},
+    environment: ${JSON.stringify(options.environment)},
+    accessToken: process.env.CONTENTFUL_DELIVERY_TOKEN,
+    contentTypes: [
+      { type: "page", contentType: "page", uidField: "slug" },
+      { type: "post", contentType: "blogPost", uidField: "slug" },
+    ],
+  },
+  routes: [
+    { type: "page", pattern: "/:slug", getPath: (doc) => \`/\${doc.uid}\` },
+    {
+      type: "post",
+      pattern: "/blog/:slug",
+      getPath: (doc) => \`/blog/\${doc.uid}\`,
+    },
+  ],
+});
+`;
+}
+
+function sanityStarterConfig(options: ParsedInitOptions): string {
+  return `import { defineConfig } from "@cms-lab/core";
+
+export default defineConfig({
+  site: { url: ${JSON.stringify(options.url)} },
+  framework: { type: "next", router: ${JSON.stringify(options.router)} },
+  cms: {
+    provider: "sanity",
+    projectId: ${JSON.stringify(options.projectId)},
+    dataset: ${JSON.stringify(options.dataset)},
+    apiVersion: "2025-02-19",
+    token: process.env.SANITY_READ_TOKEN,
+    contentTypes: [
+      { type: "page", documentType: "page", uidField: "slug.current" },
+      { type: "post", documentType: "post", uidField: "slug.current" },
+    ],
+  },
+  routes: [
+    { type: "page", pattern: "/:slug", getPath: (doc) => \`/\${doc.uid}\` },
+    {
+      type: "post",
+      pattern: "/blog/:slug",
+      getPath: (doc) => \`/blog/\${doc.uid}\`,
+    },
+  ],
 });
 `;
 }

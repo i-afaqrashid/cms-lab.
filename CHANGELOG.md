@@ -15,6 +15,9 @@ history stays consistent across GitHub and npm.
 
 ### Added
 
+- Added `cms-lab init` starters for WordPress, Contentful, and Sanity, so all
+  six bundled adapters can be scaffolded (new flags: `--wp-url`, `--space-id`,
+  `--environment`, `--project-id`, `--dataset`).
 - Added opt-in image-dimension validation via `checks.images.dimensions`. Flags
   CMS image fields with no usable width/height (`CMS-IMG-DIMENSIONS`, warning),
   a common cause of layout shift (CLS). Reuses the existing image detection and

@@ -2074,6 +2074,71 @@ test("runCli init can write a Payload starter config", async () => {
   expect(config).toContain('pattern: "/blog/:slug"');
 });
 
+test("runCli init can write WordPress, Contentful, and Sanity starters", async () => {
+  const cases: Array<{
+    cms: string;
+    args: string[];
+    expect: string[];
+  }> = [
+    {
+      cms: "wordpress",
+      args: ["--wp-url", "http://localhost:8080"],
+      expect: [
+        'provider: "wordpress"',
+        "http://localhost:8080",
+        'endpoint: "posts"',
+      ],
+    },
+    {
+      cms: "contentful",
+      args: ["--space-id", "demo-space", "--environment", "master"],
+      expect: [
+        'provider: "contentful"',
+        'spaceId: "demo-space"',
+        "process.env.CONTENTFUL_DELIVERY_TOKEN",
+      ],
+    },
+    {
+      cms: "sanity",
+      args: ["--project-id", "demo-proj", "--dataset", "production"],
+      expect: [
+        'provider: "sanity"',
+        'projectId: "demo-proj"',
+        'uidField: "slug.current"',
+        "process.env.SANITY_READ_TOKEN",
+      ],
+    },
+  ];
+
+  for (const testCase of cases) {
+    const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+    const exitCode = await runCli(
+      ["init", "--cms", testCase.cms, ...testCase.args],
+      {
+        cwd,
+        stdout: () => {},
+        stderr: () => {},
+      },
+    );
+    const config = await readFile(join(cwd, "cms-lab.config.ts"), "utf8");
+
+    expect(exitCode).toBe(0);
+    for (const fragment of testCase.expect) {
+      expect(config).toContain(fragment);
+    }
+  }
+});
+
+test("runCli init rejects an unknown --cms provider", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  const exitCode = await runCli(["init", "--cms", "bogus"], {
+    cwd,
+    stdout: () => {},
+    stderr: () => {},
+  });
+  expect(exitCode).not.toBe(0);
+});
+
 test("runCli doctor uses site.healthPath for localized apps", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "pages"), { recursive: true });
