@@ -18,6 +18,7 @@
       "@cms-lab/contentful": ["packages/contentful/src/index.ts"],
       "@cms-lab/directus": ["packages/directus/src/index.ts"],
       "@cms-lab/next": ["packages/next/src/index.ts"],
+      "@cms-lab/payload": ["packages/payload/src/index.ts"],
       "@cms-lab/prismic": ["packages/prismic/src/index.ts"],
       "@cms-lab/reporter": ["packages/reporter/src/index.ts"],
       "@cms-lab/sanity": ["packages/sanity/src/index.ts"],

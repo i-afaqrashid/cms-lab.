@@ -236,6 +236,21 @@ cms: {
 }
 ```
 
+Payload:
+
+```ts
+cms: {
+  provider: "payload",
+  url: "http://localhost:3000",
+  apiPath: "/api",
+  token: process.env.PAYLOAD_TOKEN,
+  collections: [
+    { type: "page", collection: "pages", uidField: "slug" },
+    { type: "post", collection: "posts", uidField: "slug" },
+  ],
+}
+```
+
 All adapters normalize content into the same scan model, so route checks, field
 checks, SEO checks, report output, and CI behavior stay consistent. Use
 `uidField` when your CMS does not expose a plain `uid` or `slug` field. Use
@@ -248,6 +263,7 @@ dotted paths from `document.data`.
 cms-lab init
 cms-lab init --cms strapi --router pages
 cms-lab init --cms directus --router pages
+cms-lab init --cms payload
 cms-lab doctor
 cms-lab scan
 cms-lab agent-context
@@ -311,7 +327,7 @@ test, and it marks adapter maturity limits explicitly.
 
 Current coverage includes Prismic with Next.js App Router, Strapi v4 with
 Next.js Pages Router, Strapi single types, and adapter fixture checks for
-Directus, WordPress, Contentful, and Sanity.
+Directus, WordPress, Contentful, Sanity, and Payload.
 
 See
 [`/docs/bug-examples`](https://cmslab.afaqrashid.com/docs/bug-examples) for the

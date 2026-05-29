@@ -23,6 +23,10 @@ export default defineConfig({
       ).pathname,
       "@cms-lab/next": new URL("./packages/next/src/index.ts", import.meta.url)
         .pathname,
+      "@cms-lab/payload": new URL(
+        "./packages/payload/src/index.ts",
+        import.meta.url,
+      ).pathname,
       "@cms-lab/prismic": new URL(
         "./packages/prismic/src/index.ts",
         import.meta.url,

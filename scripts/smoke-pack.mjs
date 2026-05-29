@@ -34,6 +34,7 @@ const installTarballs = [
   findTarball(tarballs, /^cms-lab-contentful-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-directus-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-next-\d.*\.tgz$/),
+  findTarball(tarballs, /^cms-lab-payload-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-prismic-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-reporter-\d.*\.tgz$/),
   findTarball(tarballs, /^cms-lab-sanity-\d.*\.tgz$/),

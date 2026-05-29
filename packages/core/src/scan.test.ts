@@ -1797,3 +1797,54 @@ test("scanDocuments skips custom rules when filtered out via --skip", async () =
     [],
   );
 });
+
+test("scanDocuments flags Payload media missing alt and SEO meta", async () => {
+  const result = await scanDocuments({
+    config: {
+      site: { url: "http://localhost:3000" },
+      framework: { type: "next" as const, router: "app" as const },
+      cms: {
+        provider: "payload" as const,
+        url: "http://localhost:3000",
+        collections: [{ type: "page", collection: "pages", uidField: "slug" }],
+      },
+      routes: [
+        {
+          type: "page",
+          pattern: "/:slug",
+          getPath: (doc: { uid?: string }) => `/${doc.uid}`,
+        },
+      ],
+      checks: { routes: false },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "p1",
+        type: "page",
+        uid: "home",
+        status: "published",
+        data: {
+          meta: { title: "Home", description: "Welcome" },
+          hero: {
+            url: "/media/hero.jpg",
+            mimeType: "image/jpeg",
+            filename: "hero.jpg",
+            alt: "",
+          },
+        },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(result.diagnostics.map((d) => d.code)).toContain("A11Y-IMG-ALT");
+  expect(
+    result.diagnostics.filter((d) => d.code === "SEO-META-MISSING"),
+  ).toEqual([]);
+});

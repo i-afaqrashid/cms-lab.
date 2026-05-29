@@ -8,6 +8,7 @@ const packageOrder = [
   "@cms-lab/contentful",
   "@cms-lab/directus",
   "@cms-lab/next",
+  "@cms-lab/payload",
   "@cms-lab/prismic",
   "@cms-lab/reporter",
   "@cms-lab/sanity",

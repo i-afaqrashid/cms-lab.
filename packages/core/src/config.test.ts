@@ -153,6 +153,42 @@ test("validateConfig accepts local CMS provider configs", () => {
       },
     }).cms.provider,
   ).toBe("sanity");
+
+  expect(
+    validateConfig({
+      ...base,
+      cms: {
+        provider: "payload",
+        url: "http://localhost:3000",
+        apiPath: "/api",
+        token: "payload-token",
+        collections: [
+          { type: "page", collection: "pages", uidField: "slug" },
+          {
+            type: "pricing",
+            collection: "pricing",
+            uidField: "id",
+            routable: false,
+          },
+        ],
+      },
+    }).cms.provider,
+  ).toBe("payload");
+});
+
+test("validateConfig rejects a Payload config without collections", () => {
+  expect(() =>
+    validateConfig({
+      site: { url: "http://localhost:3000" },
+      framework: { type: "next", router: "app" },
+      cms: {
+        provider: "payload",
+        url: "http://localhost:3000",
+        collections: [],
+      },
+      routes: [{ type: "page", pattern: "/:uid", getPath: () => "/about" }],
+    }),
+  ).toThrow();
 });
 
 test("validateConfig rejects unsafe site health paths", () => {

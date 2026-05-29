@@ -1,0 +1,45 @@
+{
+  "name": "@cms-lab/payload",
+  "version": "1.2.6",
+  "type": "module",
+  "description": "Payload CMS document adapter for cms-lab.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-afaqrashid/cms-lab.git",
+    "directory": "packages/payload"
+  },
+  "homepage": "https://cmslab.afaqrashid.com",
+  "bugs": {
+    "url": "https://github.com/i-afaqrashid/cms-lab/issues"
+  },
+  "keywords": [
+    "cms",
+    "payload",
+    "payloadcms",
+    "testing"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.10"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --tsconfig ../../tsconfig.base.json"
+  },
+  "dependencies": {
+    "@cms-lab/core": "workspace:*"
+  },
+  "author": "Afaq Rashid"
+}

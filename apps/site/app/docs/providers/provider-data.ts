@@ -144,6 +144,56 @@ export default defineConfig({
     ],
   },
   {
+    slug: "payload",
+    name: "Payload",
+    packageName: "@cms-lab/payload",
+    summary:
+      "Use Payload when collections live in the same Next.js app and expose route, SEO, and media fields over the REST API.",
+    config: `import { defineConfig } from "@cms-lab/core";
+
+export default defineConfig({
+  site: { url: "http://localhost:3000" },
+  framework: { type: "next", router: "app" },
+  cms: {
+    provider: "payload",
+    url: "http://localhost:3000",
+    apiPath: "/api",
+    token: process.env.PAYLOAD_TOKEN,
+    collections: [
+      { type: "page", collection: "pages", uidField: "slug" },
+      { type: "post", collection: "posts", uidField: "slug" },
+    ],
+  },
+  routes: [
+    { type: "page", pattern: "/:slug", getPath: (doc) => "/" + doc.uid },
+    {
+      type: "post",
+      pattern: "/blog/:slug",
+      getPath: (doc) => "/blog/" + doc.uid,
+    },
+  ],
+});`,
+    fieldMapping: `cms: {
+  provider: "payload",
+  collections: [
+    {
+      type: "page",
+      collection: "pages",
+      uidField: "slug",
+      urlField: "seo.canonical",
+    },
+    // Relation-heavy collections can be checked without route probing.
+    { type: "pricing", collection: "pricing", uidField: "id", routable: false },
+  ],
+}`,
+    caveats: [
+      "Reads the REST API at {url}{apiPath}/{collection}; apiPath defaults to /api.",
+      "token is sent in the Authorization header (verbatim if it already has a scheme, otherwise as JWT), so both JWT and API-key auth work.",
+      "Payload's _status draft flag maps onto the cms-lab published/draft status.",
+      "Run cms-lab init --cms payload for a starter config.",
+    ],
+  },
+  {
     slug: "wordpress",
     name: "WordPress",
     packageName: "@cms-lab/wordpress",

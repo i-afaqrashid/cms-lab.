@@ -309,6 +309,12 @@ function cmsDetails(config: CmsProviderConfig): string {
 - Document types: ${config.contentTypes.map((contentType) => `${contentType.type} (${contentType.documentType})`).join(", ")}`;
   }
 
+  if (config.provider === "payload") {
+    return `## CMS details
+
+- Collections: ${config.collections.map((collection) => `${collection.type} (${collection.collection})`).join(", ")}`;
+  }
+
   return `## CMS details
 
 - Content types: ${(

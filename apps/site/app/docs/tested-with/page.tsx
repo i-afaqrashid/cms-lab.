@@ -75,13 +75,14 @@ const rows = [
   },
   {
     adapter: "Payload",
-    packageName: "not available",
-    configDocs: "not yet",
-    tests: "not yet",
+    packageName: "@cms-lab/payload",
+    configDocs: "basic",
+    tests: "adapter fixtures",
     publicExample: "not yet",
     singletons: "not yet",
     relations: "not yet",
-    limits: "Tracked separately before claiming Payload support.",
+    limits:
+      "REST collection fetch, pagination, _status draft normalization, slug/UID mapping, SEO, and media alt text are covered at fixture level. Embedded in-process queries and business rules are still planned.",
   },
 ];
 
