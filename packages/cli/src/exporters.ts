@@ -134,6 +134,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
     return "relationships";
   }
 
+  if (diagnostic.code.startsWith("CMS-LOCALE")) {
+    return "localization";
+  }
+
   if (diagnostic.code.startsWith("SEO-")) {
     return "seo";
   }

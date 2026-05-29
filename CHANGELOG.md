@@ -23,6 +23,11 @@ history stays consistent across GitHub and npm.
   and `routable`, JWT or API-key auth, and checks SEO and media alt text. Added
   `cms-lab init --cms payload`.
 
+- Added opt-in localization completeness via `checks.localization`. Groups
+  published documents by a translation key (`groupField`, default
+  `document.uid`) and emits `CMS-LOCALE-MISSING` (warning) for any group that
+  is not published in every configured locale. Adds a `localization` check
+  group for `--only` / `--skip`.
 - Added `CMS-RELATIONSHIP-UNPUBLISHED` (warning): a published document whose
   relationship rule is satisfied only by draft records links to nothing live at
   runtime. Relationship checks are now status-aware.

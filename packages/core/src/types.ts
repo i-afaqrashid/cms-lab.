@@ -161,6 +161,25 @@ export type CustomRuleFn = (
 
 export type CustomRule = CustomDeclarativeRule | CustomRuleFn;
 
+/**
+ * Locale-parity check. Groups published documents by a translation key and
+ * flags any group that does not have a live document in every expected locale.
+ */
+export type LocalizationCheckOptions = {
+  /** Locales every content group should have, e.g. ["en", "fr", "de"]. */
+  locales: string[];
+  /** Path in `document.data` to the document's locale. Defaults to "locale". */
+  localeField?: string;
+  /**
+   * Path in `document.data` to the value that links translations of the same
+   * content. Defaults to `document.uid` (common when locales share a slug).
+   */
+  groupField?: string;
+  /** Limit the check to these content types. */
+  types?: string[];
+  severity?: DiagnosticSeverity;
+};
+
 export type PrismicCmsProviderConfig = {
   provider: "prismic";
   repositoryName: string;
@@ -315,6 +334,7 @@ export type CmsLabConfig = {
     fields?: boolean | { required?: RequiredFieldRule[] };
     relationships?: RelationshipRule[];
     custom?: CustomRule[];
+    localization?: LocalizationCheckOptions;
   };
 };
 
@@ -352,7 +372,8 @@ export type CheckGroup =
   | "images"
   | "fields"
   | "relationships"
-  | "custom";
+  | "custom"
+  | "localization";
 
 export type ScanFilters = {
   types?: string[];

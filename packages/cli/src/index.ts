@@ -1688,6 +1688,7 @@ function parseCheckGroups(values: string[] | undefined): CheckGroup[] {
     "fields",
     "relationships",
     "custom",
+    "localization",
   ]);
   const groups = splitList(values);
 

@@ -194,6 +194,14 @@ const explanations: DiagnosticExplanation[] = [
     fix: "Check the related CMS collection, the join fields in checks.relationships, and whether the related content should be published or active.",
   },
   {
+    code: "CMS-LOCALE-MISSING",
+    severity: "warning",
+    title: "Content is missing a locale translation",
+    meaning:
+      "Localization validation is enabled (checks.localization) and a content group does not have a published document in every configured locale. Only published documents count, so a translation that exists only as a draft is reported as missing.",
+    fix: "Publish the missing locale translation, or narrow checks.localization (locales, types, or groupField) to match how the project links translations.",
+  },
+  {
     code: "CMS-RELATIONSHIP-UNPUBLISHED",
     severity: "warning",
     title: "Published document links only to unpublished content",

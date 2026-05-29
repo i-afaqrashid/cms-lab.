@@ -20,6 +20,7 @@ export default function ConfigurationPage() {
         { href: "#route-fields", label: "Route fields" },
         { href: "#required-fields", label: "Required fields" },
         { href: "#relationships", label: "Relationships" },
+        { href: "#localization", label: "Localization" },
         { href: "#custom-rules", label: "Custom rules" },
       ]}
     >
@@ -389,6 +390,31 @@ export default defineConfig({
         rule is satisfied only by draft records, cms-lab emits{" "}
         <code>CMS-RELATIONSHIP-UNPUBLISHED</code>, since the live page links to
         nothing live at runtime.
+      </div>
+
+      <h2 id="localization">Localization</h2>
+      <p>
+        Localization checks flag locale-parity gaps: a content group that is
+        published in some locales but missing in others. Documents are grouped
+        by <code>groupField</code> (defaulting to the document UID, common when
+        locales share a slug), and only published documents count, so a
+        translation that is still a draft is reported as missing.
+      </p>
+      <CodeBlock>{`checks: {
+  localization: {
+    locales: ["en", "fr", "de"],
+    // localeField defaults to "locale"; groupField defaults to the document UID.
+    localeField: "locale",
+    groupField: "translationKey",
+    types: ["page", "article"],
+    severity: "warning",
+  },
+}`}</CodeBlock>
+      <div className="callout">
+        <strong>Opt-in</strong>
+        The check runs only when <code>checks.localization</code> is set, and
+        emits <code>CMS-LOCALE-MISSING</code> for each group missing a locale.
+        Set <code>types</code> to limit it to localized content types.
       </div>
       <div className="callout">
         <strong>Provider fields</strong>

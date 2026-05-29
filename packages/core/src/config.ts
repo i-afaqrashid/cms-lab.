@@ -313,6 +313,16 @@ const checksSchema = z
       .optional(),
     relationships: z.array(relationshipRuleSchema).optional(),
     custom: z.array(customRuleSchema).optional(),
+    localization: z
+      .object({
+        locales: z.array(z.string().min(1)).min(1),
+        localeField: z.string().min(1).optional(),
+        groupField: z.string().min(1).optional(),
+        types: z.array(z.string().min(1)).min(1).optional(),
+        severity: z.enum(["error", "warning", "info"]).optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .optional();

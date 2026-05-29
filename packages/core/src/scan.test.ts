@@ -2233,3 +2233,112 @@ test("structured-data validation reports routes with no JSON-LD as info", async 
   const diag = result.diagnostics.find((d) => d.code === "SEO-JSONLD-MISSING");
   expect(diag?.severity).toBe("info");
 });
+
+async function scanForLocalization(
+  localization: unknown,
+  docs: Array<{
+    id: string;
+    uid?: string;
+    status: "published" | "draft";
+    data: Record<string, unknown>;
+  }>,
+) {
+  return scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: {
+        routes: false,
+        seo: false,
+        a11y: false,
+        images: false,
+        fields: false,
+        localization,
+      },
+    } as never,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: docs.map((d) => ({ type: "page" as const, ...d })),
+    fetch: async () => new Response("ok"),
+  });
+}
+
+test("localization flags a content group missing a published locale", async () => {
+  const result = await scanForLocalization({ locales: ["en", "fr", "de"] }, [
+    { id: "en", uid: "about", status: "published", data: { locale: "en" } },
+    { id: "fr", uid: "about", status: "published", data: { locale: "fr" } },
+    // de exists only as a draft -> not live -> missing.
+    { id: "de", uid: "about", status: "draft", data: { locale: "de" } },
+  ]);
+
+  const diag = result.diagnostics.find((d) => d.code === "CMS-LOCALE-MISSING");
+  expect(diag?.severity).toBe("warning");
+  expect(diag?.message).toContain("de");
+  expect(diag?.message).toContain("page/about");
+});
+
+test("localization is silent when every locale is published", async () => {
+  const result = await scanForLocalization(
+    { locales: ["en", "fr"], groupField: "translationKey" },
+    [
+      {
+        id: "en",
+        uid: "about-en",
+        status: "published",
+        data: { locale: "en", translationKey: "about" },
+      },
+      {
+        id: "fr",
+        uid: "a-propos",
+        status: "published",
+        data: { locale: "fr", translationKey: "about" },
+      },
+    ],
+  );
+
+  expect(
+    result.diagnostics.filter((d) => d.code === "CMS-LOCALE-MISSING"),
+  ).toEqual([]);
+});
+
+test("localization skips documents without a locale and respects --skip", async () => {
+  const docs = [
+    {
+      id: "en",
+      uid: "about",
+      status: "published" as const,
+      data: { locale: "en" },
+    },
+    // No locale field -> ignored entirely.
+    { id: "x", uid: "settings", status: "published" as const, data: {} },
+  ];
+
+  const flagged = await scanForLocalization({ locales: ["en", "fr"] }, docs);
+  expect(
+    flagged.diagnostics
+      .filter((d) => d.code === "CMS-LOCALE-MISSING")
+      .map((d) => d.path),
+  ).toEqual(["localization.page.about"]);
+
+  const skipped = await scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: { routes: false, localization: { locales: ["en", "fr"] } },
+    } as never,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: docs.map((d) => ({ type: "page" as const, ...d })),
+    filters: { skip: ["localization"] },
+    fetch: async () => new Response("ok"),
+  });
+  expect(
+    skipped.diagnostics.filter((d) => d.code === "CMS-LOCALE-MISSING"),
+  ).toEqual([]);
+});

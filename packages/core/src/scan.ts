@@ -115,6 +115,10 @@ export async function scanDocuments(
     );
   }
 
+  if (shouldRunCheck("localization", options.config, options.filters)) {
+    diagnostics.push(...checkLocalization(options.config, documents));
+  }
+
   return {
     project: options.project,
     documents,
@@ -1147,6 +1151,99 @@ function relationshipRules(config: CmsLabConfig): RelationshipRule[] {
   return config.checks?.relationships ?? [];
 }
 
+/**
+ * Locale-parity check. Groups published documents by a translation key
+ * (`groupField`, defaulting to `document.uid`) and flags any group that does
+ * not have a live document in every configured locale. Only published
+ * documents count toward a locale being present, so a translation that exists
+ * only as a draft is reported as missing.
+ */
+function checkLocalization(
+  config: CmsLabConfig,
+  documents: CMSDocument[],
+): Diagnostic[] {
+  const options = config.checks?.localization;
+  if (!options) {
+    return [];
+  }
+
+  const localeField = options.localeField ?? "locale";
+  const expected = [...new Set(options.locales)];
+  const typeFilter = options.types ? new Set(options.types) : undefined;
+
+  const groups = new Map<
+    string,
+    {
+      type: string;
+      groupKey: string;
+      locales: Set<string>;
+      sample: CMSDocument;
+    }
+  >();
+
+  for (const document of documents) {
+    if (document.status !== "published") {
+      continue;
+    }
+    if (typeFilter && !typeFilter.has(document.type)) {
+      continue;
+    }
+
+    const data = asRecord(document.data) ?? {};
+    const localeValue = readCmsDataPath(data, localeField);
+    if (typeof localeValue !== "string" || localeValue.trim().length === 0) {
+      continue;
+    }
+    const locale = localeValue.trim();
+
+    const groupValue = options.groupField
+      ? readCmsDataPath(data, options.groupField)
+      : document.uid;
+    const groupKey =
+      groupValue === undefined || groupValue === null
+        ? undefined
+        : String(groupValue);
+    if (!groupKey) {
+      continue;
+    }
+
+    const key = `${document.type}:${groupKey}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.locales.add(locale);
+    } else {
+      groups.set(key, {
+        type: document.type,
+        groupKey,
+        locales: new Set([locale]),
+        sample: document,
+      });
+    }
+  }
+
+  const diagnostics: Diagnostic[] = [];
+
+  for (const group of groups.values()) {
+    const missing = expected.filter((locale) => !group.locales.has(locale));
+    if (missing.length === 0) {
+      continue;
+    }
+
+    const present = [...group.locales].sort().join(", ") || "none";
+    diagnostics.push(
+      createDiagnostic({
+        severity: options.severity ?? "warning",
+        code: "CMS-LOCALE-MISSING",
+        message: `Content group ${group.type}/${group.groupKey} is missing locale(s): ${missing.join(", ")} (published: ${present})`,
+        path: `localization.${group.type}.${group.groupKey}`,
+        source: sourceFor(config, group.sample),
+      }),
+    );
+  }
+
+  return diagnostics;
+}
+
 function summarizeDiagnosticGroups(
   diagnostics: Diagnostic[],
   config: CmsLabConfig,
@@ -1600,7 +1697,11 @@ function shouldRunCheck(
     return isCheckEnabled(config.checks?.images, true);
   }
 
-  if (group === "relationships" || group === "custom") {
+  if (
+    group === "relationships" ||
+    group === "custom" ||
+    group === "localization"
+  ) {
     return true;
   }
 

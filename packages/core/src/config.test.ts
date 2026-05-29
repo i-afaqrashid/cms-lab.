@@ -306,6 +306,32 @@ test("validateConfig rejects unknown keys in a custom rule", () => {
   ).toThrow();
 });
 
+test("validateConfig accepts localization checks and rejects empty locales", () => {
+  const base = {
+    site: { url: "http://localhost:3000" },
+    framework: { type: "next", router: "app" },
+    cms: { provider: "prismic", repositoryName: "demo" },
+    routes: [{ type: "page", pattern: "/:uid", getPath: () => "/about" }],
+  };
+
+  const config = validateConfig({
+    ...base,
+    checks: {
+      localization: {
+        locales: ["en", "fr"],
+        groupField: "translationKey",
+        types: ["page"],
+        severity: "warning",
+      },
+    },
+  });
+  expect(config.checks?.localization?.locales).toEqual(["en", "fr"]);
+
+  expect(() =>
+    validateConfig({ ...base, checks: { localization: { locales: [] } } }),
+  ).toThrow();
+});
+
 test("validateConfig rejects unsupported SEO check sub-options", () => {
   expect(() =>
     validateConfig({

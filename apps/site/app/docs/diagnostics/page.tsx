@@ -109,6 +109,14 @@ export default function DiagnosticsPage() {
             records, so it links to nothing live at runtime.
           </DiagnosticCode>
           <DiagnosticCode
+            code="CMS-LOCALE-MISSING"
+            severity="warning"
+            group="localization"
+          >
+            A content group has no published document in one or more configured
+            locales. Opt-in via <code>checks.localization</code>.
+          </DiagnosticCode>
+          <DiagnosticCode
             code="SEO-META-MISSING"
             severity="warning"
             group="seo"
