@@ -1,4 +1,5 @@
 import { createDiagnostic, summarizeDiagnostics } from "./diagnostics.js";
+import { evaluateCustomRules } from "./custom-rules.js";
 import { readCmsDataPath } from "./data-path.js";
 import { SiteUnreachableError } from "./errors.js";
 import type {
@@ -31,6 +32,11 @@ export type ScanDocumentsOptions = {
    * Useful for tests that need to assert backoff timing without waiting.
    */
   sleep?: (ms: number) => Promise<void>;
+  /**
+   * Reference time for custom rule date assertions. Defaults to Date.now().
+   * Useful for deterministic tests of relative-date rules.
+   */
+  now?: number;
 };
 
 const MAX_BACKOFF_MS = 8_000;
@@ -100,6 +106,12 @@ export async function scanDocuments(
 
   if (shouldRunCheck("relationships", options.config, options.filters)) {
     diagnostics.push(...checkRelationships(options.config, documents));
+  }
+
+  if (shouldRunCheck("custom", options.config, options.filters)) {
+    diagnostics.push(
+      ...evaluateCustomRules(options.config, documents, { now: options.now }),
+    );
   }
 
   return {
@@ -1085,7 +1097,7 @@ function shouldRunCheck(
     return isCheckEnabled(config.checks?.images, true);
   }
 
-  if (group === "relationships") {
+  if (group === "relationships" || group === "custom") {
     return true;
   }
 

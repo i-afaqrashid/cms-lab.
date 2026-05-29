@@ -1705,3 +1705,95 @@ test("scanDocuments leaves WordPress posts with usable alt text silent", async (
     ),
   ).toEqual([]);
 });
+
+test("scanDocuments surfaces custom rule diagnostics in the result", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: {
+        routes: false,
+        seo: false,
+        a11y: false,
+        images: false,
+        fields: false,
+        custom: [
+          {
+            code: "MENU-PRICE",
+            type: "page",
+            path: "price",
+            assert: { gt: 0 },
+            message: "price must be > 0",
+          },
+        ],
+      },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "ok",
+        type: "page",
+        uid: "a",
+        status: "published",
+        data: { price: 9 },
+      },
+      {
+        id: "bad",
+        type: "page",
+        uid: "b",
+        status: "published",
+        data: { price: 0 },
+      },
+    ],
+    fetch: async () => new Response("ok"),
+  });
+
+  const custom = result.diagnostics.filter((d) => d.code === "MENU-PRICE");
+  expect(custom).toEqual([
+    {
+      severity: "error",
+      code: "MENU-PRICE",
+      message: "price must be > 0",
+      path: "data.price",
+      source: "prismic:page#bad",
+    },
+  ]);
+  expect(result.summary.errors).toBe(1);
+});
+
+test("scanDocuments skips custom rules when filtered out via --skip", async () => {
+  const result = await scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: {
+        routes: false,
+        custom: [{ type: "page", path: "price", assert: { gt: 0 } }],
+      },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      {
+        id: "bad",
+        type: "page",
+        uid: "b",
+        status: "published",
+        data: { price: 0 },
+      },
+    ],
+    filters: { skip: ["custom"] },
+    fetch: async () => new Response("ok"),
+  });
+
+  expect(result.diagnostics.filter((d) => d.code === "CUSTOM-RULE")).toEqual(
+    [],
+  );
+});

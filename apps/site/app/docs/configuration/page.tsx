@@ -20,6 +20,7 @@ export default function ConfigurationPage() {
         { href: "#route-fields", label: "Route fields" },
         { href: "#required-fields", label: "Required fields" },
         { href: "#relationships", label: "Relationships" },
+        { href: "#custom-rules", label: "Custom rules" },
       ]}
     >
       <div className="breadcrumb">Docs / Configuration</div>
@@ -362,6 +363,94 @@ export default defineConfig({
         <code>alternativeText</code>, Directus image descriptions, WordPress{" "}
         <code>alt_text</code>, Contentful asset descriptions, and Sanity image{" "}
         <code>alt</code> fields.
+      </div>
+
+      <h2 id="custom-rules">Custom rules</h2>
+      <p>
+        Custom rules cover project-specific invariants that the built-in route,
+        field, SEO, and image checks do not. They come in two forms: declarative
+        rules for the common case and functional rules for the rest. Both
+        produce normal diagnostics, so they show up in the terminal, JSON,
+        Markdown, JUnit, Slack, and HTML reports, and they respect{" "}
+        <code>--only custom</code> and <code>--skip custom</code>.
+      </p>
+      <p>
+        A declarative rule applies to one content <code>type</code>, reads the
+        value at <code>path</code> from <code>document.data</code>, and emits a
+        diagnostic when <code>assert</code> fails. An optional{" "}
+        <code>filter</code> narrows the rule to documents whose fields match.
+      </p>
+      <CodeBlock>{`checks: {
+  custom: [
+    // active menu items must have a price above zero
+    {
+      code: "MENU-PRICE",
+      type: "menu_item",
+      path: "price",
+      assert: { gt: 0 },
+      severity: "error",
+      message: "Menu item price must be greater than 0",
+    },
+    // legal pages must have been reviewed in the last 12 months
+    {
+      type: "page",
+      filter: { template: "legal" },
+      path: "last_reviewed_at",
+      assert: { newerThan: "12months" },
+      severity: "warning",
+      code: "LEGAL-REVIEW-OVERDUE",
+    },
+    // event dates must be in the future
+    { type: "event", path: "eventDate", assert: "futureDate" },
+    // image descriptions must not be placeholder text
+    {
+      type: "menu_item",
+      path: "image.description",
+      assert: { notMatches: "^(image|photo|picture)$" },
+      code: "IMG-DESC-PLACEHOLDER",
+    },
+  ],
+}`}</CodeBlock>
+      <p>
+        Supported assertions: <code>present</code>, <code>futureDate</code>,{" "}
+        <code>pastDate</code> (string shorthands), and the object form with{" "}
+        <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>,{" "}
+        <code>oneOf</code>, <code>matches</code>, <code>notMatches</code>,{" "}
+        <code>minLength</code>, <code>maxLength</code>, <code>newerThan</code>,
+        and <code>olderThan</code>. Every constraint in an object assertion must
+        hold for the rule to pass. Durations accept values such as{" "}
+        <code>30d</code>, <code>2 weeks</code>, <code>12months</code>, or{" "}
+        <code>1y</code>.
+      </p>
+      <p>
+        A functional rule is a function called once per document. It receives
+        the document and a context with <code>readPath</code> plus{" "}
+        <code>error</code>, <code>warning</code>, and <code>info</code> helpers.
+        Use it for cross-document or multi-field checks the declarative form
+        cannot express.
+      </p>
+      <CodeBlock>{`checks: {
+  custom: [
+    (doc, ctx) => {
+      if (doc.type !== "branch") return;
+      const items = ctx.readPath("available_items");
+      if (!Array.isArray(items) || items.length === 0) {
+        ctx.error(
+          "BRANCH-NO-ITEMS",
+          "Branch " + doc.id + " has no available items",
+          { path: "data.available_items" },
+        );
+      }
+    },
+  ],
+}`}</CodeBlock>
+      <div className="callout">
+        <strong>Codes and grouping</strong>
+        Declarative rules default to the <code>CUSTOM-RULE</code> code; set{" "}
+        <code>code</code> to give a rule its own. Diagnostics whose code starts
+        with <code>CUSTOM</code> are grouped under a <code>custom</code> group
+        in the HTML report and JUnit output; functional rules can use any code
+        you like.
       </div>
     </DocsShell>
   );

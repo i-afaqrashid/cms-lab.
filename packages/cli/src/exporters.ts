@@ -142,6 +142,10 @@ function groupForDiagnostic(diagnostic: Diagnostic): string {
     return "a11y";
   }
 
+  if (diagnostic.code.startsWith("CUSTOM")) {
+    return "custom";
+  }
+
   return "other";
 }
 

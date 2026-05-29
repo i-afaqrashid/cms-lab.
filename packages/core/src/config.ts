@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { ConfigLoadError } from "./errors.js";
-import type { CmsLabConfig, RouteDefinition } from "./types.js";
+import type { CmsLabConfig, CustomRuleFn, RouteDefinition } from "./types.js";
 
 const routeSchema = z
   .object({
@@ -177,6 +177,59 @@ const relationshipRuleSchema = z
   })
   .strict();
 
+const customAssertionObjectSchema = z
+  .object({
+    present: z.boolean().optional(),
+    gt: z.number().optional(),
+    gte: z.number().optional(),
+    lt: z.number().optional(),
+    lte: z.number().optional(),
+    oneOf: z
+      .array(z.union([z.string(), z.number(), z.boolean()]))
+      .min(1)
+      .optional(),
+    matches: z.string().min(1).optional(),
+    notMatches: z.string().min(1).optional(),
+    minLength: z.number().int().min(0).optional(),
+    maxLength: z.number().int().min(0).optional(),
+    futureDate: z.boolean().optional(),
+    pastDate: z.boolean().optional(),
+    newerThan: z.string().min(1).optional(),
+    olderThan: z.string().min(1).optional(),
+  })
+  .strict()
+  .refine(
+    (assertion) =>
+      Object.values(assertion).some((value) => value !== undefined),
+    { message: "Custom rule assert must declare at least one constraint" },
+  );
+
+const customAssertionSchema = z.union([
+  z.enum(["present", "futureDate", "pastDate"]),
+  customAssertionObjectSchema,
+]);
+
+const customDeclarativeRuleSchema = z
+  .object({
+    code: z.string().min(1).optional(),
+    type: z.string().min(1),
+    filter: z
+      .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+      .optional(),
+    path: z.string().min(1),
+    assert: customAssertionSchema,
+    severity: z.enum(["error", "warning", "info"]).optional(),
+    message: z.string().min(1).optional(),
+  })
+  .strict();
+
+const customRuleSchema = z.union([
+  z.custom<CustomRuleFn>((value) => typeof value === "function", {
+    message: "Functional custom rules must be a function",
+  }),
+  customDeclarativeRuleSchema,
+]);
+
 const checksSchema = z
   .object({
     routes: z
@@ -222,6 +275,7 @@ const checksSchema = z
       ])
       .optional(),
     relationships: z.array(relationshipRuleSchema).optional(),
+    custom: z.array(customRuleSchema).optional(),
   })
   .strict()
   .optional();

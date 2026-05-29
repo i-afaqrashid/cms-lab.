@@ -1,7 +1,13 @@
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { defineConfig, loadCmsLabConfig, validateConfig } from "@cms-lab/core";
+import {
+  defineConfig,
+  loadCmsLabConfig,
+  validateConfig,
+  type CMSDocument,
+  type CustomRuleContext,
+} from "@cms-lab/core";
 
 test("defineConfig preserves config shape for typed user configs", () => {
   const config = defineConfig({
@@ -200,6 +206,68 @@ test("validateConfig accepts required field check rules", () => {
       severity: "warning",
     },
   ]);
+});
+
+test("validateConfig accepts declarative and functional custom rules", () => {
+  const config = validateConfig({
+    site: { url: "http://localhost:3000" },
+    framework: { type: "next", router: "app" },
+    cms: { provider: "prismic", repositoryName: "demo" },
+    routes: [{ type: "page", pattern: "/:uid", getPath: () => "/about" }],
+    checks: {
+      custom: [
+        {
+          code: "MENU-PRICE",
+          type: "menu_item",
+          path: "price",
+          assert: { gt: 0 },
+          severity: "error",
+        },
+        {
+          type: "page",
+          filter: { template: "legal" },
+          path: "last_reviewed_at",
+          assert: { newerThan: "12months" },
+        },
+        { type: "event", path: "eventDate", assert: "futureDate" },
+        (doc: CMSDocument, ctx: CustomRuleContext) => {
+          if (doc.type === "branch") {
+            ctx.warning("BRANCH", "noop");
+          }
+        },
+      ],
+    },
+  });
+
+  expect(config.checks?.custom).toHaveLength(4);
+});
+
+test("validateConfig rejects a custom assert with no constraint", () => {
+  expect(() =>
+    validateConfig({
+      site: { url: "http://localhost:3000" },
+      framework: { type: "next", router: "app" },
+      cms: { provider: "prismic", repositoryName: "demo" },
+      routes: [{ type: "page", pattern: "/:uid", getPath: () => "/about" }],
+      checks: { custom: [{ type: "page", path: "title", assert: {} }] },
+    }),
+  ).toThrow(/constraint|Invalid|custom|assert/i);
+});
+
+test("validateConfig rejects unknown keys in a custom rule", () => {
+  expect(() =>
+    validateConfig({
+      site: { url: "http://localhost:3000" },
+      framework: { type: "next", router: "app" },
+      cms: { provider: "prismic", repositoryName: "demo" },
+      routes: [{ type: "page", pattern: "/:uid", getPath: () => "/about" }],
+      checks: {
+        custom: [
+          { type: "page", path: "title", assert: "present", typoKey: true },
+        ],
+      },
+    }),
+  ).toThrow();
 });
 
 test("validateConfig rejects unsupported SEO check sub-options", () => {
