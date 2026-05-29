@@ -70,3 +70,39 @@ jobs:
 
       - name: Publish packages
         run: pnpm release:publish-tarballs .release-packages
+
+  sbom:
+    name: Generate and attach SBOM
+    needs: publish
+    if: github.repository == 'i-afaqrashid/cms-lab'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Generate CycloneDX SBOM
+        # Best-effort: a SBOM hiccup must never block an already-published release.
+        continue-on-error: true
+        run: npx --yes @cyclonedx/cdxgen@11 --type pnpm --output sbom.json --no-recurse .
+
+      - name: Upload SBOM artifact
+        if: hashFiles('sbom.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+
+      - name: Attach SBOM to the release
+        if: hashFiles('sbom.json') != ''
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" sbom.json --clobber

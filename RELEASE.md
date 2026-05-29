@@ -37,6 +37,7 @@ The public npm packages are:
 - `@cms-lab/wordpress`
 - `@cms-lab/contentful`
 - `@cms-lab/sanity`
+- `@cms-lab/payload`
 - `@cms-lab/reporter`
 
 These packages are published from GitHub Actions using npm Trusted Publishing.
@@ -82,6 +83,10 @@ npm's OIDC flow with `id-token: write` enabled.
 5. Run the packaged CLI smoke test.
 6. Pack all publishable packages into `.release-packages/`.
 7. Publish tarballs in dependency order: adapter/core packages first, `@cms-lab/cli` next.
+8. Generate a CycloneDX SBOM (`sbom.json`), upload it as a workflow artifact, and
+   attach it to the GitHub release for the tag. This step is best-effort and
+   never blocks an already-published release; npm provenance (`--provenance`,
+   `id-token: write`) remains the primary supply-chain signal.
 
 The workflow does not use dependency or Next.js caches during release publishes.
 It refuses to publish if any `name@version` already exists on npm.
