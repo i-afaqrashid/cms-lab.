@@ -2129,6 +2129,100 @@ test("runCli init can write WordPress, Contentful, and Sanity starters", async (
   }
 });
 
+test("runCli watch reruns the scan on config change and exits on abort", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  const configPath = join(cwd, "cms-lab.config.ts");
+  await writeFile(
+    configPath,
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  let scanRuns = 0;
+  let onChange: (() => void) | undefined;
+  const controller = new AbortController();
+  let stdout = "";
+
+  const waitUntil = async (predicate: () => boolean) => {
+    for (let i = 0; i < 200 && !predicate(); i += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+  };
+
+  const promise = runCli(["watch", "--config", configPath], {
+    cwd,
+    stdout: (text) => {
+      stdout += text;
+    },
+    stderr: () => {},
+    fetchCmsDocuments: async () => {
+      scanRuns += 1;
+      return [];
+    },
+    fetch: async () => new Response("ok"),
+    watch: (_paths, change) => {
+      onChange = change;
+      return () => {};
+    },
+    watchSignal: controller.signal,
+  });
+
+  await waitUntil(() => onChange !== undefined);
+  expect(scanRuns).toBe(1);
+
+  onChange?.();
+  await waitUntil(() => scanRuns >= 2);
+
+  controller.abort();
+  const exitCode = await promise;
+
+  expect(exitCode).toBe(0);
+  expect(scanRuns).toBeGreaterThanOrEqual(2);
+  expect(stdout).toContain("cms-lab watch: watching");
+});
+
+test("runCli watch rejects an invalid --interval", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+  await mkdir(join(cwd, "app"), { recursive: true });
+  await writeFile(
+    join(cwd, "package.json"),
+    JSON.stringify({ dependencies: { next: "^15.0.0" } }),
+  );
+  await writeFile(
+    join(cwd, "cms-lab.config.ts"),
+    `
+      import { defineConfig } from '@cms-lab/core'
+      export default defineConfig({
+        site: { url: 'http://localhost:3000' },
+        framework: { type: 'next', router: 'app' },
+        cms: { provider: 'prismic', repositoryName: 'demo' },
+        routes: [{ type: 'page', pattern: '/:uid', getPath: (doc) => '/' + doc.uid }],
+      })
+    `,
+  );
+
+  const exitCode = await runCli(["watch", "--interval", "soon"], {
+    cwd,
+    stdout: () => {},
+    stderr: () => {},
+    watchSignal: AbortSignal.abort(),
+  });
+
+  expect(exitCode).toBe(2);
+});
+
 test("runCli init rejects an unknown --cms provider", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   const exitCode = await runCli(["init", "--cms", "bogus"], {

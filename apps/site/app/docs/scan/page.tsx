@@ -13,6 +13,7 @@ export default function ScanPage() {
       toc={[
         { href: "#synopsis", label: "Synopsis" },
         { href: "#flags", label: "Flags" },
+        { href: "#watch", label: "Watch mode" },
         { href: "#exit-codes", label: "Exit codes" },
         { href: "#json", label: "JSON" },
       ]}
@@ -252,6 +253,23 @@ export default function ScanPage() {
           </tr>
         </tbody>
       </table>
+
+      <h2 id="watch">Watch mode</h2>
+      <p>
+        <code>cms-lab watch</code> re-runs the scan when{" "}
+        <code>cms-lab.config.ts</code> changes and prints a short timestamped
+        summary per run, so you can iterate on config and content without
+        re-invoking the CLI. It accepts the same <code>--only</code>,{" "}
+        <code>--skip</code>, and <code>--type</code> filters as{" "}
+        <code>scan</code>, plus <code>--interval</code> for periodic re-runs.
+      </p>
+      <CodeBlock>{`cms-lab watch
+cms-lab watch --only routes
+cms-lab watch --interval 30s`}</CodeBlock>
+      <p>
+        Watch runs until interrupted (Ctrl-C). It reloads the config on each
+        run, so config edits take effect immediately.
+      </p>
 
       <h2 id="exit-codes">Exit codes</h2>
       <table className="table">

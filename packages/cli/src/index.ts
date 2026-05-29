@@ -1,5 +1,5 @@
 import { Command, CommanderError } from "commander";
-import { readFileSync } from "node:fs";
+import { readFileSync, watch as fsWatch } from "node:fs";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { performance } from "node:perf_hooks";
@@ -16,6 +16,7 @@ import {
   type DiagnosticDiff,
   SiteUnreachableError,
   diffDiagnostics,
+  durationMs,
   explainDiagnostic,
   loadCmsLabConfig,
   makeBaseline,
@@ -61,6 +62,13 @@ export type CliDependencies = {
   fetch?: FetchLike;
   fetchCmsDocuments?: (config: CmsProviderConfig) => Promise<CMSDocument[]>;
   fetchPrismicDocuments?: (config: CmsProviderConfig) => Promise<CMSDocument[]>;
+  /**
+   * Subscribe to changes on `paths`, returning an unsubscribe function.
+   * Injected in tests; defaults to a debounced `fs.watch` wrapper.
+   */
+  watch?: (paths: string[], onChange: () => void) => () => void;
+  /** Stops `cms-lab watch`. Defaults to a SIGINT-backed signal in the CLI. */
+  watchSignal?: AbortSignal;
 };
 
 type ScanCommandOptions = {
@@ -112,6 +120,17 @@ type DoctorCommandOptions = {
   retries?: string;
   debug?: boolean;
   verbose?: string;
+};
+
+type WatchCommandOptions = {
+  config?: string;
+  url?: string;
+  type?: string[];
+  only?: string[];
+  skip?: string[];
+  interval?: string;
+  timeout?: string;
+  retries?: string;
 };
 
 type InitCommandOptions = {
@@ -266,6 +285,35 @@ Examples:
     )
     .action(async (options: ScanCommandOptions) => {
       exitCode = await runScan(options, dependencies);
+    });
+
+  program
+    .command("watch")
+    .description(
+      "Re-run the scan when cms-lab.config.ts changes, and optionally on an interval. Prints a short summary per run.",
+    )
+    .option("--config <path>", "Path to cms-lab config file")
+    .option("--url <url>", "Override config.site.url")
+    .option("--type <type...>", "Limit to content types. Repeatable.")
+    .option("--only <group...>", "Run only these check groups. Repeatable.")
+    .option("--skip <group...>", "Skip these check groups. Repeatable.")
+    .option(
+      "--interval <duration>",
+      "Also re-run on a fixed interval, e.g. 30s or 5m",
+    )
+    .option("--timeout <ms>", "Per-route HTTP timeout in milliseconds")
+    .option("--retries <count>", "Retry transient route probe failures", "1")
+    .addHelpText(
+      "after",
+      `
+Examples:
+  cms-lab watch
+  cms-lab watch --only routes
+  cms-lab watch --interval 30s
+`,
+    )
+    .action(async (options: WatchCommandOptions) => {
+      exitCode = await runWatch(options, dependencies);
     });
 
   program
@@ -681,6 +729,186 @@ async function runScan(
     writeStderr(dependencies, `Unexpected error: ${safeMessageFrom(error)}\n`);
     return 2;
   }
+}
+
+async function runWatch(
+  options: WatchCommandOptions,
+  dependencies: CliDependencies,
+): Promise<number> {
+  const cwd = dependencies.cwd ?? process.cwd();
+  const timeoutMs = parseTimeout(options.timeout);
+  const retries = parseRetries(options.retries);
+  const filters = {
+    types: splitList(options.type),
+    only: parseCheckGroups(options.only),
+    skip: parseCheckGroups(options.skip),
+  };
+
+  let intervalMs: number | undefined;
+  if (options.interval) {
+    intervalMs = durationMs(options.interval);
+    if (!Number.isFinite(intervalMs) || intervalMs <= 0) {
+      writeStderr(
+        dependencies,
+        `Config error: --interval must be a positive duration such as 30s or 5m\n`,
+      );
+      return 2;
+    }
+  }
+
+  // Detect the Next.js project once; config is reloaded each run so edits to
+  // cms-lab.config.ts take effect without restarting.
+  let project: ProjectInfo;
+  try {
+    project = await detectNextProject(cwd);
+  } catch (error) {
+    writeStderr(dependencies, `Unexpected error: ${safeMessageFrom(error)}\n`);
+    return 2;
+  }
+
+  let running = false;
+  let rerunQueued = false;
+
+  const runOnce = async (): Promise<void> => {
+    if (running) {
+      rerunQueued = true;
+      return;
+    }
+    running = true;
+    try {
+      do {
+        rerunQueued = false;
+        await runWatchScan(
+          { cwd, options, filters, timeoutMs, retries, project },
+          dependencies,
+        );
+      } while (rerunQueued);
+    } finally {
+      running = false;
+    }
+  };
+
+  const configPath = resolve(cwd, options.config ?? "cms-lab.config.ts");
+  writeStdout(
+    dependencies,
+    `cms-lab watch: watching ${relative(cwd, configPath) || configPath}${
+      intervalMs ? ` (interval ${options.interval})` : ""
+    }\n`,
+  );
+
+  await runOnce();
+
+  const watchImpl = dependencies.watch ?? defaultWatch;
+  const unsubscribe = watchImpl([configPath], () => {
+    void runOnce();
+  });
+
+  let timer: ReturnType<typeof setInterval> | undefined;
+  if (intervalMs) {
+    timer = setInterval(() => void runOnce(), intervalMs);
+  }
+
+  await waitForAbort(dependencies.watchSignal);
+
+  unsubscribe();
+  if (timer) {
+    clearInterval(timer);
+  }
+
+  return 0;
+}
+
+async function runWatchScan(
+  context: {
+    cwd: string;
+    options: WatchCommandOptions;
+    filters: { types: string[]; only: CheckGroup[]; skip: CheckGroup[] };
+    timeoutMs: number | undefined;
+    retries: number | undefined;
+    project: ProjectInfo;
+  },
+  dependencies: CliDependencies,
+): Promise<void> {
+  const { cwd, options, filters, timeoutMs, retries, project } = context;
+  try {
+    const loaded = await loadCmsLabConfig({ cwd, configPath: options.config });
+    const config = {
+      ...loaded.config,
+      site: {
+        ...loaded.config.site,
+        url: options.url ?? loaded.config.site.url,
+      },
+    };
+    const documents = await fetchCmsDocuments(config.cms, dependencies);
+    const result = await scanDocuments({
+      config,
+      project,
+      documents,
+      fetch: dependencies.fetch,
+      timeoutMs,
+      retries,
+      filters,
+    });
+    const { errors, warnings, info } = result.summary;
+    writeStdout(
+      dependencies,
+      `[${watchTimestamp()}] ${errors} ${plural(errors, "error")}, ${warnings} ${plural(
+        warnings,
+        "warning",
+      )}, ${info} info, ${result.documents.length} ${plural(
+        result.documents.length,
+        "document",
+      )}\n`,
+    );
+  } catch (error) {
+    writeStderr(
+      dependencies,
+      `[${watchTimestamp()}] scan failed: ${redactSensitive(safeMessageFrom(error))}\n`,
+    );
+  }
+}
+
+function watchTimestamp(): string {
+  return new Date().toTimeString().slice(0, 8);
+}
+
+function waitForAbort(signal: AbortSignal | undefined): Promise<void> {
+  if (!signal) {
+    return new Promise<void>(() => {});
+  }
+  if (signal.aborted) {
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolveAbort) => {
+    signal.addEventListener("abort", () => resolveAbort(), { once: true });
+  });
+}
+
+function defaultWatch(paths: string[], onChange: () => void): () => void {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const debounced = () => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(onChange, 100);
+  };
+
+  const watchers = paths.map((path) => {
+    try {
+      return fsWatch(path, { persistent: true }, debounced);
+    } catch {
+      return undefined;
+    }
+  });
+
+  return () => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    for (const watcher of watchers) {
+      watcher?.close();
+    }
+  };
 }
 
 async function runDoctor(
