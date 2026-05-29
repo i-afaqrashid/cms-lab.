@@ -17,16 +17,26 @@ history stays consistent across GitHub and npm.
 - Added the default `CUSTOM-RULE` diagnostic code and a `custom` check group.
   Custom diagnostics flow through terminal, JSON, Markdown, JUnit, Slack, and
   HTML output and respect `--only custom` / `--skip custom`.
+- Added the `@cms-lab/payload` adapter and `provider: "payload"` config.
+  Reads the Payload REST API (`{url}{apiPath}/{collection}`), normalizes
+  collection docs, maps the `_status` draft flag, supports `uidField`/`urlField`
+  and `routable`, JWT or API-key auth, and checks SEO and media alt text. Added
+  `cms-lab init --cms payload`.
 
 ### Documentation
 
 - Documented declarative and functional custom rules in the configuration docs
   and added `CUSTOM-RULE` to the diagnostics reference.
+- Added a Payload provider page, README config block, and tested-with matrix
+  entry.
 
 ### Verification
 
 - Added core custom-rule, scan, config-schema, HTML reporter, and CLI exporter
   tests covering user-defined diagnostics.
+- Added Payload adapter fixture tests (collection fetch, pagination, status
+  normalization, slug/UID mapping, auth, SEO, media alt) and a core scan test
+  for Payload media.
 
 ## 1.2.6 - 2026-05-26
 

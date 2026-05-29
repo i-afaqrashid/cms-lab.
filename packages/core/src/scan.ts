@@ -990,6 +990,10 @@ function imageAltCandidate(
     return { isImage: true, value: record.description };
   }
 
+  if (provider === "payload" && isPayloadImageRecord(record)) {
+    return { isImage: true, value: record.alt };
+  }
+
   if (provider === "contentful" && isContentfulImageRecord(record)) {
     return { isImage: true, value: record.description ?? record.title };
   }
@@ -1016,6 +1020,19 @@ function imageAltCandidate(
   }
 
   return { isImage: false, value: undefined };
+}
+
+function isPayloadImageRecord(record: Record<string, unknown>): boolean {
+  if (typeof record.url !== "string") {
+    return false;
+  }
+
+  return (
+    (typeof record.mimeType === "string" &&
+      record.mimeType.startsWith("image/")) ||
+    hasImageExtension(record.filename) ||
+    "alt" in record
+  );
 }
 
 function isDirectusImageRecord(record: Record<string, unknown>): boolean {

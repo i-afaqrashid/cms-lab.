@@ -133,6 +133,9 @@ importers:
       "@cms-lab/next":
         specifier: workspace:*
         version: link:../next
+      "@cms-lab/payload":
+        specifier: workspace:*
+        version: link:../payload
       "@cms-lab/prismic":
         specifier: workspace:*
         version: link:../prismic
@@ -177,6 +180,12 @@ importers:
         version: link:../core
 
   packages/next:
+    dependencies:
+      "@cms-lab/core":
+        specifier: workspace:*
+        version: link:../core
+
+  packages/payload:
     dependencies:
       "@cms-lab/core":
         specifier: workspace:*

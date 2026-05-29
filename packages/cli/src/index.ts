@@ -38,6 +38,7 @@ import { renderHtmlReport } from "@cms-lab/reporter";
 import { fetchSanityDocuments as defaultFetchSanityDocuments } from "@cms-lab/sanity";
 import { fetchStrapiDocuments as defaultFetchStrapiDocuments } from "@cms-lab/strapi";
 import { fetchWordPressDocuments as defaultFetchWordPressDocuments } from "@cms-lab/wordpress";
+import { fetchPayloadDocuments as defaultFetchPayloadDocuments } from "@cms-lab/payload";
 import {
   postSlackPayload,
   renderJUnitReport,
@@ -123,6 +124,7 @@ type InitCommandOptions = {
   strapiUrl?: string;
   strapiLocale?: string;
   directusUrl?: string;
+  payloadUrl?: string;
 };
 
 type AgentContextCommandOptions = {
@@ -370,7 +372,7 @@ Examples:
     .option("--force", "Overwrite an existing config file")
     .option(
       "--cms <provider>",
-      "Starter CMS provider: prismic, strapi, or directus",
+      "Starter CMS provider: prismic, strapi, directus, or payload",
       "prismic",
     )
     .option("--router <router>", "Next.js router: app or pages", "app")
@@ -383,6 +385,11 @@ Examples:
     )
     .option("--strapi-locale <locale>", "Strapi locale query param")
     .option("--directus-url <url>", "Directus API URL", "http://localhost:8055")
+    .option(
+      "--payload-url <url>",
+      "Payload REST API base URL",
+      "http://localhost:3000",
+    )
     .addHelpText(
       "after",
       `
@@ -391,6 +398,7 @@ Examples:
   cms-lab init --repository my-prismic-repo --url http://localhost:3000
   cms-lab init --cms strapi --router pages --strapi-url http://localhost:1337
   cms-lab init --cms directus --router pages --directus-url http://localhost:8055
+  cms-lab init --cms payload --payload-url http://localhost:3000
   cms-lab init --config cms-lab.config.ts --force
 `,
     )
@@ -1536,6 +1544,12 @@ function describeCms(config: CmsProviderConfig): string {
     )}`;
   }
 
+  if (config.provider === "payload") {
+    return `payload url=${safeUrl(config.url)} collections=${formatList(
+      config.collections.map((collection) => collection.collection),
+    )}`;
+  }
+
   return `wordpress url=${safeUrl(config.url)} contentTypes=${formatList(
     config.contentTypes?.map((contentType) => contentType.endpoint) ?? [
       "pages",
@@ -1632,6 +1646,10 @@ async function fetchCmsDocuments(
 
   if (config.provider === "sanity") {
     return defaultFetchSanityDocuments(config, { fetch: dependencies.fetch });
+  }
+
+  if (config.provider === "payload") {
+    return defaultFetchPayloadDocuments(config, { fetch: dependencies.fetch });
   }
 
   return defaultFetchWordPressDocuments(config, { fetch: dependencies.fetch });
@@ -2010,20 +2028,26 @@ function plural(value: number, singular: string): string {
 }
 
 type ParsedInitOptions = {
-  cms: "prismic" | "strapi" | "directus";
+  cms: "prismic" | "strapi" | "directus" | "payload";
   router: ProjectInfo["router"];
   repository: string;
   url: string;
   strapiUrl: string;
   strapiLocale?: string;
   directusUrl: string;
+  payloadUrl: string;
 };
 
 function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
   const cms = options.cms ?? "prismic";
-  if (cms !== "prismic" && cms !== "strapi" && cms !== "directus") {
+  if (
+    cms !== "prismic" &&
+    cms !== "strapi" &&
+    cms !== "directus" &&
+    cms !== "payload"
+  ) {
     throw new ConfigLoadError(
-      "--cms must be one of: prismic, strapi, directus",
+      "--cms must be one of: prismic, strapi, directus, payload",
     );
   }
 
@@ -2040,6 +2064,7 @@ function parseInitOptions(options: InitCommandOptions): ParsedInitOptions {
     strapiUrl: options.strapiUrl ?? "http://localhost:1337",
     strapiLocale: options.strapiLocale,
     directusUrl: options.directusUrl ?? "http://localhost:8055",
+    payloadUrl: options.payloadUrl ?? "http://localhost:3000",
   };
 }
 
@@ -2050,6 +2075,10 @@ function starterConfig(options: ParsedInitOptions): string {
 
   if (options.cms === "directus") {
     return directusStarterConfig(options);
+  }
+
+  if (options.cms === "payload") {
+    return payloadStarterConfig(options);
   }
 
   return `import { defineConfig } from "@cms-lab/core";
@@ -2144,6 +2173,43 @@ export default defineConfig({
         severity: "warning",
       },
     ],
+  },
+});
+`;
+}
+
+function payloadStarterConfig(options: ParsedInitOptions): string {
+  return `import { defineConfig } from "@cms-lab/core";
+
+export default defineConfig({
+  site: { url: ${JSON.stringify(options.url)} },
+  framework: { type: "next", router: ${JSON.stringify(options.router)} },
+  cms: {
+    provider: "payload",
+    url: ${JSON.stringify(options.payloadUrl)},
+    // Payload self-hosts inside your Next.js app; apiPath defaults to "/api".
+    // apiPath: "/api",
+    token: process.env.PAYLOAD_TOKEN,
+    collections: [
+      { type: "page", collection: "pages", uidField: "slug" },
+      { type: "post", collection: "posts", uidField: "slug" },
+    ],
+  },
+  routes: [
+    { type: "page", pattern: "/:slug", getPath: (doc) => \`/\${doc.uid}\` },
+    {
+      type: "post",
+      pattern: "/blog/:slug",
+      getPath: (doc) => \`/blog/\${doc.uid}\`,
+    },
+  ],
+  checks: {
+    fields: {
+      required: [
+        { type: "page", path: "title" },
+        { type: "post", path: "title" },
+      ],
+    },
   },
 });
 `;

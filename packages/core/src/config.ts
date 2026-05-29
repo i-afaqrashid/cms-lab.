@@ -147,6 +147,27 @@ const sanityConfigSchema = z
   })
   .strict();
 
+const payloadConfigSchema = z
+  .object({
+    provider: z.literal("payload"),
+    url: z.string().url(),
+    apiPath: z.string().min(1).optional(),
+    token: z.string().optional(),
+    collections: z
+      .array(
+        z
+          .object({
+            type: z.string().min(1),
+            collection: z.string().min(1),
+            routable: z.boolean().optional(),
+            ...cmsFieldMappingShape,
+          })
+          .strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
 const cmsConfigSchema = z.discriminatedUnion("provider", [
   prismicConfigSchema,
   strapiConfigSchema,
@@ -154,6 +175,7 @@ const cmsConfigSchema = z.discriminatedUnion("provider", [
   wordpressConfigSchema,
   contentfulConfigSchema,
   sanityConfigSchema,
+  payloadConfigSchema,
 ]);
 
 const requiredFieldRuleSchema = z.object({

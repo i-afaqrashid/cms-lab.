@@ -239,13 +239,28 @@ export type SanityCmsProviderConfig = {
   contentTypes: SanityContentTypeConfig[];
 };
 
+export type PayloadCollectionConfig = {
+  type: string;
+  collection: string;
+  routable?: boolean;
+} & CmsFieldMappingConfig;
+
+export type PayloadCmsProviderConfig = {
+  provider: "payload";
+  url: string;
+  apiPath?: string;
+  token?: string;
+  collections: PayloadCollectionConfig[];
+};
+
 export type CmsProviderConfig =
   | PrismicCmsProviderConfig
   | StrapiCmsProviderConfig
   | DirectusCmsProviderConfig
   | WordPressCmsProviderConfig
   | ContentfulCmsProviderConfig
-  | SanityCmsProviderConfig;
+  | SanityCmsProviderConfig
+  | PayloadCmsProviderConfig;
 
 export type CmsLabConfig = {
   site: {

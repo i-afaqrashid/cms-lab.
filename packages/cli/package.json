@@ -22,6 +22,7 @@
     "strapi",
     "directus",
     "wordpress",
+    "payload",
     "cli",
     "testing"
   ],
@@ -52,6 +53,7 @@
     "@cms-lab/core": "workspace:*",
     "@cms-lab/directus": "workspace:*",
     "@cms-lab/next": "workspace:*",
+    "@cms-lab/payload": "workspace:*",
     "@cms-lab/prismic": "workspace:*",
     "@cms-lab/reporter": "workspace:*",
     "@cms-lab/sanity": "workspace:*",

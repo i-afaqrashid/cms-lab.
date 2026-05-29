@@ -2048,6 +2048,32 @@ test("runCli init can write a Directus starter config", async () => {
   expect(config).toContain('pattern: "/menu/:branch/:slug"');
 });
 
+test("runCli init can write a Payload starter config", async () => {
+  const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
+
+  const exitCode = await runCli(
+    ["init", "--cms", "payload", "--payload-url", "http://localhost:3000"],
+    {
+      cwd,
+      stdout: () => {},
+      stderr: () => {},
+    },
+  );
+
+  const config = await readFile(join(cwd, "cms-lab.config.ts"), "utf8");
+
+  expect(exitCode).toBe(0);
+  expect(config).toContain('provider: "payload"');
+  expect(config).toContain("process.env.PAYLOAD_TOKEN");
+  expect(config).toContain(
+    '{ type: "page", collection: "pages", uidField: "slug" }',
+  );
+  expect(config).toContain(
+    '{ type: "post", collection: "posts", uidField: "slug" }',
+  );
+  expect(config).toContain('pattern: "/blog/:slug"');
+});
+
 test("runCli doctor uses site.healthPath for localized apps", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "cms-lab-cli-"));
   await mkdir(join(cwd, "pages"), { recursive: true });
