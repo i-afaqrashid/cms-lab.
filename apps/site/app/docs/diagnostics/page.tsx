@@ -40,6 +40,14 @@ export default function DiagnosticsPage() {
             Expected route returned a 5xx response.
           </DiagnosticCode>
           <DiagnosticCode
+            code="CMS-ROUTE-DUPLICATE"
+            severity="error"
+            group="routes"
+          >
+            Two or more published documents resolve to the same route path. Only
+            one wins at runtime; drafts are ignored.
+          </DiagnosticCode>
+          <DiagnosticCode
             code="CMS-ROUTE-ERROR"
             severity="error"
             group="routes"

@@ -79,6 +79,7 @@ export async function scanDocuments(
     : [];
 
   if (shouldRunRoutes) {
+    diagnostics.push(...detectDuplicateRoutes(options.config, routeCandidates));
     diagnostics.push(
       ...(await checkRouteReachability(
         options.config,
@@ -198,6 +199,64 @@ function resolveRouteCandidates(
   }
 
   return candidates;
+}
+
+/**
+ * Flag two or more published documents that resolve to the same route path.
+ * Only one wins at runtime, so the others are silent content debt. Draft
+ * documents are skipped: a draft sharing a path with a published document is
+ * expected (only the published one is live). The first candidate for a path
+ * (in document order) is treated as the winner; the rest are reported.
+ */
+function detectDuplicateRoutes(
+  config: CmsLabConfig,
+  candidates: RouteCandidate[],
+): Diagnostic[] {
+  const byPath = new Map<string, RouteCandidate[]>();
+
+  for (const candidate of candidates) {
+    if (candidate.document.status === "draft") {
+      continue;
+    }
+
+    const key = duplicateRouteKey(candidate.path);
+    byPath.set(key, [...(byPath.get(key) ?? []), candidate]);
+  }
+
+  const diagnostics: Diagnostic[] = [];
+
+  for (const group of byPath.values()) {
+    if (group.length < 2) {
+      continue;
+    }
+
+    const [winner, ...losers] = group;
+    for (const loser of losers) {
+      diagnostics.push(
+        createDiagnostic({
+          severity: "error",
+          code: "CMS-ROUTE-DUPLICATE",
+          message: `Document ${loser.document.id} of type ${loser.document.type} resolves to ${pathForDiagnostic(loser.path)}, which is already used by document ${winner.document.id} of type ${winner.document.type}`,
+          path: pathForDiagnostic(loser.path),
+          source: sourceFor(config, loser.document),
+        }),
+      );
+    }
+  }
+
+  return diagnostics;
+}
+
+function duplicateRouteKey(path: string): string {
+  try {
+    const pathname = new URL(path, "https://cms-lab.local").pathname.replace(
+      /\/+$/,
+      "",
+    );
+    return pathname || "/";
+  } catch {
+    return path;
+  }
 }
 
 async function checkRouteReachability(
