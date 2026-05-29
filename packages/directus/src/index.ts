@@ -1,11 +1,14 @@
 import {
   CmsFetchError,
+  mapWithConcurrency,
   readCmsDataPath,
   type CMSDocument,
   type DirectusCollectionConfig,
   type DirectusCmsProviderConfig,
   type FetchLike,
 } from "@cms-lab/core";
+
+const COLLECTION_CONCURRENCY = 6;
 
 type DirectusResponse = {
   data?: unknown[];
@@ -20,39 +23,45 @@ export async function fetchDirectusDocuments(
   options: FetchDirectusDocumentsOptions = {},
 ): Promise<CMSDocument[]> {
   const fetchImpl = options.fetch ?? fetch;
-  const documents: CMSDocument[] = [];
   const pageSize = 100;
 
-  for (const collection of config.collections) {
-    let page = 1;
+  const perCollection = await mapWithConcurrency(
+    config.collections,
+    COLLECTION_CONCURRENCY,
+    async (collection) => {
+      const documents: CMSDocument[] = [];
+      let page = 1;
 
-    while (true) {
-      const url = new URL(
-        `/items/${trimSlashes(collection.collection)}`,
-        config.url,
-      );
-      url.searchParams.set("limit", String(pageSize));
-      url.searchParams.set("page", String(page));
+      while (true) {
+        const url = new URL(
+          `/items/${trimSlashes(collection.collection)}`,
+          config.url,
+        );
+        url.searchParams.set("limit", String(pageSize));
+        url.searchParams.set("page", String(page));
 
-      const response = await fetchJson<DirectusResponse>(
-        fetchImpl,
-        url,
-        authHeaders(config.token),
-      );
-      const rows = response.data ?? [];
-      documents.push(
-        ...rows.map((item) => normalizeDirectusItem(collection, item)),
-      );
+        const response = await fetchJson<DirectusResponse>(
+          fetchImpl,
+          url,
+          authHeaders(config.token),
+        );
+        const rows = response.data ?? [];
+        documents.push(
+          ...rows.map((item) => normalizeDirectusItem(collection, item)),
+        );
 
-      if (rows.length < pageSize) {
-        break;
+        if (rows.length < pageSize) {
+          break;
+        }
+
+        page += 1;
       }
 
-      page += 1;
-    }
-  }
+      return documents;
+    },
+  );
 
-  return documents;
+  return perCollection.flat();
 }
 
 export function normalizeDirectusItem(

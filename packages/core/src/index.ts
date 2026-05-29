@@ -1,5 +1,6 @@
 export * from "./baseline.js";
 export * from "./compare.js";
+export * from "./concurrency.js";
 export * from "./config.js";
 export * from "./custom-rules.js";
 export * from "./data-path.js";

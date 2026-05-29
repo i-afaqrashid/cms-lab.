@@ -222,6 +222,41 @@ test("normalizeDirectusItem can mark relation-heavy Directus collections as non-
   });
 });
 
+test("fetchDirectusDocuments fetches multiple collections and preserves their order", async () => {
+  let active = 0;
+  let peak = 0;
+
+  const documents = await fetchDirectusDocuments(
+    {
+      provider: "directus",
+      url: "http://localhost:8055",
+      collections: [
+        { type: "page", collection: "pages" },
+        { type: "post", collection: "posts" },
+      ],
+    },
+    {
+      fetch: async (url) => {
+        active += 1;
+        peak = Math.max(peak, active);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        active -= 1;
+
+        const collection = new URL(String(url)).pathname.split("/").pop();
+        return Response.json({
+          data: [{ id: `${collection}-1`, slug: `${collection}-1` }],
+        });
+      },
+    },
+  );
+
+  // Both collections were in flight at once.
+  expect(peak).toBe(2);
+  // Result keeps collection order (pages before posts) despite concurrency.
+  expect(documents.map((doc) => doc.type)).toEqual(["page", "post"]);
+  expect(documents.map((doc) => doc.id)).toEqual(["pages-1", "posts-1"]);
+});
+
 test("fetchDirectusDocuments sends bearer tokens and reports HTTP failures", async () => {
   let authorization: string | null = null;
 
