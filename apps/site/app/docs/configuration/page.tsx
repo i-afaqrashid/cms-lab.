@@ -343,6 +343,15 @@ export default defineConfig({
         <code>next/og</code> rather than storing them in the CMS. Enable it only
         when editors author those fields.
       </div>
+      <div className="callout">
+        <strong>Canonical validation is opt-in</strong>
+        <code>{`checks: { routes: { canonical: true } }`}</code> reads each 2xx
+        route body and checks its <code>{`<link rel="canonical">`}</code>: a
+        missing canonical is a warning, a canonical on a different origin (a
+        leftover staging hostname) is an error, and a canonical whose path
+        disagrees with the route is a warning. It is off by default because it
+        requires reading response bodies.
+      </div>
       <h2 id="relationships">Relationships</h2>
       <p>
         Relationship checks compare one field on a source document with one

@@ -350,14 +350,17 @@ async function checkRouteReachability(
       return diagnostics;
     }
 
-    // Soft-404 detection: 2xx responses whose body looks like a not-found
-    // page (common Next.js / framework fallback shape). Only runs when
-    // explicitly enabled via checks.routes.soft404.
+    // Body-level checks on 2xx responses. Only run (and only read the body)
+    // when explicitly enabled, since both require the response body:
+    //   - soft-404 detection via checks.routes.soft404
+    //   - canonical validation via checks.routes.canonical
     const soft404 = soft404Options(config);
-    if (soft404 && status >= 200 && status < 300) {
+    const canonicalEnabled = canonicalCheckEnabled(config);
+    if ((soft404 || canonicalEnabled) && status >= 200 && status < 300) {
       try {
         const body = await response.text();
-        if (matchesSoft404Body(body, soft404)) {
+
+        if (soft404 && matchesSoft404Body(body, soft404)) {
           diagnostics.push(
             createDiagnostic({
               severity: "warning",
@@ -366,6 +369,12 @@ async function checkRouteReachability(
               path: diagnosticPath,
               source: sourceFor(config, candidate.document),
             }),
+          );
+        }
+
+        if (canonicalEnabled) {
+          diagnostics.push(
+            ...checkCanonical(config, candidate, diagnosticPath, url, body),
           );
         }
       } catch {
@@ -413,6 +422,117 @@ function matchesSoft404Body(
   }
 
   return false;
+}
+
+function canonicalCheckEnabled(config: CmsLabConfig): boolean {
+  const routes = config.checks?.routes;
+  return (
+    typeof routes === "object" && routes !== null && routes.canonical === true
+  );
+}
+
+/**
+ * Validate the rendered `<link rel="canonical">` against the probed URL.
+ * Missing canonical is a warning; a canonical on a different origin (a
+ * common leftover staging hostname) is an error; a canonical whose path
+ * disagrees with the probed path (ignoring trailing slash and case) is a
+ * warning. Query strings and hashes are ignored.
+ */
+function checkCanonical(
+  config: CmsLabConfig,
+  candidate: RouteCandidate,
+  diagnosticPath: string,
+  probedUrl: URL,
+  body: string,
+): Diagnostic[] {
+  const href = extractCanonicalHref(body);
+  const source = sourceFor(config, candidate.document);
+
+  if (!href) {
+    return [
+      createDiagnostic({
+        severity: "warning",
+        code: "SEO-CANONICAL-MISSING",
+        message: `Route ${diagnosticPath} has no <link rel="canonical">`,
+        path: diagnosticPath,
+        source,
+      }),
+    ];
+  }
+
+  let canonical: URL;
+  try {
+    canonical = new URL(href, probedUrl);
+  } catch {
+    return [
+      createDiagnostic({
+        severity: "warning",
+        code: "SEO-CANONICAL-MISMATCH",
+        message: `Route ${diagnosticPath} has an unparseable canonical URL: ${redactSensitive(href)}`,
+        path: diagnosticPath,
+        source,
+      }),
+    ];
+  }
+
+  if (canonical.origin !== probedUrl.origin) {
+    return [
+      createDiagnostic({
+        severity: "error",
+        code: "SEO-CANONICAL-OFF-ORIGIN",
+        message: `Route ${diagnosticPath} canonical points to a different origin (${canonical.host})`,
+        path: diagnosticPath,
+        source,
+      }),
+    ];
+  }
+
+  if (
+    normalizeCanonicalPath(canonical.pathname) !==
+    normalizeCanonicalPath(probedUrl.pathname)
+  ) {
+    return [
+      createDiagnostic({
+        severity: "warning",
+        code: "SEO-CANONICAL-MISMATCH",
+        message: `Route ${diagnosticPath} canonical path ${canonical.pathname} does not match the probed path`,
+        path: diagnosticPath,
+        source,
+      }),
+    ];
+  }
+
+  return [];
+}
+
+function extractCanonicalHref(body: string): string | undefined {
+  const linkPattern = /<link\b[^>]*>/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = linkPattern.exec(body)) !== null) {
+    const tag = match[0];
+    const isCanonical =
+      /\brel\s*=\s*("[^"]*\bcanonical\b[^"]*"|'[^']*\bcanonical\b[^']*'|canonical\b)/i.test(
+        tag,
+      );
+    if (!isCanonical) {
+      continue;
+    }
+
+    const hrefMatch = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i.exec(
+      tag,
+    );
+    const href = hrefMatch?.[1] ?? hrefMatch?.[2] ?? hrefMatch?.[3];
+    if (href && href.trim().length > 0) {
+      return href.trim();
+    }
+  }
+
+  return undefined;
+}
+
+function normalizeCanonicalPath(pathname: string): string {
+  return (pathname.replace(/\/+$/, "") || "/").toLowerCase();
 }
 
 export function resolveSiteHealthUrl(site: CmsLabConfig["site"]): URL {

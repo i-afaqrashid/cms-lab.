@@ -1988,3 +1988,113 @@ test("og object form enables title, description, and X (Twitter) image", async (
     result.diagnostics.find((d) => d.code === "SEO-TWITTER-MISSING")?.severity,
   ).toBe("info");
 });
+
+async function scanForCanonical(bodyByPath: Record<string, string>) {
+  return scanDocuments({
+    config: {
+      ...baseConfig,
+      checks: {
+        routes: { canonical: true },
+        seo: false,
+        a11y: false,
+        images: false,
+        fields: false,
+      },
+    },
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      { id: "ok", type: "page", uid: "ok", status: "published", data: {} },
+      {
+        id: "missing",
+        type: "page",
+        uid: "missing",
+        status: "published",
+        data: {},
+      },
+      {
+        id: "stale",
+        type: "page",
+        uid: "stale",
+        status: "published",
+        data: {},
+      },
+      {
+        id: "staging",
+        type: "page",
+        uid: "staging",
+        status: "published",
+        data: {},
+      },
+    ],
+    fetch: async (url) => {
+      const pathname = new URL(String(url)).pathname;
+      return new Response(bodyByPath[pathname] ?? "", { status: 200 });
+    },
+  });
+}
+
+test("canonical validation flags missing, mismatched, and off-origin canonicals", async () => {
+  const result = await scanForCanonical({
+    "/": "<html></html>",
+    "/ok": '<link rel="canonical" href="http://localhost:3000/ok/" />',
+    "/missing": "<html><head><title>OK</title></head></html>",
+    "/stale": '<link rel="canonical" href="/old-stale-slug" />',
+    "/staging":
+      '<link rel="canonical" href="https://staging.example.com/staging" />',
+  });
+
+  const byCode = (code: string) =>
+    result.diagnostics.filter((d) => d.code === code).map((d) => d.path);
+
+  // /ok canonical matches (trailing slash ignored) -> no diagnostic.
+  expect(
+    result.diagnostics.filter(
+      (d) => d.code.startsWith("SEO-CANONICAL") && d.path === "/ok",
+    ),
+  ).toEqual([]);
+  expect(byCode("SEO-CANONICAL-MISSING")).toContain("/missing");
+  expect(byCode("SEO-CANONICAL-MISMATCH")).toContain("/stale");
+  expect(byCode("SEO-CANONICAL-OFF-ORIGIN")).toContain("/staging");
+  expect(
+    result.diagnostics.find((d) => d.code === "SEO-CANONICAL-OFF-ORIGIN")
+      ?.severity,
+  ).toBe("error");
+});
+
+test("canonical validation does not read response bodies when disabled", async () => {
+  let textReads = 0;
+  const result = await scanDocuments({
+    config: baseConfig,
+    project: {
+      framework: "next",
+      router: "app",
+      rootDir: "/site",
+      appDir: "/site/app",
+    },
+    documents: [
+      { id: "a", type: "page", uid: "a", status: "published", data: {} },
+    ],
+    fetch: async () => {
+      const response = new Response(
+        '<link rel="canonical" href="https://staging.example.com/a" />',
+        { status: 200 },
+      );
+      const originalText = response.text.bind(response);
+      response.text = async () => {
+        textReads += 1;
+        return originalText();
+      };
+      return response;
+    },
+  });
+
+  expect(
+    result.diagnostics.filter((d) => d.code.startsWith("SEO-CANONICAL")),
+  ).toEqual([]);
+  expect(textReads).toBe(0);
+});

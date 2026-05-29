@@ -26,6 +26,12 @@ history stays consistent across GitHub and npm.
 - Added `CMS-ROUTE-DUPLICATE` (error): flags two or more published documents
   that resolve to the same route path. Drafts are ignored; the first document
   in scan order is treated as the winner.
+- Added opt-in canonical validation via `checks.routes.canonical`. On 2xx
+  routes it parses `<link rel="canonical">` and flags a missing canonical
+  (`SEO-CANONICAL-MISSING`, warning), a canonical on a different origin
+  (`SEO-CANONICAL-OFF-ORIGIN`, error), and a path mismatch beyond trailing
+  slash and case (`SEO-CANONICAL-MISMATCH`, warning). The response body is read
+  only when soft-404 or canonical checks are enabled.
 - Added opt-in Open Graph / X (Twitter) card validation via `checks.seo.og`.
   `true` checks `og:image` (`SEO-OG-IMAGE-MISSING`); the object form also
   enables `og:title`/`og:description` (`SEO-OG-MISSING`) and the X (Twitter)
