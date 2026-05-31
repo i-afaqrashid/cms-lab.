@@ -54,6 +54,28 @@ git push origin v1.0.3
 
 The workflow publishes from the tag only. Do not publish from a branch.
 
+## Adding a new publishable package
+
+npm Trusted Publishing is configured per package from the package settings page
+on npmjs.com. Before adding a new package to `packages/` and the publish order,
+make sure the package name exists on npm and has this repository's trusted
+publisher configured. Otherwise npm can reject the first publish with `404`
+after earlier packages in the same release have already published.
+
+Run this before tagging when a release adds a package:
+
+```sh
+for pkg in @cms-lab/core @cms-lab/contentful @cms-lab/directus @cms-lab/next @cms-lab/payload @cms-lab/prismic @cms-lab/reporter @cms-lab/sanity @cms-lab/strapi @cms-lab/wordpress @cms-lab/cli; do
+  npm view "$pkg" name
+done
+```
+
+The publish script also performs this preflight in CI and exits before
+publishing anything if a package name is missing or inaccessible. If a workflow
+is rerun after a partial registry publish, already-published package versions
+are skipped and the remaining missing versions are published in dependency
+order.
+
 ## Trusted Publishing
 
 Each package must keep this npm Trusted Publishing configuration:
