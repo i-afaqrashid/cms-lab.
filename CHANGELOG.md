@@ -6,6 +6,10 @@ history stays consistent across GitHub and npm.
 
 ## Unreleased
 
+No unreleased changes yet.
+
+## 1.3.0 - 2026-05-31
+
 ### Changed
 
 - All CMS adapters (Prismic aside, which has a single endpoint) now fetch their

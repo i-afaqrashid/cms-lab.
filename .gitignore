@@ -53,3 +53,8 @@ gemini.md
 .cursor/
 .windsurf/
 .aider*
+
+# Local-only working files (not part of the published project)
+HANDOFF.md
+improvements/
+LAUNCH-READY.md
