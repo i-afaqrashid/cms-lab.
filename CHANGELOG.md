@@ -6,7 +6,11 @@ history stays consistent across GitHub and npm.
 
 ## Unreleased
 
-No unreleased changes yet.
+### Fixed
+
+- Hardened the npm publish script so it preflights missing package names before
+  publishing anything and skips package versions that already exist when a tag
+  workflow is rerun.
 
 ## 1.3.0 - 2026-05-31
 

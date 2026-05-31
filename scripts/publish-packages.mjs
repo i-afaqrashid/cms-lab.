@@ -53,16 +53,56 @@ for (const entry of packages) {
   if (!packageOrder.includes(name)) {
     fail(`Unexpected package tarball: ${name}@${version}.`);
   }
-
-  if (awaitPackageExists(name, version)) {
-    fail(`${name}@${version} already exists on npm. Refusing to republish.`);
-  }
 }
 
+const registryState = new Map(
+  packages.map((entry) => {
+    const { name, version } = entry.packageJson;
+    return [
+      name,
+      {
+        packageExists: awaitPackageRootExists(name),
+        versionExists: awaitPackageVersionExists(name, version),
+      },
+    ];
+  }),
+);
+
+const missingPackages = packages.filter(
+  (entry) => !registryState.get(entry.packageJson.name)?.packageExists,
+);
+
+if (missingPackages.length > 0) {
+  fail(
+    [
+      "The following npm package names do not exist or are not accessible:",
+      ...missingPackages.map((entry) => `- ${entry.packageJson.name}`),
+      "",
+      "Create the package and configure npm Trusted Publishing before pushing a release tag.",
+      "This preflight stops before publishing anything so the release cannot become partial.",
+    ].join("\n"),
+  );
+}
+
+const publishQueue = packages.filter((entry) => {
+  const { name, version } = entry.packageJson;
+  if (registryState.get(name)?.versionExists) {
+    console.log(`${name}@${version} already exists on npm; skipping.`);
+    return false;
+  }
+
+  return true;
+});
+
 for (const name of packageOrder) {
-  const entry = packages.find(
+  const entry = publishQueue.find(
     (candidate) => candidate.packageJson.name === name,
   );
+
+  if (!entry) {
+    continue;
+  }
+
   const args = ["publish", entry.tarball, "--access", "public", "--provenance"];
 
   if (dryRun) {
@@ -85,7 +125,26 @@ function readPackageJson(tarball) {
   return JSON.parse(output);
 }
 
-function awaitPackageExists(name, version) {
+function awaitPackageRootExists(name) {
+  const result = spawnSync("npm", ["view", name, "name"], {
+    encoding: "utf8",
+    env: npmEnv(),
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  if (result.status === 0) {
+    return true;
+  }
+
+  if (result.stderr.includes("E404") || result.stdout.includes("E404")) {
+    return false;
+  }
+
+  process.stderr.write(result.stderr);
+  fail(`Could not check npm registry for ${name}.`);
+}
+
+function awaitPackageVersionExists(name, version) {
   const result = spawnSync("npm", ["view", `${name}@${version}`, "version"], {
     encoding: "utf8",
     env: npmEnv(),
