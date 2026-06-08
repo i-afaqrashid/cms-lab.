@@ -8,9 +8,9 @@
     "scan": "cms-lab scan --ci --report --markdown --junit --json --fail-on never"
   },
   "dependencies": {
-    "next": "^15.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "next": "^16.2.7",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@cms-lab/cli": "latest",
