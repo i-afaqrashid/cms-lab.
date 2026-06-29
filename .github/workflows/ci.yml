@@ -48,7 +48,7 @@ jobs:
           echo "PNPM_STORE_PATH=$PNPM_STORE_PATH" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.PNPM_STORE_PATH }}
           key: ${{ runner.os }}-${{ github.job }}-node-${{ matrix.node-version }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -101,7 +101,7 @@ jobs:
           echo "PNPM_STORE_PATH=$PNPM_STORE_PATH" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.PNPM_STORE_PATH }}
           key: ${{ runner.os }}-${{ github.job }}-node-22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -114,7 +114,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Cache Next.js build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: apps/site/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('apps/site/**/*.js', 'apps/site/**/*.jsx', 'apps/site/**/*.ts', 'apps/site/**/*.tsx', 'apps/site/**/*.css', 'apps/site/**/*.mdx', 'apps/site/package.json') }}
@@ -164,7 +164,7 @@ jobs:
           echo "PNPM_STORE_PATH=$PNPM_STORE_PATH" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.PNPM_STORE_PATH }}
           key: ${{ runner.os }}-${{ github.job }}-node-22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
