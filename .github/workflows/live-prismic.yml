@@ -41,7 +41,7 @@ jobs:
           echo "PNPM_STORE_PATH=$PNPM_STORE_PATH" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ${{ env.PNPM_STORE_PATH }}
           key: ${{ runner.os }}-${{ github.job }}-node-22-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
