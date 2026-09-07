@@ -59,7 +59,7 @@
     "@cms-lab/sanity": "workspace:*",
     "@cms-lab/strapi": "workspace:*",
     "@cms-lab/wordpress": "workspace:*",
-    "commander": "^14.0.2",
+    "commander": "^15.0.0",
     "picocolors": "^1.1.1"
   },
   "author": "Afaq Rashid"
